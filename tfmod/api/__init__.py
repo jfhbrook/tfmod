@@ -89,7 +89,9 @@ class Meta:
     next_url: Optional[str] = None
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Meta":
+    def from_json(cls, data: Optional[Dict[str, Any]]) -> "Optional[Meta]":
+        if data is None:
+            return None
         return cls(
             **dict(
                 data,
@@ -107,7 +109,7 @@ class Paginated(Protocol):
     A paginated response.
     """
 
-    meta: Meta
+    meta: Optional[Meta]
 
 
 # I'm guessing at this, I haven't seen a module in the wild with dependencies
@@ -347,13 +349,13 @@ class ModuleList(Paginated):
     A paginated list of Terraform modules.
     """
 
-    meta: Meta
+    meta: Optional[Meta]
     modules: List[ShortModule]
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "ModuleList":
         return cls(
-            meta=Meta.from_json(data["meta"]),
+            meta=Meta.from_json(data.get("meta", None)),
             modules=[ShortModule.from_json(module) for module in data["modules"]],
         )
 
@@ -377,7 +379,7 @@ class ShortRoot:
                     Provider.from_json(provider) for provider in data["providers"]
                 ],
                 dependencies=as_list(data["dependencies"], Dependency),
-                deprecation=as_none(data["deprecation"]),
+                deprecation=as_none(data.get("deprecation", None)),
             )
         )
 
@@ -414,6 +416,7 @@ class Version:
     version: str
     root: ShortRoot
     submodules: List[ShortSubmodule]
+    deprecation: None
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Version":
@@ -426,6 +429,7 @@ class Version:
                     ShortSubmodule.from_json(submodule)
                     for submodule in data["submodules"]
                 ],
+                deprecation=as_none(data["deprecation"]),
             )
         )
 
@@ -456,13 +460,13 @@ class VersionList(Paginated):
     A paginated list of versions of Terraform modules.
     """
 
-    meta: Meta
+    meta: Optional[Meta]
     modules: List[ModuleVersions]
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "VersionList":
         return cls(
-            meta=Meta.from_json(data["meta"]),
+            meta=Meta.from_json(data.get("meta", None)),
             modules=[ModuleVersions.from_json(module) for module in data["modules"]],
         )
 
@@ -606,6 +610,8 @@ class APIClient:
         """
 
         url = f"{self.base_url}/{namespace}/{name}/{provider}/versions"
+
+        print(url)
 
         res = requests.get(url)
 

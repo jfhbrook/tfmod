@@ -9,11 +9,16 @@ from tfmod.api import (
     Module,
     ModuleInfo,
     ModuleList,
+    ModuleVersions,
     Output,
     Provider,
     Resource,
     ShortModule,
+    ShortRoot,
+    ShortSubmodule,
     Summary,
+    Version,
+    VersionList,
 )
 
 
@@ -531,6 +536,199 @@ def test_search(api_client) -> None:
             prev_offset=None,
         ),
         modules=[],
+    )
+
+
+@pytest.mark.vcr
+def test_versions(api_client) -> None:
+    versions = api_client.versions("terraform-alicloud-modules", "disk", "alicloud")
+
+    assert versions == VersionList(
+        meta=None,
+        modules=[
+            ModuleVersions(
+                source="terraform-alicloud-modules/disk/alicloud",
+                versions=[
+                    Version(
+                        version="1.0.0",
+                        root=ShortRoot(providers=[], dependencies=[], deprecation=None),
+                        submodules=[
+                            ShortSubmodule(
+                                path="modules/disk",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                            ShortSubmodule(
+                                path="modules/disk_attachment",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                        ],
+                        deprecation=None,
+                    ),
+                    Version(
+                        version="1.2.0",
+                        root=ShortRoot(providers=[], dependencies=[], deprecation=None),
+                        submodules=[
+                            ShortSubmodule(
+                                path="modules/disk",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                            ShortSubmodule(
+                                path="modules/disk_attachment",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                        ],
+                        deprecation=None,
+                    ),
+                    Version(
+                        version="1.3.0",
+                        root=ShortRoot(
+                            providers=[
+                                Provider(
+                                    name="alicloud",
+                                    namespace="",
+                                    source="",
+                                    version=">=1.56.0",
+                                )
+                            ],
+                            dependencies=[],
+                            deprecation=None,
+                        ),
+                        submodules=[
+                            ShortSubmodule(
+                                path="modules/disk",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                            ShortSubmodule(
+                                path="modules/disk_attachment",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                        ],
+                        deprecation=None,
+                    ),
+                    Version(
+                        version="1.4.0",
+                        root=ShortRoot(
+                            providers=[
+                                Provider(
+                                    name="alicloud",
+                                    namespace="",
+                                    source="",
+                                    version=">=1.56.0",
+                                )
+                            ],
+                            dependencies=[],
+                            deprecation=None,
+                        ),
+                        submodules=[
+                            ShortSubmodule(
+                                path="modules/disk",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                            ShortSubmodule(
+                                path="modules/disk_attachment",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                        ],
+                        deprecation=None,
+                    ),
+                    Version(
+                        version="1.5.0",
+                        root=ShortRoot(providers=[], dependencies=[], deprecation=None),
+                        submodules=[
+                            ShortSubmodule(
+                                path="modules/disk",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                            ShortSubmodule(
+                                path="modules/disk_attachment",
+                                providers=[
+                                    Provider(
+                                        name="alicloud",
+                                        namespace="",
+                                        source="",
+                                        version="",
+                                    )
+                                ],
+                                dependencies=[],
+                            ),
+                        ],
+                        deprecation=None,
+                    ),
+                ],
+            )
+        ],
     )
 
 
