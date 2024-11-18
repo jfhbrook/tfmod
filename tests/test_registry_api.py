@@ -505,3 +505,18 @@ def test_list_namespace(api_client) -> None:
             ),
         ],
     )
+
+@pytest.mark.vcr
+def test_search(api_client) -> None:
+    modules = api_client.search("dokku")
+
+    assert modules == ModuleList(
+        meta=Meta(
+            limit=15,
+            current_offset=0,
+            next_offset=None,
+            prev_offset=None,
+        ),
+        modules=[]
+    )
+ 
