@@ -581,21 +581,3 @@ class APIClient:
         data = res.json()
 
         return Summary.from_json(data)
-
-
-T = TypeVar("T", bound=Paginated)
-Method = Callable[..., T]
-
-
-def paginate(method: Method[T], *args: Any, **kwargs: Any) -> Generator[T, None, None]:
-    """
-    Iterate over a paginated method on APIClient.
-    """
-
-    res: T = method(*args, **kwargs)
-
-    while res.meta.next_offset is not None:
-        yield res
-        res = method(*args, **dict(kwargs, offset=res.meta.next_offset))
-
-    yield res
