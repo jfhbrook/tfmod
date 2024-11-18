@@ -114,6 +114,20 @@ class Input:
 
 
 @dataclass
+class Output:
+    """
+    An output from a Terraform module.
+    """
+
+    name: str
+    description: str
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Output":
+        return cls(**data)
+
+
+@dataclass
 class ModuleInfo:
     """
     Information about a Terraform root module or submodule.
@@ -124,6 +138,7 @@ class ModuleInfo:
     readme: str
     empty: bool
     inputs: List[Input]
+    outputs: List[Output]
     dependencies: List[Dependency]
     provider_dependencies: List[Provider]
     resources: List[Resource]
@@ -131,13 +146,18 @@ class ModuleInfo:
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "ModuleInfo":
         return cls(
-            **dict(data),
-            inputs=[Input.from_json(input_) for input_ in data["inputs"]],
-            provider_dependencies=[
-                Provider.from_json(provider)
-                for provider in data["provider_dependencies"]
-            ],
-            resources=[Resource.from_json(resource) for resource in data["resources"]],
+            **dict(
+                data,
+                inputs=[Input.from_json(input_) for input_ in data["inputs"]],
+                outputs=[Output.from_json(output) for output in data["outputs"]],
+                provider_dependencies=[
+                    Provider.from_json(provider)
+                    for provider in data["provider_dependencies"]
+                ],
+                resources=[
+                    Resource.from_json(resource) for resource in data["resources"]
+                ],
+            )
         )
 
 
@@ -187,6 +207,7 @@ class Module:
     verified: bool
     root: ModuleInfo
     submodules: List[ModuleInfo]
+    examples: List[ModuleInfo]
     providers: List[str]
     versions: List[str]
     deprecation: None
@@ -196,6 +217,9 @@ class Module:
         return cls(
             **dict(
                 data,
+                examples=[
+                    ModuleInfo.from_json(example) for example in data["examples"]
+                ],
                 root=ModuleInfo.from_json(data["root"]),
                 submodules=[
                     ModuleInfo.from_json(module) for module in data["submodules"]
