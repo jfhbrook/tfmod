@@ -1,17 +1,15 @@
 # https://developer.hashicorp.com/terraform/registry/api-docs
 
 from dataclasses import dataclass
+import datetime
 from typing import (
     Any,
-    Callable,
     Dict,
-    Generator,
     List,
     Optional,
     Protocol,
     Set,
     Type,
-    TypeVar,
 )
 
 import requests
@@ -74,6 +72,11 @@ def as_none(x: Any) -> None:
     if x is not None:
         raise ValueError(f"{x} is not None")
     return x
+
+
+def as_datetime(x: Any) -> datetime.datetime:
+    s = as_(x, str)
+    return datetime.datetime.fromisoformat(s)
 
 
 @dataclass
@@ -259,7 +262,7 @@ class ShortModule:
     description: str
     source: str
     tag: str
-    published_at: str  # TODO: parse as datetime.datetime
+    published_at: datetime.datetime
     downloads: int
     verified: bool
 
@@ -278,7 +281,7 @@ class ShortModule:
                 description=as_(data["description"], str),
                 source=as_(data["source"], str),
                 tag=as_(data["tag"], str),
-                published_at=as_(data["published_at"], str),
+                published_at=as_datetime(data["published_at"]),
                 downloads=as_(data["downloads"], int),
                 verified=as_(data["verified"], bool),
             )
@@ -301,7 +304,7 @@ class Module:
     description: str
     source: str
     tag: str
-    published_at: str  # TODO: parse as datetime.datetime
+    published_at: datetime.datetime
     downloads: int
     verified: bool
     root: ModuleInfo
@@ -326,7 +329,7 @@ class Module:
                 description=as_(data["description"], str),
                 source=as_(data["source"], str),
                 tag=as_(data["tag"], str),
-                published_at=as_(data["published_at"], str),
+                published_at=as_datetime(data["published_at"]),
                 downloads=as_(data["downloads"], int),
                 verified=as_(data["verified"], bool),
                 root=ModuleInfo.from_json(data["root"]),
