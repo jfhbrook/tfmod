@@ -15,9 +15,6 @@ from typing import (
 
 import requests
 
-# rate limit: 429
-# load shedding: 503
-
 
 class APIError(Exception):
     """
@@ -35,6 +32,22 @@ class APIError(Exception):
             )
         super().__init__(msg)
         self.errors: List[str] = errors
+
+
+class RateLimitError(APIError):
+    """
+    A rate limit error.
+    """
+
+    pass
+
+
+class LoadSheddingError(APIError):
+    """
+    An error raised when the registry is load shedding.
+    """
+
+    pass
 
 
 @dataclass
@@ -377,18 +390,25 @@ class Summary:
         return cls(data=Metrics.from_json(data["data"]))
 
 
-def raise_for_status(res: requests.Response, codes: Optional[Set[int]] = None) -> None:
-    if not codes:
-        codes = {200}
-    if res.status_code not in codes:
+def raise_for_status(
+    res: requests.Response, success_codes: Optional[Set[int]] = None
+) -> None:
+    if not success_codes:
+        success_codes = {200}
+    if res.status_code not in success_codes:
+        cls = APIError
+        if res.status_code == 429:
+            cls = RateLimitError
+        elif res.status_code == 503:
+            cls = LoadSheddingError
         try:
             json = res.json()
             errors = json["errors"]
             assert type(errors) == list
         except Exception as exc:
-            raise APIError(res.status_code, []) from exc
+            raise cls(res.status_code, []) from exc
         else:
-            raise APIError(res.status_code, errors)
+            raise cls(res.status_code, errors)
 
 
 class APIClient:
