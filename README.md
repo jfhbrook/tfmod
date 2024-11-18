@@ -21,12 +21,16 @@
   - do validation checks
   - create git tags
   - publish branch and tags
-  - if possible, hit publish endpoint in terraform api
+  - if module not "published" according to terraform API, open the relevant
+    page in the web browser
 - repo - open github repo in web browser
 - run - run a script
-  - 
+  - defaults for fmt, lint, etc
+  - print script before running it (like npm)
 - test - run the test script
-- unpublish - remove git tag? I dunno
+- unpublish
+  - validate that package published in the first place
+  - open page for package that allows for unpublish
 - validate
   - make sure everything follows standard module structure
   - check github for description
