@@ -10,6 +10,7 @@ from typing import (
     Optional,
     Protocol,
     Set,
+    Type,
     TypeVar,
 )
 
@@ -50,6 +51,31 @@ class LoadSheddingError(APIError):
     pass
 
 
+def as_[T](x: Any, type_: Type[T]) -> T:
+    if type(x) != type_:
+        raise ValueError(f"{x} is not a {type_}")
+    return x
+
+
+def as_optional[T](x: Any, type_: Type[T]) -> Optional[T]:
+    if x is None:
+        return x
+    if type(x) != type_:
+        raise ValueError(f"{x} is not a {type_}")
+    return x
+
+
+def as_list[T](x: Any, type_: Type[T]) -> List[T]:
+    xs = as_(x, list)
+    return [as_(x, type_) for x in xs]
+
+
+def as_none(x: Any) -> None:
+    if x is not None:
+        raise ValueError(f"{x} is not None")
+    return x
+
+
 @dataclass
 class Meta:
     """
@@ -64,7 +90,16 @@ class Meta:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Meta":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                limit=as_(data["limit"], int),
+                current_offset=as_(data["current_offset"], int),
+                next_offset=as_optional(data.get("next_offset", None), int),
+                prev_offset=as_optional(data.get("prev_offset", None), int),
+                next_url=as_optional(data.get("next_url", None), str),
+            )
+        )
 
 
 class Paginated(Protocol):
@@ -92,7 +127,15 @@ class Provider:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Provider":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                name=as_(data["name"], str),
+                namespace=as_(data["namespace"], str),
+                source=as_(data["source"], str),
+                version=as_(data["version"], str),
+            )
+        )
 
 
 @dataclass
@@ -106,7 +149,13 @@ class Resource:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Resource":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                name=as_(data["name"], str),
+                type=as_(data["type"], str),
+            )
+        )
 
 
 @dataclass
@@ -123,7 +172,15 @@ class Input:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Input":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                name=as_(data["name"], str),
+                type=as_(data["type"], str),
+                description=as_(data["description"], str),
+                required=as_(data["required"], bool),
+            )
+        )
 
 
 @dataclass
@@ -137,7 +194,13 @@ class Output:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Output":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                name=as_(data["name"], str),
+                description=as_(data["description"], str),
+            )
+        )
 
 
 @dataclass
@@ -161,6 +224,10 @@ class ModuleInfo:
         return cls(
             **dict(
                 data,
+                path=as_(data["path"], str),
+                name=as_(data["name"], str),
+                readme=as_(data["readme"], str),
+                empty=as_(data["empty"], bool),
                 inputs=[Input.from_json(input_) for input_ in data["inputs"]],
                 outputs=[Output.from_json(output) for output in data["outputs"]],
                 provider_dependencies=[
@@ -196,7 +263,24 @@ class ShortModule:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "ShortModule":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                id=as_(data["id"], str),
+                owner=as_(data["owner"], str),
+                namespace=as_(data["namespace"], str),
+                name=as_(data["name"], str),
+                version=as_(data["version"], str),
+                provider=as_(data["provider"], str),
+                provider_logo_url=as_(data["provider_logo_url"], str),
+                description=as_(data["description"], str),
+                source=as_(data["source"], str),
+                tag=as_(data["tag"], str),
+                published_at=as_(data["published_at"], str),
+                downloads=as_(data["downloads"], int),
+                verified=as_(data["verified"], bool),
+            )
+        )
 
 
 @dataclass
@@ -230,13 +314,29 @@ class Module:
         return cls(
             **dict(
                 data,
-                examples=[
-                    ModuleInfo.from_json(example) for example in data["examples"]
-                ],
+                id=as_(data["id"], str),
+                owner=as_(data["owner"], str),
+                namespace=as_(data["namespace"], str),
+                name=as_(data["name"], str),
+                version=as_(data["version"], str),
+                provider=as_(data["provider"], str),
+                provider_logo_url=as_(data["provider_logo_url"], str),
+                description=as_(data["description"], str),
+                source=as_(data["source"], str),
+                tag=as_(data["tag"], str),
+                published_at=as_(data["published_at"], str),
+                downloads=as_(data["downloads"], int),
+                verified=as_(data["verified"], bool),
                 root=ModuleInfo.from_json(data["root"]),
                 submodules=[
                     ModuleInfo.from_json(module) for module in data["submodules"]
                 ],
+                examples=[
+                    ModuleInfo.from_json(example) for example in data["examples"]
+                ],
+                providers=as_list(data["providers"], str),
+                versions=as_list(data["versions"], str),
+                deprecation=as_none(data["deprecation"]),
             )
         )
 
@@ -276,6 +376,8 @@ class ShortRoot:
                 providers=[
                     Provider.from_json(provider) for provider in data["providers"]
                 ],
+                dependencies=as_list(data["dependencies"], Dependency),
+                deprecation=as_none(data["deprecation"]),
             )
         )
 
@@ -298,6 +400,7 @@ class ShortSubmodule:
                 providers=[
                     Provider.from_json(provider) for provider in data["providers"]
                 ],
+                dependencies=as_list(data["dependencies"], Dependency),
             )
         )
 
@@ -317,6 +420,7 @@ class Version:
         return cls(
             **dict(
                 data,
+                version=as_(data["version"], str),
                 root=ShortRoot.from_json(data["root"]),
                 submodules=[
                     ShortSubmodule.from_json(submodule)
@@ -340,6 +444,7 @@ class ModuleVersions:
         return cls(
             **dict(
                 data,
+                source=as_(data["source"], str),
                 versions=[Version.from_json(version) for version in data["versions"]],
             )
         )
@@ -374,7 +479,14 @@ class Metrics:
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Metrics":
-        return cls(**data)
+        return cls(
+            **dict(
+                data,
+                type=as_(data["type"], str),
+                id=as_(data["id"], str),
+                attributes=as_(data["attributes"], dict),
+            )
+        )
 
 
 @dataclass
