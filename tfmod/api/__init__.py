@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import (
     Any,
     Callable,
-    cast,
     Dict,
     Generator,
     List,
@@ -48,6 +47,7 @@ class Meta:
     current_offset: int
     next_offset: Optional[int] = None
     prev_offset: Optional[int] = None
+    next_url: Optional[str] = None
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Meta":

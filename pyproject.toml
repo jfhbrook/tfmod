@@ -8,8 +8,9 @@ authors = [
 readme = "README.md"
 dependencies = [
   "go-flag",
+  "pytest-recording>=0.13.2",
   "python-hcl2",
-  "requests"
+  "requests",
 ]
 keywords = []
 license = { text = "BSD-3" }

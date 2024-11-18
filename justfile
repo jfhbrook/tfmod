@@ -40,8 +40,8 @@ check:
   uv run npx pyright@latest
 
 # Run tests with pytest
-test:
-  uv run pytest ./tests
+test *argv:
+  uv run pytest {{ argv }} ./tests
   @just _clean-test
 
 _clean-test:
