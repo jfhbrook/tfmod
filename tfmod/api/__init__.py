@@ -1,7 +1,7 @@
 # https://developer.hashicorp.com/terraform/registry/api-docs
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Protocol, Set
+from typing import Any, Dict, List, Optional, Protocol, Set
 
 import requests
 
@@ -35,8 +35,12 @@ class Meta:
 
     limit: int
     current_offset: int
-    next_offset: Optional[int]
-    prev_offset: Optional[int]
+    next_offset: Optional[int] = None
+    prev_offset: Optional[int] = None
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Meta":
+        return cls(**data)
 
 
 class Paginated(Protocol):
@@ -62,6 +66,10 @@ class Provider:
     source: str
     version: str  # actually a version range
 
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Provider":
+        return cls(**data)
+
 
 @dataclass
 class Resource:
@@ -71,6 +79,10 @@ class Resource:
 
     name: str
     type: str
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Resource":
+        return cls(**data)
 
 
 @dataclass
@@ -84,6 +96,10 @@ class Input:
     description: str
     default: str  # contains Terraform value
     required: bool
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Input":
+        return cls(**data)
 
 
 @dataclass
@@ -100,6 +116,18 @@ class ModuleInfo:
     dependencies: List[Dependency]
     provider_dependencies: List[Provider]
     resources: List[Resource]
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "ModuleInfo":
+        return cls(
+            **dict(data),
+            inputs=[Input.from_json(input_) for input_ in data["inputs"]],
+            provider_dependencies=[
+                Provider.from_json(provider)
+                for provider in data["provider_dependencies"]
+            ],
+            resources=[Resource.from_json(resource) for resource in data["resources"]],
+        )
 
 
 @dataclass
@@ -121,6 +149,10 @@ class ShortModule:
     published_at: str  # TODO: parse as datetime.datetime
     downloads: int
     verified: bool
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "ShortModule":
+        return cls(**data)
 
 
 @dataclass
@@ -148,6 +180,18 @@ class Module:
     versions: List[str]
     deprecation: None
 
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Module":
+        return cls(
+            **dict(
+                data,
+                root=ModuleInfo.from_json(data["root"]),
+                submodules=[
+                    ModuleInfo.from_json(module) for module in data["submodules"]
+                ],
+            )
+        )
+
 
 @dataclass
 class ModuleList(Paginated):
@@ -157,6 +201,13 @@ class ModuleList(Paginated):
 
     meta: Meta
     modules: List[ShortModule]
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "ModuleList":
+        return cls(
+            meta=Meta.from_json(data["meta"]),
+            modules=[ShortModule.from_json(module) for module in data["modules"]],
+        )
 
 
 @dataclass
@@ -169,6 +220,17 @@ class ShortRoot:
     dependencies: List[Dependency]
     deprecation: None
 
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "ShortRoot":
+        return cls(
+            **dict(
+                data,
+                providers=[
+                    Provider.from_json(provider) for provider in data["providers"]
+                ],
+            )
+        )
+
 
 @dataclass
 class ShortSubmodule:
@@ -179,6 +241,17 @@ class ShortSubmodule:
     path: str
     providers: List[Provider]
     dependencies: List[Dependency]
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "ShortSubmodule":
+        return cls(
+            **dict(
+                data,
+                providers=[
+                    Provider.from_json(provider) for provider in data["providers"]
+                ],
+            )
+        )
 
 
 @dataclass
@@ -191,6 +264,19 @@ class Version:
     root: ShortRoot
     submodules: List[ShortSubmodule]
 
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Version":
+        return cls(
+            **dict(
+                data,
+                root=ShortRoot.from_json(data["root"]),
+                submodules=[
+                    ShortSubmodule.from_json(submodule)
+                    for submodule in data["submodules"]
+                ],
+            )
+        )
+
 
 @dataclass
 class ModuleVersions:
@@ -201,6 +287,15 @@ class ModuleVersions:
     source: str
     versions: List[Version]
 
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "ModuleVersions":
+        return cls(
+            **dict(
+                data,
+                versions=[Version.from_json(version) for version in data["versions"]],
+            )
+        )
+
 
 @dataclass
 class VersionList(Paginated):
@@ -210,6 +305,13 @@ class VersionList(Paginated):
 
     meta: Meta
     modules: List[ModuleVersions]
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "VersionList":
+        return cls(
+            meta=Meta.from_json(data["meta"]),
+            modules=[ModuleVersions.from_json(module) for module in data["modules"]],
+        )
 
 
 @dataclass
@@ -222,6 +324,10 @@ class Metrics:
     id: str
     attributes: Dict[str, int]
 
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Metrics":
+        return cls(**data)
+
 
 @dataclass
 class Summary:
@@ -230,6 +336,10 @@ class Summary:
     """
 
     data: Metrics
+
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Summary":
+        return cls(data=Metrics.from_json(data["data"]))
 
 
 def raise_for_status(res: requests.Response, codes: Optional[Set[int]] = None) -> None:
@@ -318,10 +428,7 @@ class APIClient:
 
         data = res.json()
 
-        return VersionList(
-            meta=Meta(**data["meta"]),
-            modules=[ModuleVersions(**module) for module in data["modules"]],
-        )
+        return VersionList.from_json(data)
 
     def _download(self, url: str) -> str:
         res = requests.get(url, allow_redirects=True)
@@ -355,10 +462,7 @@ class APIClient:
 
         data = res.json()
 
-        return ModuleList(
-            meta=Meta(**data["meta"]),
-            modules=[ShortModule(**module) for module in data["modules"]],
-        )
+        return ModuleList.from_json(data)
 
     def latest_for_provider(self, namespace: str, name: str, provider: str) -> Module:
         url = f"{self.base_url}/{namespace}/{name}/{provider}"
@@ -369,41 +473,7 @@ class APIClient:
 
         data = res.json()
 
-        return Module(
-            **dict(
-                data,
-                root=ModuleInfo(
-                    **dict(
-                        data["root"],
-                        inputs=[Input(**input_) for input_ in data["root"]["inputs"]],
-                        provider_dependencies=[
-                            Provider(**provider)
-                            for provider in data["root"]["provider_dependencies"]
-                        ],
-                        resources=[
-                            Resource(**resource)
-                            for resource in data["root"]["resources"]
-                        ],
-                    )
-                ),
-                submodules=[
-                    ModuleInfo(
-                        **dict(
-                            module,
-                            inputs=[Input(**input_) for input_ in module["inputs"]],
-                            provider_dependencies=[
-                                Provider(**provider)
-                                for provider in module["provider_dependencies"]
-                            ],
-                            resources=[
-                                Resource(**resource) for resource in module["resources"]
-                            ],
-                        )
-                    )
-                    for module in data["submodules"]
-                ],
-            )
-        )
+        return Module.from_json(data)
 
     def get(self, namespace: str, name: str, provider: str, version: str) -> Module:
         url = f"{self.base_url}/{namespace}/{name}/{provider}/{version}"
@@ -414,48 +484,14 @@ class APIClient:
 
         data = res.json()
 
-        return Module(
-            **dict(
-                data,
-                root=ModuleInfo(
-                    **dict(
-                        data["root"],
-                        inputs=[Input(**input_) for input_ in data["root"]["inputs"]],
-                        provider_dependencies=[
-                            Provider(**provider)
-                            for provider in data["root"]["provider_dependencies"]
-                        ],
-                        resources=[
-                            Resource(**resource)
-                            for resource in data["root"]["resources"]
-                        ],
-                    )
-                ),
-                submodules=[
-                    ModuleInfo(
-                        **dict(
-                            module,
-                            inputs=[Input(**input_) for input_ in module["inputs"]],
-                            provider_dependencies=[
-                                Provider(**provider)
-                                for provider in module["provider_dependencies"]
-                            ],
-                            resources=[
-                                Resource(**resource) for resource in module["resources"]
-                            ],
-                        )
-                    )
-                    for module in data["submodules"]
-                ],
-            )
-        )
+        return Module.from_json(data)
 
     def download_latest(self, namespace: str, name: str, provider: str):
         url = f"{self.base_url}/{namespace}/{name}/{provider}/download"
 
         return self._download(url)
 
-    def metrics(self, namespace: str, name: str, provider: str) -> MetricsSummary:
+    def metrics(self, namespace: str, name: str, provider: str) -> Summary:
         url = f"{self.base_url}/{namespace}/{name}/{provider}/downloads/summary"
 
         res = requests.get(url)
@@ -464,4 +500,4 @@ class APIClient:
 
         data = res.json()
 
-        return Summary(data=Metrics(**data["data"]))
+        return Summary.from_json(data)
