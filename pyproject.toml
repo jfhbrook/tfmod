@@ -11,6 +11,7 @@ dependencies = [
   "pytest-recording>=0.13.2",
   "python-hcl2",
   "requests",
+  "syrupy>=4.7.2",
 ]
 keywords = []
 license = { text = "BSD-3" }

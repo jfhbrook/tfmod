@@ -2,15 +2,7 @@
 
 from dataclasses import dataclass
 import datetime
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    Set,
-    Type,
-)
+from typing import Any, Dict, List, Optional, Protocol, Set, Type
 
 import requests
 

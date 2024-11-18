@@ -816,6 +816,18 @@ wheels = [
 ]
 
 [[package]]
+name = "syrupy"
+version = "4.7.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/67/81/f46d234fa4ca0edcdeed973bab9acd8f8ac186537cdc850e9e84a00f61a0/syrupy-4.7.2.tar.gz", hash = "sha256:ea45e099f242de1bb53018c238f408a5bb6c82007bc687aefcbeaa0e1c2e935a", size = 49320 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/75/57b629fdd256efc58fb045618d603ce0b0f5fcc477f34b758e34423efb99/syrupy-4.7.2-py3-none-any.whl", hash = "sha256:eae7ba6be5aed190237caa93be288e97ca1eec5ca58760e4818972a10c4acc64", size = 49234 },
+]
+
+[[package]]
 name = "tfmod"
 version = "1.0.0"
 source = { virtual = "." }
@@ -824,6 +836,7 @@ dependencies = [
     { name = "pytest-recording" },
     { name = "python-hcl2" },
     { name = "requests" },
+    { name = "syrupy" },
 ]
 
 [package.optional-dependencies]
@@ -850,6 +863,7 @@ requires-dist = [
     { name = "pytest-recording", specifier = ">=0.13.2" },
     { name = "python-hcl2" },
     { name = "requests" },
+    { name = "syrupy", specifier = ">=4.7.2" },
     { name = "toml", marker = "extra == 'dev'" },
     { name = "validate-pyproject", extras = ["all"], marker = "extra == 'dev'" },
 ]
@@ -932,7 +946,7 @@ version = "6.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyyaml" },
-    { name = "urllib3" },
+    { name = "urllib3", marker = "python_full_version >= '3.12'" },
     { name = "wrapt" },
     { name = "yarl" },
 ]
