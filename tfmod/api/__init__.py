@@ -572,8 +572,6 @@ class APIClient:
 
         url = f"{self.v2_base_url}/{namespace}/{name}/{provider}/downloads/summary"
 
-        print(url)
-
         res = requests.get(url)
 
         raise_for_status(res)
