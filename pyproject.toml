@@ -8,7 +8,8 @@ authors = [
 readme = "README.md"
 dependencies = [
   "go-flag",
-  "python-hcl2"
+  "python-hcl2",
+  "requests"
 ]
 keywords = []
 license = { text = "BSD-3" }

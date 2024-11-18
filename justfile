@@ -26,12 +26,12 @@ run *argv:
 
 # Format with black and isort
 format:
-  uv run black ./tfmod ./tests ./examples
-  uv run isort --settings-file . ./tfmod ./tests ./example
+  uv run black ./tfmod ./tests
+  uv run isort --settings-file . ./tfmod ./tests
 
 # Lint with flake8
 lint:
-  uv run flake8 ./tfmod ./tests ./examples
+  uv run flake8 ./tfmod ./tests
   uv run validate-pyproject ./pyproject.toml
   shellcheck ./scripts/*.sh
 
