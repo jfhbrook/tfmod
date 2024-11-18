@@ -316,6 +316,15 @@ wheels = [
 ]
 
 [[package]]
+name = "lark"
+version = "1.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/60/bc7622aefb2aee1c0b4ba23c1446d3e30225c8770b38d7aedbfb65ca9d5a/lark-1.2.2.tar.gz", hash = "sha256:ca807d0162cd16cef15a8feecb862d7319e7a09bdb13aef927968e45040fed80", size = 252132 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/00/d90b10b962b4277f5e64a78b6609968859ff86889f5b898c1a778c06ec00/lark-1.2.2-py3-none-any.whl", hash = "sha256:c2276486b02f0f1b90be155f2c8ba4a8e194d42775786db622faccd652d8e80c", size = 111036 },
+]
+
+[[package]]
 name = "matplotlib-inline"
 version = "0.1.7"
 source = { registry = "https://pypi.org/simple" }
@@ -520,6 +529,18 @@ wheels = [
 ]
 
 [[package]]
+name = "python-hcl2"
+version = "5.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "lark" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ae/cb/18f9662201e948dbc3a1a37daf5392ac0d60667138e23d73799fc8c7bc8d/python-hcl2-5.1.1.tar.gz", hash = "sha256:e5c759d902e7566b9e8f1fcbf3eeef426269904f3fc0c3bf50d9090d00d1f57c", size = 23292 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/19/d2/fc80edee3535bf3c226c992dddebf64c1eef260f2d95c0a6e1838b0135d8/python_hcl2-5.1.1-py3-none-any.whl", hash = "sha256:4670e90aac0b0825f3a634fc684ba94a4268dbc15b062df26f4b4441af24c29a", size = 13931 },
+]
+
+[[package]]
 name = "pywin32"
 version = "308"
 source = { registry = "https://pypi.org/simple" }
@@ -605,6 +626,7 @@ version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "go-flag" },
+    { name = "python-hcl2" },
 ]
 
 [package.optional-dependencies]
@@ -628,6 +650,7 @@ requires-dist = [
     { name = "isort", marker = "extra == 'dev'" },
     { name = "jupyter-console", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
+    { name = "python-hcl2" },
     { name = "toml", marker = "extra == 'dev'" },
     { name = "validate-pyproject", extras = ["all"], marker = "extra == 'dev'" },
 ]
