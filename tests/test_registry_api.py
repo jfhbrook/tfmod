@@ -5,6 +5,7 @@ import pytest
 from tfmod.api import (
     Input,
     Meta,
+    Metrics,
     Module,
     ModuleInfo,
     ModuleList,
@@ -12,6 +13,7 @@ from tfmod.api import (
     Provider,
     Resource,
     ShortModule,
+    Summary,
 )
 
 
@@ -2895,4 +2897,17 @@ def test_latest_download_url(api_client) -> None:
     assert (
         url
         == "git::https://github.com/hashicorp/terraform-aws-consul?ref=e9ceb573687c3d28516c9e3714caca84db64a766"
+    )
+
+
+@pytest.mark.vcr
+def test_metrics(api_client) -> None:
+    metrics = api_client.metrics("hashicorp", "consul", "aws")
+
+    assert metrics == Summary(
+        data=Metrics(
+            type="module-downloads-summary",
+            id="hashicorp/consul/aws",
+            attributes={"month": 967, "total": 185417, "week": 513, "year": 44981},
+        )
     )

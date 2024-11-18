@@ -396,10 +396,9 @@ class APIClient:
     An API client for the Terraform registry.
     """
 
-    def __init__(
-        self, base_url: str = "https://registry.terraform.io/v1/modules"
-    ) -> None:
-        self.base_url = base_url
+    def __init__(self, base_url: str = "https://registry.terraform.io") -> None:
+        self.base_url = f"{base_url}/v1/modules"
+        self.v2_base_url = f"{base_url}/v2/modules"
 
     def list(
         self,
@@ -571,7 +570,9 @@ class APIClient:
         Get download metrics for a module and provider.
         """
 
-        url = f"{self.base_url}/{namespace}/{name}/{provider}/downloads/summary"
+        url = f"{self.v2_base_url}/{namespace}/{name}/{provider}/downloads/summary"
+
+        print(url)
 
         res = requests.get(url)
 
