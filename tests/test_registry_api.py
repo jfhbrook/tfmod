@@ -2876,3 +2876,23 @@ def test_get(api_client) -> None:
         ],
         deprecation=None,
     )
+
+
+@pytest.mark.vcr
+def test_download_url(api_client) -> None:
+    url = api_client.download_url("hashicorp", "consul", "aws", "0.11.0")
+
+    assert (
+        url
+        == "git::https://github.com/hashicorp/terraform-aws-consul?ref=e9ceb573687c3d28516c9e3714caca84db64a766"
+    )
+
+
+@pytest.mark.vcr
+def test_latest_download_url(api_client) -> None:
+    url = api_client.latest_download_url("hashicorp", "consul", "aws")
+
+    assert (
+        url
+        == "git::https://github.com/hashicorp/terraform-aws-consul?ref=e9ceb573687c3d28516c9e3714caca84db64a766"
+    )
