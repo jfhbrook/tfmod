@@ -828,6 +828,22 @@ wheels = [
 ]
 
 [[package]]
+name = "tf-registry"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "go-flag" },
+    { name = "pytest-recording" },
+    { name = "python-hcl2" },
+    { name = "requests" },
+    { name = "syrupy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/1d/2c63e59a789513ea0677661ce7457a872761e1e1daebfe123384dbc00cb3/tf_registry-1.0.0.tar.gz", hash = "sha256:e482a7ef310bcea713b63cf89fadbf21dff832ec7f142015b056d289e6f2de36", size = 7080 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ac/2e/1e004d164aa4886afd8fa62f60449aa5b9c4b7189a235b63079d41e025be/tf_registry-1.0.0-py3-none-any.whl", hash = "sha256:43abbbcaf849c03ac115f48984f0857adb9a418020d5fce799a7e8922f42e27b", size = 5759 },
+]
+
+[[package]]
 name = "tfmod"
 version = "1.0.0"
 source = { virtual = "." }
@@ -837,6 +853,7 @@ dependencies = [
     { name = "python-hcl2" },
     { name = "requests" },
     { name = "syrupy" },
+    { name = "tf-registry" },
 ]
 
 [package.optional-dependencies]
@@ -864,6 +881,7 @@ requires-dist = [
     { name = "python-hcl2" },
     { name = "requests" },
     { name = "syrupy", specifier = ">=4.7.2" },
+    { name = "tf-registry", specifier = ">=1.0.0" },
     { name = "toml", marker = "extra == 'dev'" },
     { name = "validate-pyproject", extras = ["all"], marker = "extra == 'dev'" },
 ]

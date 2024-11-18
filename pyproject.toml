@@ -12,6 +12,7 @@ dependencies = [
   "python-hcl2",
   "requests",
   "syrupy>=4.7.2",
+  "tf-registry>=1.0.0",
 ]
 keywords = []
 license = { text = "BSD-3" }
