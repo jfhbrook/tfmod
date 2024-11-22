@@ -237,7 +237,7 @@ wheels = [
 
 [[package]]
 name = "go-flag"
-version = "1.0.1"
+version = "2.0.1"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c1/b8/539cfb19449f90d1e1abd9a032930f8521ae37f48ca1e43f32fc7b5a02fc/go_flag-1.0.1.tar.gz", hash = "sha256:9aefd9e3ba3d19b9067b53429b644c95ebfa975684adc3657c96c6f794c8a623", size = 21165 }
 wheels = [
