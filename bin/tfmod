@@ -373,8 +373,7 @@ function install-tfmod {
   info 'updating dependencies...'
   (cd ~/.local/state/tfmod \
     && terraform -chdir=./modules/tfmod init -upgrade \
-    && "${UV_BIN}" sync --extra dev \
-    && "${UV_BIN}" pip install .)
+    && "${UV_BIN}" sync)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
     info 'copying tfmod to ~/.local/bin/tfmod...'
