@@ -8,11 +8,7 @@ authors = [
 readme = "README.md"
 dependencies = [
   "go-flag",
-  "pytest-recording>=0.13.2",
-  "python-hcl2",
-  "requests",
-  "syrupy>=4.7.2",
-  "tf-registry>=1.0.0",
+  "tf-registry"
 ]
 keywords = []
 license = { text = "BSD-3" }

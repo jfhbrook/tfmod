@@ -849,10 +849,6 @@ version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "go-flag" },
-    { name = "pytest-recording" },
-    { name = "python-hcl2" },
-    { name = "requests" },
-    { name = "syrupy" },
     { name = "tf-registry" },
 ]
 
@@ -877,11 +873,7 @@ requires-dist = [
     { name = "isort", marker = "extra == 'dev'" },
     { name = "jupyter-console", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-recording", specifier = ">=0.13.2" },
-    { name = "python-hcl2" },
-    { name = "requests" },
-    { name = "syrupy", specifier = ">=4.7.2" },
-    { name = "tf-registry", specifier = ">=1.0.0" },
+    { name = "tf-registry" },
     { name = "toml", marker = "extra == 'dev'" },
     { name = "validate-pyproject", extras = ["all"], marker = "extra == 'dev'" },
 ]

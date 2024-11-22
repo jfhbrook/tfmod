@@ -13,6 +13,7 @@ default:
 
 # Sync project
 sync:
+  terraform -chdir=modules/tfmod init -upgrade
   uv sync --extra dev
   uv pip install -e .
 
@@ -26,11 +27,13 @@ run *argv:
 
 # Format with black and isort
 format:
+  terraform fmt -recursive modules
   uv run black ./tfmod ./tests
   uv run isort --settings-file . ./tfmod ./tests
 
 # Lint with flake8
 lint:
+  tflint -chdir=modules/tfmod 
   uv run flake8 ./tfmod ./tests
   uv run validate-pyproject ./pyproject.toml
   shellcheck ./scripts/*.sh
@@ -38,6 +41,7 @@ lint:
 # Check type annotations with pyright
 check:
   uv run npx pyright@latest
+  terraform -chdir=modules/tfmod validate
 
 # Run tests with pytest
 test *argv:
