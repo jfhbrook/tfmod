@@ -1,5 +1,24 @@
 # tfmod
 
+## TODOs
+
+- [x] do up installer
+- [ ] sketch commands with go-flag
+- [ ] sketch task command, also with go-flag
+- [ ] base commands
+  - [ ] config
+  - [ ] init
+  - [ ] version command
+- [ ] task related commands
+  - [ ] run
+  - [ ] lint
+  - [ ] format
+  - [ ] test
+  - [ ] validate
+- [ ] sketch out publish
+- [ ] sketch out unpublish
+- [ ] regroup
+
 ## potential commands - based loosely on relevant commands from npm
 
 - adduser
@@ -8,7 +27,6 @@
 - dist-tag
 - docs - open terraform registry page in web browser
 - doctor - check health
-- exec - run a command
 - init
 - login - for logging into github, terraform registry, etc
 - logout
