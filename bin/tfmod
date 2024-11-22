@@ -24,11 +24,11 @@ function fatal {
 
 function has-bin {
   if which "${1}" > /dev/null 2>&1; then
-    info "${1} is installed"
+    info "found ${1} at $(which "${1}")"
     return 0
   fi
 
-  info "${1} is NOT installed"
+  info "could not find ${1}"
   return 1
 }
 
@@ -74,6 +74,8 @@ if [[ "${COMMAND}" != 'install' ]]; then
   if [ ! -d .venv ]; then
     fatal "run 'tfmod install' to install tfmod"
   fi
+
+  # rather than using uv, just use the virtualenv directly...
 
   # shellcheck disable=SC1091
   source .venv/bin/activate
@@ -125,13 +127,13 @@ esac
 # Confirm y/n
 function confirm {
   local choice
-  read -r -p "❓ ${1} (y/N)" choice
+  read -r -p "❓ ${1} (y/N) " choice
   case "${choice}" in
     y|yes|Y|YES)
       return 0
       ;;
     *)
-      return 1
+      fatal 'cowardly refusing to continue.'
       ;;
   esac
 }
@@ -240,8 +242,40 @@ function install-packages {
   fi
 }
 
+# uv related shenanigans
+
+UV_BIN=''
+
+function find-uv {
+  if [ -n "${UV_BIN}" ]; then
+    return 0
+  fi
+
+  if which uv &> /dev/null; then
+    UV_BIN="$(which uv)"
+  elif [ -f "${XDG_BIN_HOME}/uv" ]; then
+    UV_BIN="${XDG_BIN_HOME}/uv"
+  elif [ -f "${XDG_DATA_HOME}/../bin/uv" ]; then
+    UV_BIN="$(realpath "${XDG_DATA_HOME}/../bin/uv")"
+  elif [ -f "${HOME}/.local/bin/uv" ]; then
+    UV_BIN="${HOME}/.local/bin/uv"
+  fi
+
+  if [ -n "${UV_BIN}" ]; then
+    info "found uv at ${UV_BIN}"
+    return 0
+  fi
+  return 1
+}
+
+function assert-uv {
+  if [ -z "${UV_BIN}" ]; then
+    fatal 'could not find uv'
+  fi
+}
+
 function install-uv {
-  if has-bin uv; then
+  if find-uv; then
     return 0
   fi
 
@@ -285,11 +319,13 @@ function install-tfmod {
     info 'updating tfmod in ~/.local/state/tfmod...'
     (cd ~/.local/state/tfmod && git pull origin)
   fi
+  find-uv
+  assert-uv
   info 'updating dependencies...'
   (cd ~/.local/state/tfmod \
     && terraform -chdir=./modules/tfmod init -upgrade \
-    && uv sync --extra dev \
-    && uv pip install .)
+    && "${UV_BIN}" sync --extra dev \
+    && "${UV_BIN}" pip install .)
 
   info 'copying tfmod to ~/.local/bin/tfmod...'
   mkdir -p ~/.local/bin
