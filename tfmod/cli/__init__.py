@@ -11,7 +11,7 @@ def init(cmd: Command) -> None:
     initialize a new project
     """
 
-    run_terraform(cmd.name, flag.args)
+    run_terraform("init-command", flag.args)
 
 
 @command()
@@ -19,7 +19,8 @@ def config(_cmd: Command) -> None:
     """
     configure tfmod
     """
-    init_config()
+
+    run_terraform("config-command", flag.args)
 
 
 def main() -> None:
