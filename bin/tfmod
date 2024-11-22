@@ -285,10 +285,26 @@ function install-tfmod {
     info 'updating tfmod in ~/.local/state/tfmod...'
     (cd ~/.local/state/tfmod && git pull origin)
   fi
+  info 'updating dependencies...'
   (cd ~/.local/state/tfmod \
     && terraform -chdir=./modules/tfmod init -upgrade \
     && uv sync --extra dev \
     && uv pip install .)
+
+  info 'copying tfmod to ~/.local/bin/tfmod...'
+  mkdir -p ~/.local/bin
+  cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
+  chmod +x ~/.local/bin/tfmod
+}
+
+function check-path {
+  if ! which tfmod &> /dev/null; then
+    echo 'warn: tfmod not found on your PATH. you may need to add the following to your
+warn: shell profile (ie ~/.bashrc, ~/.zshrc):
+warn:
+warn:    export PATH="${PATH}:${HOME}/.local/bin"
+warn:'
+  fi
 }
 
 function install {
@@ -296,8 +312,8 @@ function install {
   install-terraform
   install-uv
   install-tfmod
+  check-path
+  info 'congratulations, tfmod is installed!'
 }
 
 install || fatal 'failed to install tfmod'
-
-info 'congratulations, tfmod is installed!'

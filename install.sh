@@ -15,11 +15,3 @@ fi
 chmod +x ~/.local/bin/tfmod
 
 ~/.local/bin/tfmod install
-
-if ! which tfmod &> /dev/null; then
-  echo 'warn: tfmod not found on your PATH. you may need to add the following to your
-warn: shell profile (ie ~/.bashrc, ~/.zshrc):
-warn:
-warn:    export PATH="${PATH}:${HOME}/.local/bin"
-warn:'
-fi
