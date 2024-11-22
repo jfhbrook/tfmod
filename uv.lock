@@ -846,7 +846,7 @@ wheels = [
 [[package]]
 name = "tfmod"
 version = "1.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "go-flag" },
     { name = "tf-registry" },
