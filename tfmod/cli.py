@@ -10,6 +10,10 @@ class Command:
     name: str
     help: str
 
+    def run(self) -> None:
+        print("init")
+        print(flag.args)
+
 
 commands: Dict[str, Command] = dict(
     init=Command(name="init", help="initialize a new project")
@@ -58,8 +62,10 @@ def bail(message: str) -> NoReturn:
 
 def main() -> None:
     flag.parse()
-    command: Optional[str] = flag.args[0] if len(flag.args) else None
-    args: List[str] = flag.args[1:]
+    command: Optional[str] = None
+    
+    if len(flag.args):
+        command = flag.args[0]
 
     if not command:
         bail("no command specified")
@@ -70,8 +76,7 @@ def main() -> None:
 
     if command in commands:
         cmd = commands[command]
+        flag.args.pop(0)
+        cmd.run()
     else:
         bail(f"unknown command {command}")
-
-    print(cmd)
-    print(args)
