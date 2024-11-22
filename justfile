@@ -25,6 +25,10 @@ sync:
 run *argv:
   uv run {{ argv }}
 
+# Run tfmod
+tfmod *argv:
+  uv run -- python3 -m tfmod {{ argv }}
+
 # Format with black and isort
 format:
   terraform fmt -recursive modules
