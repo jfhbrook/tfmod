@@ -336,9 +336,11 @@ function install-tfmod {
     && "${UV_BIN}" sync --extra dev \
     && "${UV_BIN}" pip install .)
 
-  info 'copying tfmod to ~/.local/bin/tfmod...'
-  mkdir -p ~/.local/bin
-  cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
+  if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
+    info 'copying tfmod to ~/.local/bin/tfmod...'
+    mkdir -p ~/.local/bin
+    cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
+  fi
   chmod +x ~/.local/bin/tfmod
 }
 
