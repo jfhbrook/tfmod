@@ -11,7 +11,6 @@ terraform {
 
 provider "shell" {
   environment = {
-    module_path = path.module
+    tfmod_path = "${path.module}/../../"
   }
-  interpreter = ["/usr/bin/env", "python3", "-m", "tfmod.task"]
 }
