@@ -41,6 +41,9 @@ dev = [
 [project.scripts]
 router = "tfmod:main"
 
+[tool.uv]
+package = true
+
 [tool.isort]
 profile = "appnexus"
 known_application = "tfmod"
