@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import sys
-from typing import Dict, List, Optional
+from typing import Dict, List, NoReturn, Optional
 
 import flag
 
@@ -27,17 +27,33 @@ def usage():
             print(commands[command].help)
             return
 
-    print(
-        """usage: tfmod [OPTIONS] [COMMAND]
-
-COMMANDS
-"""
-    )
+    print("usage: tfmod [OPTIONS] [COMMAND]")
+    print("")
+    print("COMMANDS")
+    print("")
 
     for command in commands.values():
         print(f"	{command.name}    {command.help}")
 
     print("")
+
+
+def help() -> NoReturn:
+    """
+    Print usage and exit cleanly
+    """
+    usage()
+    sys.exit(0)
+
+
+def bail(message: str) -> NoReturn:
+    """
+    Print an error, print usage and exit 2
+    """
+    print(f"error: {message}")
+    print("")
+    usage()
+    sys.exit(2)
 
 
 def main() -> None:
@@ -46,20 +62,16 @@ def main() -> None:
     args: List[str] = flag.args[1:]
 
     if not command:
-        usage()
-        sys.exit(2)
+        bail("no command specified")
 
     if command == "help":
         flag.args.pop(0)
-        usage()
-        sys.exit(0)
+        help()
 
     if command in commands:
         cmd = commands[command]
     else:
-        print(f"error: unknown command {command}")
-        usage()
-        sys.exit(2)
+        bail(f"unknown command {command}")
 
     print(cmd)
     print(args)
