@@ -14,4 +14,4 @@ else
 fi
 chmod +x ~/.local/bin/tfmod
 
-~/.local/bin/tfmod install
+~/.local/bin/tfmod update

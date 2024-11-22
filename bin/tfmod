@@ -38,15 +38,19 @@ COMMAND=''
 
 while [[ $# -gt 0 ]]; do
   case "${1}" in
-    install|remove)
+    update|unwise)
       if [ -z "${COMMAND}" ]; then
         COMMAND="${1}"
       fi
       shift
       ;;
-    --log-level)
+    -log-level)
       LOG_LEVEL="${2}"
       shift
+      shift
+      ;;
+    -log-level=*)
+      LOG_LEVEL="${1#*=}"
       shift
       ;;
     *)
@@ -56,7 +60,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # remove takes priority over everything
-if [[ "${COMMAND}" == 'remove' ]]; then
+if [[ "${COMMAND}" == 'unwise' ]]; then
   rm -rf ~/.local/state/tfmod
   rm -f "${BASH_SOURCE[0]}"
   info 'tfmod is uninstalled'
@@ -68,11 +72,13 @@ if [ ! -d ~/.local/state/tfmod ]; then
   COMMAND='install'
 fi
 
+UL_TFMOD="run 'tfmod update' to install tfmod"
+
 # If we're not installing, run
-if [[ "${COMMAND}" != 'install' ]]; then
-  cd ~/.local/state/tfmod || fatal "run 'tfmod install' to install tfmod"
+if [[ "${COMMAND}" != 'update' ]]; then
+  cd ~/.local/state/tfmod || fatal "${INSTALL_TFMOD}"
   if [ ! -d .venv ]; then
-    fatal "run 'tfmod install' to install tfmod"
+    fatal "${INSTALL_TFMOD}"
   fi
 
   # rather than using uv, just use the virtualenv directly...
@@ -82,7 +88,10 @@ if [[ "${COMMAND}" != 'install' ]]; then
   exec tfmod "${ARGV[@]}"
 fi
 
-# Installer
+# Installer/updater
+
+UPDATE_OK='tfmod is installed and updated'
+UPDATE_ERR='failed to install or update tfmod'
 
 # More logging functions
 function is-debug {
@@ -349,7 +358,7 @@ function install {
   install-uv
   install-tfmod
   check-path
-  info 'congratulations, tfmod is installed!'
+  info "${UPDATE_OK}"
 }
 
-install || fatal 'failed to install tfmod'
+install || fatal "${UPDATE_ERR}"
