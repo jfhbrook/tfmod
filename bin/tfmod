@@ -35,21 +35,34 @@ function has-bin {
 LOG_LEVEL='info'
 ARGV="$*"
 COMMAND=''
+SHOW_HELP=''
+
+UNWISE_HELP='usage: tfmod unwise
+
+Remove tfmod and all its files.'
+
+UPDATE_HELP='usage: tfmod update
+
+Install or update tfmod and its dependencies.'
 
 while [[ $# -gt 0 ]]; do
   case "${1}" in
+    -h|-help|--help)
+      SHOW_HELP=1
+      shift
+      ;;
     update|unwise)
       if [ -z "${COMMAND}" ]; then
         COMMAND="${1}"
       fi
       shift
       ;;
-    -log-level)
+    -log-level|--log-level)
       LOG_LEVEL="${2}"
       shift
       shift
       ;;
-    -log-level=*)
+    -log-level=*|--log-level=*)
       LOG_LEVEL="${1#*=}"
       shift
       ;;
@@ -59,8 +72,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# remove takes priority over everything
+# unwise takes priority over everything
 if [[ "${COMMAND}" == 'unwise' ]]; then
+  if [ -n "${SHOW_HELP}" ]; then
+    echo "${UNWISE_HELP}"
+    exit 0
+  fi
+
   rm -rf ~/.local/state/tfmod
   rm -f "${BASH_SOURCE[0]}"
   info 'tfmod is uninstalled'
@@ -88,7 +106,18 @@ if [[ "${COMMAND}" != 'update' ]]; then
   exec tfmod "${ARGV[@]}"
 fi
 
+#
 # Installer/updater
+#
+# This follows the regular code path in an effort to help
+# avoid unneeded interpreting on the part of bash and hopefully
+# make things imperceptibly faster
+#
+
+if [ -n "${SHOW_HELP}" ]; then
+  echo "${UPDATE_HELP}"
+  exit 0
+fi
 
 UPDATE_OK='tfmod is installed and updated'
 UPDATE_ERR='failed to install or update tfmod'
