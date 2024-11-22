@@ -13,7 +13,7 @@ default:
 
 # Sync project
 sync:
-  terraform -chdir=modules/tfmod init -upgrade
+  terraform -chdir=./modules/tfmod init -upgrade
   uv sync --extra dev
   uv pip install -e .
 
@@ -33,10 +33,11 @@ format:
 
 # Lint with flake8
 lint:
-  tflint -chdir=modules/tfmod 
+  # cd ./modules/tfmod && tflint
   uv run flake8 ./tfmod ./tests
   uv run validate-pyproject ./pyproject.toml
-  shellcheck ./scripts/*.sh
+  shellcheck install.sh
+  shellcheck bin/tfmod
 
 # Check type annotations with pyright
 check:

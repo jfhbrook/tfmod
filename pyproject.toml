@@ -6,10 +6,6 @@ authors = [
   {name = "Josh Holbrook", email = "josh.holbrook@gmail.com"}
 ]
 readme = "README.md"
-dependencies = [
-  "go-flag",
-  "tf-registry"
-]
 keywords = []
 license = { text = "BSD-3" }
 classifiers = [
@@ -25,6 +21,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 requires-python = ">=3.12"
+dependencies = [
+  "go-flag",
+  "tf-registry"
+]
 
 [project.optional-dependencies]
 dev = [
@@ -37,6 +37,9 @@ dev = [
   "toml",
   "validate-pyproject[all]",
 ]
+
+[project.scripts]
+router = "tfmod:main"
 
 [tool.isort]
 profile = "appnexus"

@@ -1,0 +1,298 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Enough logging to launch tfmod
+
+function log {
+  local level
+  level="${1}"
+  shift
+  echo "${level}:" "$@" 1>&2
+}
+
+function error {
+  log error "$@"
+}
+
+function fatal {
+  error "$@"
+  exit 1
+}
+
+function unknown-argument {
+  fatal "unknown argument: ${1}"
+}
+
+# Check if a bin is installed
+
+function has-bin {
+  if which "${1}" > /dev/null 2>&1; then
+    info "${1} is installed"
+    return 0
+  fi
+
+  info "${1} is NOT installed"
+  return 1
+}
+
+LOG_LEVEL='warn'
+ARGV="$*"
+COMMAND=''
+
+while [[ $# -gt 0 ]]; do
+  case "${1}" in
+    install|remove)
+      if [ -n "${COMMAND}" ]; then
+        COMMAND="${1}"
+      else
+        unknown-argument "${1}"
+      fi
+      shift
+      ;;
+    --log-level)
+      LOG_LEVEL="${2}"
+      shift
+      shift
+      ;;
+    *)
+      unknown-argument "${1}"
+  esac
+done
+
+# remove takes priority over everything
+if [[ "${COMMAND}" == 'remove' ]]; then
+  rm -rf ~/.local/state/tfmod
+  rm -f "${BASH_SOURCE[0]}"
+  info 'tfmod is uninstalled'
+  exit 0
+fi
+
+# If not cloned, we need to install tfmod
+if [ ! -d ~/.local/state/tfmod ]; then
+  COMMAND='install'
+fi
+
+# If we're not installing, run
+if [[ "${COMMAND}" != 'install' ]]; then
+  cd ~/.local/state/tfmod || fatal "run 'tfmod install' to install tfmod"
+  if [ ! -d .venv ]; then
+    fatal "run 'tfmod install' to install tfmod"
+  fi
+
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
+  exec tfmod "${ARGV[@]}"
+fi
+
+# Installer
+
+# More logging functions
+function is-debug {
+  [[ "${LOG_LEVEL}" == 'debug' ]]
+}
+
+function is-info {
+  [[ "${LOG_LEVEL}" == 'info' ]] || is-debug
+}
+
+function is-warn {
+  [[ "${LOG_LEVEL}" == 'warn' ]] || is-info
+}
+
+function debug {
+  if is-debug; then
+    log debug "$@"
+  fi
+}
+
+function info {
+  if is-info; then
+    log info "$@"
+  fi
+}
+
+function warn {
+  if is-warn; then
+    log warn "$@"
+  fi
+}
+
+# Ensure log level is set correctly
+case "${LOG_LEVEL}" in
+  debug|info|warn|error)
+    ;;
+  *)
+    LOG_LEVEL='warn'
+    log-warn "unknown log level ${LOG_LEVEL}"
+esac
+
+# Confirm y/n
+function confirm {
+  local choice
+  read -r -p "❓ ${1} (y/N)" choice
+  case "${choice}" in
+    y|yes|Y|YES)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# OS detection
+
+function is-macos {
+  if [[ "${OSTYPE}" == "darwin"* ]]; then
+    debug 'macos detected'
+    return 0
+  fi
+  return 1
+}
+
+PACKAGES=()
+
+function use-package {
+  local cmd
+  local pkg
+
+  cmd="${1}"
+  pkg="${2:-${1}}"
+
+  if ! has-bin "${cmd}"; then
+    PACKAGES+=("${pkg}")
+  fi
+}
+
+# homebrew based installs
+
+function install-homebrew {
+  if confirm 'Would you like to install homebrew?'; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    info 'homebrew installed'
+    return 0
+  fi
+  return 1
+}
+
+function brew-install {
+  if ! has-bin brew; then
+    install-homebrew
+  fi
+
+  info 'Installing the following homebrew formulas:'
+  for formula in "${HOMEBREW_FORMULAS[@]}"; do
+    info "- ${formula}"
+  done
+
+  # Homebrew doesn't prompt by default
+  if confirm 'Would you like to install these formulas with homebrew?'; then
+    brew install "${HOMEBREW_FORMULAS[@]}"
+    return 0
+  fi
+  return 1
+}
+
+# linux-based installs
+
+function apt-install {
+  sudo apt install "${PACKAGES[@]}"
+}
+
+function dnf-install {
+  sudo dnf install "${PACKAGES[@]}"
+}
+
+# do it up
+
+function install-brew-packages {
+  add-package git
+  add-package python
+  add-package terraform hashicorp/tap/terraform
+  brew-install
+}
+
+function install-apt-packages {
+  add-package git
+  add-package python3
+  apt-install
+}
+
+function install-dnf-packages {
+  add-package git
+  add-package python3
+  dnf-install
+}
+
+function install-packages {
+  if [ ${#PACKAGES[@]} -eq 0 ]; then
+    return 1
+  fi
+
+  if is-macos; then
+    install-brew-packages
+  elif has-bin apt; then
+    install-apt-packages
+  elif has-bin dnf; then
+    install-dnf-packages
+  else
+    fatal 'do not know how to install packages'
+  fi
+}
+
+function install-uv {
+  if has-bin uv; then
+    return 0
+  fi
+
+  info 'uv is installed with the following command:'
+  info
+  info '    curl -LsSf https://astral.sh/uv/install.sh | sh'
+  info
+
+  if confirm 'would you like to install uv?'; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    return 0
+  fi
+  return 1
+}
+
+function install-terraform {
+  if has-bin terraform; then
+    return 0
+  fi
+
+  warn 'in order to use tfmod, you need to install terraform'
+  warn 'you may find instructions here:'
+  warn
+  warn '    https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli'
+  warn
+  warn 'alternately, consider the tool '\'tfswitch\'':'
+  warn
+  warn '    https://tfswitch.warrensbox.com/'
+  warn
+  error 'without terraform, tfmod can not continue'
+  return 1
+}
+
+function install-tfmod {
+  mkdir -p ~/.local/state
+
+  if [ ! -d ~/.local/state/tfmod ]; then
+    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git)
+  fi
+  (cd ~/.local/state/tfmod \
+    && terraform -chdir=./modules/tfmod init -upgrade \
+    && uv sync --extra dev \
+    && uv pip install .)
+}
+
+function install {
+  install-packages
+  install-terraform
+  install-uv
+  install-tfmod
+}
+
+install
