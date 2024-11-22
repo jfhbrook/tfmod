@@ -3,8 +3,8 @@
 ## TODOs
 
 - [x] do up installer
-- [ ] sketch commands with go-flag
-- [ ] sketch task command, also with go-flag
+- [x] cli abstraction with go-flag
+- [x] stub terraform runner
 - [ ] base commands
   - [ ] config
   - [ ] init
