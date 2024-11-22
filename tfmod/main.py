@@ -1,2 +1,2 @@
 def main() -> None:
-    pass
+    print('salad')
