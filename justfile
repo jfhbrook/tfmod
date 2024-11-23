@@ -13,7 +13,7 @@ default:
 
 # Sync project
 sync:
-  terraform -chdir=./modules/tfmod init -upgrade
+  for module in ./modules/*; do terraform "-chdir=${module}" init -upgrade; done
   uv sync --extra dev
   uv pip install -e .
 
