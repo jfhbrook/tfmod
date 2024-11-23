@@ -153,6 +153,15 @@ function ok {
   echo -e "\e[0;92m${1}\e[0m"
 }
 
+function quote {
+  if ! is-info; then
+    return 0
+  fi
+  while read -r line; do
+    echo "  │ ${line}"
+  done
+}
+
 # Ensure log level is set correctly
 case "${TF_LOG}" in
   TRACE|DEBUG|INFO|WARN|ERROR)
@@ -162,7 +171,12 @@ case "${TF_LOG}" in
     log-warn "Unknown log level ${TF_LOG}"
 esac
 
-UPDATE_OK='tfmod is installed and updated!'
+UPDATE_OK='tfmod has been successfully updated!
+
+You may now begin working with tfmod. Try running "tfmod init" to create
+your first project. All tfmod commands should now work.
+
+To update tfmod in the future, run "tfmod update"!'
 
 function update-ok {
   ok "${UPDATE_OK}"
@@ -268,7 +282,7 @@ function brew-install {
 
   # Homebrew doesn't prompt by default
   if confirm 'Would you like to install these formulas with homebrew?'; then
-    brew install "${HOMEBREW_FORMULAS[@]}"
+    brew install "${HOMEBREW_FORMULAS[@]}" | quote
     return 0
   fi
   return 1
@@ -356,10 +370,10 @@ function install-uv {
     return 0
   fi
 
-  info 'uv is installed with the following command:'
-  info
-  info '    curl -LsSf https://astral.sh/uv/install.sh | sh'
-  info
+  echo 'uv is installed with the following command:'
+  echo
+  echo '    curl -LsSf https://astral.sh/uv/install.sh | sh'
+  echo
 
   if confirm 'Would you like to install uv?'; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -373,39 +387,41 @@ function install-terraform {
     return 0
   fi
 
-  warn 'In order to use tfmod, you need to install terraform'
-  warn 'you may find instructions here:'
-  warn
-  warn '    https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli'
-  warn
-  warn 'alternately, consider the tool '\'tfswitch\'':'
-  warn
-  warn '    https://tfswitch.warrensbox.com/'
-  warn
-  error 'without terraform, tfmod can not continue'
-  return 1
+  fatal 'Without terraform, tfmod can not continue' \
+'In order to use tfmod, you need to install terraform. You may find instructions
+here:
+
+    https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+alternately, consider the tool '\'tfswitch\'':
+
+    https://tfswitch.warrensbox.com/'
 }
 
 function install-tfmod {
   mkdir -p ~/.local/state
 
   if [ ! -d ~/.local/state/tfmod ]; then
-    info 'Installing tfmod to ~/.local/state/tfmod...'
-    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git)
+    echo 'Installing tfmod to ~/.local/state/tfmod...'
+    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git 1>&1 | quote)
   else
-    info 'Updating tfmod in ~/.local/state/tfmod...'
-    (cd ~/.local/state/tfmod && git pull origin)
+    echo 'Updating tfmod in ~/.local/state/tfmod...'
+    (cd ~/.local/state/tfmod && git pull origin 2>&1 | quote)
   fi
   find-uv
   assert-uv
-  info 'Updating dependencies...'
-  (cd ~/.local/state/tfmod \
-    && for module in ./modules/*; do terraform "-chdir=${module}" init -upgrade || fatal-update; done \
+  echo 'Updating Terraform modules...'
+  (set -euo pipefail; cd ~/.local/state/tfmod \
+    && for module in ./modules/*; do \
+        echo "- modules/$(basename "${module}")"
+        terraform -no-color "-chdir=${module}" init -upgrade | quote
+      done)
+  echo 'Updating Python dependencies...'
+  (set -euo pipefail cd ~/.local/state/tfmod \
     && rm -rf .venv \
-    && "${UV_BIN}" sync)
+    && "${UV_BIN}" sync 2>&1 | quote)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
-    info 'Copying tfmod to ~/.local/bin/tfmod...'
+    echo 'Copying tfmod to ~/.local/bin/tfmod...'
     mkdir -p ~/.local/bin
     cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
   fi
