@@ -58,9 +58,9 @@ def usage():
             print(COMMANDS[command].help)
             return
 
-    print("usage: tfmod [OPTIONS] [COMMAND]")
+    print("Usage: tfmod [OPTIONS] [COMMAND]")
     print("")
-    print("COMMANDS")
+    print("Commands:")
     print("")
 
     for command in COMMANDS.values():

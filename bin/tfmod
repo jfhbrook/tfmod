@@ -4,15 +4,18 @@ set -euo pipefail
 
 # Enough logging to launch tfmod
 
-function log {
-  local level
-  level="${1}"
-  shift
-  echo "${level}:" "$@" 1>&2
-}
-
 function error {
-  log error "$@"
+  echo -e '\e[0;31m│\e[0m'
+  echo -e '\e[0;31m│ Error:\e[0m' "${1}"
+
+  if [ -n "${2}" ]; then
+    echo -e '\e[0;31m│\e[0m'
+    echo "${2}" | while read -r line; do
+    echo -e '\e[0;31m│\e[0m ' "${line}"
+    done
+  fi
+
+  echo -e '\e[0;31m│\e[0m'
 }
 
 function fatal {
@@ -20,16 +23,23 @@ function fatal {
   exit 1
 }
 
-LOG_LEVEL='info'
+ERR_NOT_INSTALLED="tfmod is not installed correctly"
+ERR_NOT_INSTALLED_MSG="To install tfmod, run 'tfmod update'"
+
+function fatal-not-installed {
+  fatal "${ERR_NOT_INSTALLED}" "${ERR_NOT_INSTALLED_MSG}"
+}
+
+TF_LOG="${TF_LOG:-WARN}"
 ARGV="$*"
 COMMAND=''
 SHOW_HELP=''
 
-UNWISE_HELP='usage: tfmod unwise
+UNWISE_HELP='Usage: tfmod unwise
 
 Remove tfmod and all its files.'
 
-UPDATE_HELP='usage: tfmod update
+UPDATE_HELP='Usage: tfmod update
 
 Install or update tfmod and its dependencies.'
 
@@ -43,15 +53,6 @@ while [[ $# -gt 0 ]]; do
       if [ -z "${COMMAND}" ]; then
         COMMAND="${1}"
       fi
-      shift
-      ;;
-    -log-level|--log-level)
-      LOG_LEVEL="${2}"
-      shift
-      shift
-      ;;
-    -log-level=*|--log-level=*)
-      LOG_LEVEL="${1#*=}"
       shift
       ;;
     *)
@@ -78,20 +79,16 @@ if [ ! -d ~/.local/state/tfmod ]; then
   COMMAND='install'
 fi
 
-INSTALL_TFMOD="run 'tfmod update' to install tfmod"
-
 # If we're not installing, run
 if [[ "${COMMAND}" != 'update' ]]; then
-  cd ~/.local/state/tfmod || fatal "${INSTALL_TFMOD}"
-  if [ ! -d .venv ]; then
-    fatal "${INSTALL_TFMOD}"
-  fi
+  cd ~/.local/state/tfmod || fatal-not-installed
+  [ -d .venv ] || fatal-not-installed
 
   # rather than using uv, just use the virtualenv directly...
 
   # shellcheck disable=SC1091
   source .venv/bin/activate
-  exec tfmod "${ARGV[@]}"
+  exec python3 -m tfmod "${ARGV[@]}"
 fi
 
 #
@@ -107,59 +104,89 @@ if [ -n "${SHOW_HELP}" ]; then
   exit 0
 fi
 
-UPDATE_OK='tfmod is installed and updated'
-UPDATE_ERR='failed to install or update tfmod'
-
 # More logging functions
+
+function log {
+  TS="$(date +"%Y-%m-%dT%H:%M:%S%z")"
+  local level
+  level="${1}"
+  shift
+  echo "${TS} ${level}" "$@" 1>&2
+}
+
+function is-trace {
+  [[ "${TF_LOG}" == 'TRACE' ]]
+}
+
 function is-debug {
-  [[ "${LOG_LEVEL}" == 'debug' ]]
+  [[ "${TF_LOG}" == 'DEBUG' ]] || is-trace
 }
 
 function is-info {
-  [[ "${LOG_LEVEL}" == 'info' ]] || is-debug
+  [[ "${TF_LOG}" == 'INFO' ]] || is-debug
 }
 
 function is-warn {
-  [[ "${LOG_LEVEL}" == 'warn' ]] || is-info
+  [[ "${TF_LOG}" == 'WARN' ]] || is-info
 }
 
 function debug {
   if is-debug; then
-    log debug "$@"
+    log '[DEBUG]' "$@"
   fi
 }
 
 function info {
   if is-info; then
-    log info "$@"
+    log '[INFO] ' "$@"
   fi
 }
 
 function warn {
   if is-warn; then
-    log warn "$@"
+    log '[WARN] ' "$@"
   fi
 }
 
+function ok {
+  echo -e "\e[0;92m${1}\e[0m"
+}
+
 # Ensure log level is set correctly
-case "${LOG_LEVEL}" in
-  debug|info|warn|error)
+case "${TF_LOG}" in
+  TRACE|DEBUG|INFO|WARN|ERROR)
     ;;
   *)
-    LOG_LEVEL='warn'
-    log-warn "unknown log level ${LOG_LEVEL}"
+    TF_LOG='WARN'
+    log-warn "Unknown log level ${TF_LOG}"
 esac
+
+UPDATE_OK='tfmod is installed and updated!'
+
+function update-ok {
+  ok "${UPDATE_OK}"
+}
+
+ERR_UPDATE='Failed to install or update tfmod'
+ERR_UPDATE_MSG='This is probably a bug in tfmod. File an issue at:
+
+    https://github.com/jfhbrook/tfmod/issues
+'
+
+function fatal-update {
+  fatal "${ERR_UPDATE}" "${ERR_UPDATE_MSG}"
+}
 
 # Confirm y/n
 function confirm {
   local choice
-  read -r -p "❓ ${1} (y/N) " choice
+  read -r -p "${1} (y/N) " choice
   case "${choice}" in
     y|yes|Y|YES)
       return 0
       ;;
     *)
-      fatal 'cowardly refusing to continue.'
+      fatal 'Cowardly refusing to continue.'
       ;;
   esac
 }
@@ -168,7 +195,7 @@ function confirm {
 
 function is-macos {
   if [[ "${OSTYPE}" == "darwin"* ]]; then
-    debug 'macos detected'
+    debug 'MacOS detected'
     return 0
   fi
   return 1
@@ -186,14 +213,14 @@ function has-bin {
   fi
 
   if which "${1}" > /dev/null 2>&1; then
-    info "found ${1} at $(which "${1}")"
+    info "Found ${1} at $(which "${1}")"
     if [ "${1}" == 'terraform' ]; then
       TERRAFORM_IN_PATH=1
     fi
     return 0
   fi
 
-  info "could not find ${1}"
+  info "Could not find ${1}"
   return 1
 }
 
@@ -220,7 +247,7 @@ function no-packages {
 function install-homebrew {
   if confirm 'Would you like to install homebrew?'; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    info 'homebrew installed'
+    info 'Homebrew installed'
     return 0
   fi
   return 1
@@ -319,7 +346,7 @@ function find-uv {
 
 function assert-uv {
   if [ -z "${UV_BIN}" ]; then
-    fatal 'could not find uv'
+    fatal 'Could not find uv'
   fi
 }
 
@@ -333,7 +360,7 @@ function install-uv {
   info '    curl -LsSf https://astral.sh/uv/install.sh | sh'
   info
 
-  if confirm 'would you like to install uv?'; then
+  if confirm 'Would you like to install uv?'; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
     return 0
   fi
@@ -345,7 +372,7 @@ function install-terraform {
     return 0
   fi
 
-  warn 'in order to use tfmod, you need to install terraform'
+  warn 'In order to use tfmod, you need to install terraform'
   warn 'you may find instructions here:'
   warn
   warn '    https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli'
@@ -362,21 +389,21 @@ function install-tfmod {
   mkdir -p ~/.local/state
 
   if [ ! -d ~/.local/state/tfmod ]; then
-    info 'installing tfmod to ~/.local/state/tfmod...'
+    info 'Installing tfmod to ~/.local/state/tfmod...'
     (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git)
   else
-    info 'updating tfmod in ~/.local/state/tfmod...'
+    info 'Updating tfmod in ~/.local/state/tfmod...'
     (cd ~/.local/state/tfmod && git pull origin)
   fi
   find-uv
   assert-uv
-  info 'updating dependencies...'
+  info 'Updating dependencies...'
   (cd ~/.local/state/tfmod \
     && terraform -chdir=./modules/tfmod init -upgrade \
     && "${UV_BIN}" sync)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
-    info 'copying tfmod to ~/.local/bin/tfmod...'
+    info 'Copying tfmod to ~/.local/bin/tfmod...'
     mkdir -p ~/.local/bin
     cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
   fi
@@ -400,7 +427,7 @@ function install {
   install-uv
   install-tfmod
   check-path
-  info "${UPDATE_OK}"
+  update-ok
 }
 
-install || fatal "${UPDATE_ERR}"
+install || fatal-update

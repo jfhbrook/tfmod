@@ -1,7 +1,8 @@
 import flag
 
 from tfmod.cli.base import command, Command, parse
-from tfmod.config import init_config
+
+# from tfmod.config import init_config
 from tfmod.terraform import run_terraform
 
 
