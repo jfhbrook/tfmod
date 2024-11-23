@@ -401,6 +401,7 @@ function install-tfmod {
   info 'Updating dependencies...'
   (cd ~/.local/state/tfmod \
     && for module in ./modules/*; do terraform "-chdir=${module}" init -upgrade || fatal-update; done \
+    && rm -rf .venv \
     && "${UV_BIN}" sync)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
