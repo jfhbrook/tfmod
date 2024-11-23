@@ -4,7 +4,7 @@ set -euo pipefail
 
 TFMOD_URL=https://raw.githubusercontent.com/jfhbrook/tfmod/refs/heads/main/bin/tfmod
 
-echo 'info: copying tfmod to ~/.local/bin/tfmod...'
+echo 'Copying tfmod to ~/.local/bin/tfmod...'
 mkdir -p ~/.local/bin
 
 if [ -f "./bin/tfmod" ]; then
