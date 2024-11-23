@@ -8,7 +8,7 @@ function error {
   echo -e '\e[0;31m│\e[0m'
   echo -e '\e[0;31m│ Error:\e[0m' "${1}"
 
-  if [ -n "${2}" ]; then
+  if [ -n "${2:-}" ]; then
     echo -e '\e[0;31m│\e[0m'
     echo "${2}" | while read -r line; do
     echo -e '\e[0;31m│\e[0m ' "${line}"
@@ -329,7 +329,7 @@ function install-packages {
   elif has-bin dnf; then
     install-dnf-packages
   else
-    fatal 'do not know how to install packages'
+    fatal 'Do not know how to install packages'
   fi
 }
 
