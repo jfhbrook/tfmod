@@ -275,9 +275,9 @@ function brew-install {
     install-homebrew
   fi
 
-  info 'Installing the following homebrew formulas:'
+  echo 'Installing the following homebrew formulas:'
   for formula in "${HOMEBREW_FORMULAS[@]}"; do
-    info "- ${formula}"
+    echo "- ${formula}"
   done
 
   # Homebrew doesn't prompt by default
