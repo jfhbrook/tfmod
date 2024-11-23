@@ -107,6 +107,7 @@ fi
 # More logging functions
 
 function log {
+  # TODO: Terraform shows fractional seconds...
   TS="$(date +"%Y-%m-%dT%H:%M:%S%z")"
   local level
   level="${1}"
@@ -399,7 +400,7 @@ function install-tfmod {
   assert-uv
   info 'Updating dependencies...'
   (cd ~/.local/state/tfmod \
-    && terraform -chdir=./modules/tfmod init -upgrade \
+    && for module in ./modules/*; do terraform "-chdir=${module}" init -upgrade || fatal-update; done \
     && "${UV_BIN}" sync)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
