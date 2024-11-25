@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Enough logging to launch tfmod
+# Enough logging to launch TfMod
 
 function error {
   echo -e '\e[0;31m│\e[0m'
@@ -23,8 +23,8 @@ function fatal {
   exit 1
 }
 
-ERR_NOT_INSTALLED="tfmod is not installed correctly"
-ERR_NOT_INSTALLED_MSG="To install tfmod, run 'tfmod update'"
+ERR_NOT_INSTALLED="TfMod is not installed correctly"
+ERR_NOT_INSTALLED_MSG="To install TfMod, run 'tfmod update'"
 
 function fatal-not-installed {
   fatal "${ERR_NOT_INSTALLED}" "${ERR_NOT_INSTALLED_MSG}"
@@ -35,13 +35,13 @@ ARGV="$*"
 COMMAND=''
 SHOW_HELP=''
 
-UNWISE_HELP='Usage: tfmod unwise
+UNWISE_HELP='Usage: TfMod unwise
 
-Remove tfmod and all its files.'
+Remove TfMod and all its files.'
 
-UPDATE_HELP='Usage: tfmod update
+UPDATE_HELP='Usage: TfMod update
 
-Install or update tfmod and its dependencies.'
+Install or update TfMod and its dependencies.'
 
 while [[ $# -gt 0 ]]; do
   case "${1}" in
@@ -68,27 +68,27 @@ if [[ "${COMMAND}" == 'unwise' ]]; then
     exit 0
   fi
 
-  rm -rf ~/.local/state/tfmod
+  rm -rf ~/.local/state/TfMod
   rm -f "${BASH_SOURCE[0]}"
-  info 'tfmod is uninstalled'
+  info 'TfMod is uninstalled'
   exit 0
 fi
 
-# If not cloned, we need to install tfmod
-if [ ! -d ~/.local/state/tfmod ]; then
+# If not cloned, we need to install TfMod
+if [ ! -d ~/.local/state/TfMod ]; then
   COMMAND='install'
 fi
 
 # If we're not installing, run
 if [[ "${COMMAND}" != 'update' ]]; then
-  cd ~/.local/state/tfmod || fatal-not-installed
+  cd ~/.local/state/TfMod || fatal-not-installed
   [ -d .venv ] || fatal-not-installed
 
   # rather than using uv, just use the virtualenv directly...
 
   # shellcheck disable=SC1091
   source .venv/bin/activate
-  exec python3 -m tfmod "${ARGV[@]}"
+  exec python3 -m TfMod "${ARGV[@]}"
 fi
 
 #
@@ -171,21 +171,21 @@ case "${TF_LOG}" in
     log-warn "Unknown log level ${TF_LOG}"
 esac
 
-UPDATE_OK='tfmod has been successfully updated!
+UPDATE_OK='TfMod has been successfully updated!
 
-You may now begin working with tfmod. Try running "tfmod init" to create
-your first project. All tfmod commands should now work.
+You may now begin working with TfMod. Try running "tfmod init" to create
+your first project. All TfMod commands should now work.
 
-To update tfmod in the future, run "tfmod update"!'
+To update TfMod in the future, run "tfmod update"!'
 
 function update-ok {
   ok "${UPDATE_OK}"
 }
 
-ERR_UPDATE='Failed to install or update tfmod'
-ERR_UPDATE_MSG='This is probably a bug in tfmod. File an issue at:
+ERR_UPDATE='Failed to install or update TfMod'
+ERR_UPDATE_MSG='This is probably a bug in TfMod. File an issue at:
 
-    https://github.com/jfhbrook/tfmod/issues
+    https://github.com/jfhbrook/TfMod/issues
 '
 
 function fatal-update {
@@ -387,8 +387,8 @@ function install-terraform {
     return 0
   fi
 
-  fatal 'Without terraform, tfmod can not continue' \
-'In order to use tfmod, you need to install terraform. You may find instructions
+  fatal 'Without terraform, TfMod can not continue' \
+'In order to use TfMod, you need to install terraform. You may find instructions
 here:
 
     https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
@@ -397,40 +397,40 @@ alternately, consider the tool '\'tfswitch\'':
     https://tfswitch.warrensbox.com/'
 }
 
-function install-tfmod {
+function install-TfMod {
   mkdir -p ~/.local/state
 
-  if [ ! -d ~/.local/state/tfmod ]; then
-    echo 'Installing tfmod to ~/.local/state/tfmod...'
-    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git 1>&1 | quote)
+  if [ ! -d ~/.local/state/TfMod ]; then
+    echo 'Installing TfMod to ~/.local/state/tfmod...'
+    (cd ~/.local/state && git clone git@github.com:jfhbrook/TfMod.git 1>&1 | quote)
   else
-    echo 'Updating tfmod source in ~/.local/state/tfmod...'
-    (cd ~/.local/state/tfmod && git pull origin 2>&1 | quote)
+    echo 'Updating TfMod source in ~/.local/state/tfmod...'
+    (cd ~/.local/state/TfMod && git pull origin 2>&1 | quote)
   fi
   find-uv
   assert-uv
   echo 'Updating Terraform modules...'
-  (set -euo pipefail; cd ~/.local/state/tfmod \
+  (set -euo pipefail; cd ~/.local/state/TfMod \
     && for module in ./modules/*; do \
         echo "- modules/$(basename "${module}")"
         terraform -no-color "-chdir=${module}" init -upgrade | quote
       done)
   echo 'Updating Python dependencies...'
-  (set -euo pipefail cd ~/.local/state/tfmod \
+  (set -euo pipefail cd ~/.local/state/TfMod \
     && rm -rf .venv \
     && "${UV_BIN}" sync 2>&1 | quote)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
-    echo 'Copying tfmod to ~/.local/bin/tfmod...'
+    echo 'Copying TfMod to ~/.local/bin/tfmod...'
     mkdir -p ~/.local/bin
-    cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
+    cp ~/.local/state/TfMod/bin/tfmod ~/.local/bin/tfmod
   fi
-  chmod +x ~/.local/bin/tfmod
+  chmod +x ~/.local/bin/TfMod
 }
 
 function check-path {
-  if ! which tfmod &> /dev/null; then
-    warn 'tfmod not found on your PATH. you may need to add the following to your'
+  if ! which TfMod &> /dev/null; then
+    warn 'TfMod not found on your PATH. you may need to add the following to your'
     warn 'shell profile (ie ~/.bashrc, ~/.zshrc):'
     warn
     # shellcheck disable=SC2016
@@ -443,7 +443,7 @@ function install {
   install-packages
   install-terraform
   install-uv
-  install-tfmod
+  install-TfMod
   check-path
   update-ok
 }
