@@ -1,15 +1,32 @@
+from typing import NoReturn
+
 import flag
 
-from tfmod.cli.base import command, Command, parse
-
-# from tfmod.config import init_config
+from tfmod import TFMOD_VERSION
+from tfmod.cli.base import cli, command, Command, exit, run
 from tfmod.terraform import run_terraform
 
 
-@command()
-def init(cmd: Command) -> None:
+def check_for_updates() -> None:
     """
-    initialize a new project
+    Check for updates
+    """
+    pass
+
+
+def version() -> None:
+    """
+    Show TfMod version and check for updates
+    """
+
+    print(f"TfMod v{TFMOD_VERSION}")
+    check_for_updates()
+
+
+@command()
+def init(_cmd: Command) -> None:
+    """
+    Initialize a new project
     """
 
     run_terraform("init-command", flag.args)
@@ -18,11 +35,27 @@ def init(cmd: Command) -> None:
 @command()
 def config(_cmd: Command) -> None:
     """
-    configure tfmod
+    Configure TfMod
     """
 
     run_terraform("config-command", flag.args)
 
 
+@cli
 def main() -> None:
-    parse()
+    """
+    The command line entry point
+    """
+
+    v = flag.Ptr(False)
+
+    flag.bool_var(v, "version", False, "Show TfMod version")
+    flag.bool_var(v, "v", False, "Alias for -version")
+
+    flag.parse()
+
+    if v:
+        version()
+        exit()
+
+    run()

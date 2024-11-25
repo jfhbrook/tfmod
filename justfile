@@ -46,7 +46,7 @@ lint:
 # Check type annotations with pyright
 check:
   uv run npx pyright@latest
-  terraform -chdir=modules/tfmod validate
+  for module in modules/*; do terraform "-chdir=${module}" validate; done
 
 # Run tests with pytest
 test *argv:

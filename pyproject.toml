@@ -23,7 +23,8 @@ classifiers = [
 requires-python = ">=3.12"
 dependencies = [
   "go-flag",
-  "tf-registry"
+  "tf-registry",
+  "toml",
 ]
 
 [project.optional-dependencies]
@@ -34,7 +35,6 @@ dev = [
   "black",
   "isort",
   "jupyter-console",
-  "toml",
   "validate-pyproject[all]",
 ]
 

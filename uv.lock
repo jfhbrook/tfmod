@@ -850,6 +850,7 @@ source = { editable = "." }
 dependencies = [
     { name = "go-flag" },
     { name = "tf-registry" },
+    { name = "toml" },
 ]
 
 [package.optional-dependencies]
@@ -860,7 +861,6 @@ dev = [
     { name = "isort" },
     { name = "jupyter-console" },
     { name = "pytest" },
-    { name = "toml" },
     { name = "validate-pyproject", extra = ["all"] },
 ]
 
@@ -874,7 +874,7 @@ requires-dist = [
     { name = "jupyter-console", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "tf-registry" },
-    { name = "toml", marker = "extra == 'dev'" },
+    { name = "toml" },
     { name = "validate-pyproject", extras = ["all"], marker = "extra == 'dev'" },
 ]
 
@@ -956,7 +956,7 @@ version = "6.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyyaml" },
-    { name = "urllib3" },
+    { name = "urllib3", marker = "python_full_version >= '3.12'" },
     { name = "wrapt" },
     { name = "yarl" },
 ]
