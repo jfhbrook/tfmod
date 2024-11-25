@@ -11,7 +11,7 @@ function error {
   if [ -n "${2:-}" ]; then
     echo -e '\e[0;31m│\e[0m'
     echo "${2}" | while read -r line; do
-    echo -e '\e[0;31m│\e[0m ' "${line}"
+      echo -e '\e[0;31m│\e[0m ' "${line}"
     done
   fi
 
