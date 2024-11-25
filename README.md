@@ -5,10 +5,14 @@
 - [x] do up installer
 - [x] cli abstraction with go-flag
 - [x] stub terraform runner
-- [ ] base commands
-  - [ ] config
-  - [ ] init
-  - [ ] version command
+- [ ] set up [bash_bundler](https://github.com/jfhbrook/bash_bundler)
+- [ ] version command - straightforward, hopefully
+- [ ] init command
+  - terraform-like prompt that supports defaults
+    - use [parser](https://pypi.org/project/python-hcl2/) to pull from `variables.tf`
+  - terraform module that generates init
+    - use [encode_tfvars function](https://developer.hashicorp.com/terraform/language/functions/terraform-encode_tfvars)
+- [ ] config command
 - [ ] task related commands
   - [ ] run
   - [ ] lint
