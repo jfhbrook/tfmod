@@ -6,7 +6,8 @@ from typing import Callable, Dict, List, NoReturn, Optional
 
 import flag
 
-from tfmod.error import Error
+from tfmod.error import CliError, Exit, Help
+from tfmod.logging import configure_logger
 
 
 @dataclass
@@ -62,6 +63,7 @@ def print_global_defaults() -> None:
         if fl.def_value != "false":
             value_name = "VALUE"
 
+        # TODO: Wrap usage at 79 chars
         print(
             f"  -{fl.name}{'=' + value_name if value_name is not None else ''}      {fl.usage}"
         )
@@ -102,27 +104,11 @@ def usage():
     print("")
 
 
-class Help(Error):
-    """
-    Signals help
-    """
-
-
 def help() -> NoReturn:
     """
     Show usage and exit
     """
     raise Help()
-
-
-class Exit(Error):
-    """
-    Signals an exit
-    """
-
-    def __init__(self, exit_code: int) -> None:
-        super().__init__(f"Exit({exit_code}")
-        self.exit_code = exit_code
 
 
 def exit(exit_code: int = 0) -> NoReturn:
@@ -132,12 +118,6 @@ def exit(exit_code: int = 0) -> NoReturn:
     raise Exit(exit_code)
 
 
-class CliError(Error):
-    """
-    An exception for CLI errors
-    """
-
-
 def error(message: str) -> NoReturn:
     """
     Print a CLI error message, show usage, and exit(2)
@@ -145,19 +125,24 @@ def error(message: str) -> NoReturn:
     raise CliError(message)
 
 
-def not_found() -> NoReturn:
+def not_found(command: str) -> NoReturn:
     """
     Command not found
     """
 
-    error(f"Unknown command {command}")
+    error(
+        f"""TfMod has no command named "{command}".
+
+To see all of TfMod's top-level commands, run:
+  terraform -help"""
+    )
 
 
 def none_specified() -> NoReturn:
     """
     No command was specified
     """
-    error("No command specified")
+    help()
 
 
 Main = Callable[[], None]
@@ -170,6 +155,8 @@ def cli(fn: Main) -> Main:
 
     @functools.wraps(fn)
     def cli() -> None:
+        configure_logger()
+
         try:
             fn()
         except Help:
@@ -178,9 +165,7 @@ def cli(fn: Main) -> Main:
         except Exit as exc:
             sys.exit(exc.exit_code)
         except CliError as exc:
-            print(f"error: {exc}")
-            print("")
-            usage()
+            print(exc)
             sys.exit(2)
 
     return cli
@@ -209,4 +194,4 @@ def run() -> None:
 
         exit()
     else:
-        not_found()
+        not_found(command)

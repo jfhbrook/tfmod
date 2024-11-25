@@ -4,7 +4,7 @@ import json
 import os
 from typing import Literal, Mapping, Optional
 
-from rich import print
+from rich import print as pprint
 
 from tfmod.cli.base import Exit
 
@@ -39,16 +39,15 @@ BOTTOM_BAR = "╵"
 
 
 class Logger:
-    def __init__(self, env: Mapping[str, str] = os.environ) -> None:
-        self.level = Level.WARN
-        if "TF_LOG" in env:
-            self.level: Level = Level[env["TF_LOG"]]
+    def __init__(self, level: Level) -> None:
+        self.level = level
 
     def timestamp(self) -> str:
         now = datetime.datetime.now()
         ts = now.strftime("%Y-%m-%dT%H:%M:%S.%f")
         tz = now.strftime("%z")
-        # Millisonds instead of microseconds
+
+        # Milliseconds instead of microseconds
         return ts[:-3] + tz
 
     def is_level(self, level: Level) -> bool:
@@ -61,7 +60,7 @@ class Logger:
     def show(
         self, level: str, color: Color, title: str, message: Optional[str]
     ) -> None:
-        print(
+        pprint(
             "\n".join(
                 [
                     f"[{color}]{TOP_BAR}",
@@ -71,8 +70,8 @@ class Logger:
         )
         if message:
             for line in message.split("\n"):
-                print(f"[{color}]{MIDDLE_BAR} [/{color}] {line}")
-        print(f"[{color}]{BOTTOM_BAR}[/{color}]")
+                pprint(f"[{color}]{MIDDLE_BAR} [/{color}] {line}")
+        pprint(f"[{color}]{BOTTOM_BAR}[/{color}]")
 
     def trace(self, message: str) -> None:
         if self.is_level(Level.TRACE):
@@ -104,7 +103,7 @@ class JSONLogger(Logger):
         now = datetime.datetime.now()
         return now.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
 
-    def log(self, level: Level, message: str) -> None:
+    def log_json(self, level: Level, message: str) -> None:
         print(
             json.dumps(
                 {
@@ -114,3 +113,20 @@ class JSONLogger(Logger):
                 }
             )
         )
+
+
+logger: Logger = Logger(Level.WARN)
+
+
+def configure_logger(env: Mapping[str, str] = os.environ) -> None:
+    global logger
+
+    if "TF_LOG" in env:
+        if env["TF_LOG"] == Level.JSON:
+            logger = JSONLogger(Level.JSON)
+        elif not env["TF_LOG"]:
+            pass
+        elif env["TF_LOG"] not in Level:
+            logger.level = Level.TRACE
+        else:
+            logger.level = Level[env["TF_LOG"]]
