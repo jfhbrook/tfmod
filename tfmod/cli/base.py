@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import functools
 import sys
 import textwrap
-from typing import Callable, Dict, NoReturn, Optional
+from typing import Callable, Dict, List, NoReturn, Optional
 
 import flag
 
@@ -50,6 +50,27 @@ def command(
     return decorator
 
 
+def print_global_defaults() -> None:
+    """
+    Print global default flags
+    """
+
+    def visitor(fl: flag.Flag) -> None:
+        # TODO: Configure with flag method wrapper
+        value_name: Optional[str] = None
+
+        if fl.def_value != "false":
+            value_name = "VALUE"
+
+        print(
+            f"  -{fl.name}{'=' + value_name if value_name is not None else ''}      {fl.usage}"
+        )
+        b: List[str] = []
+        b += f"  -{fl.name}"
+
+    flag.visit_all(visitor)
+
+
 @flag.usage
 def usage():
     """
@@ -60,7 +81,7 @@ def usage():
         command = flag.args[0]
 
         if command in COMMANDS:
-            print(f"usage: tfmod [OPTIONS] {command}")
+            print(f"Usage: tfmod [OPTIONS] {command}")
             print("")
             print(COMMANDS[command].help)
             return
@@ -68,10 +89,15 @@ def usage():
     print("Usage: tfmod [OPTIONS] [COMMAND]")
     print("")
     print("Commands:")
-    print("")
 
     for command in COMMANDS.values():
-        print(f"	{command.name}    {command.help}")
+        print(f"  {command.name}          {command.help}")
+
+    print("")
+
+    print("Global options (use these before the subcommand, if any):")
+
+    print_global_defaults()
 
     print("")
 

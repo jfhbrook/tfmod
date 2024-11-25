@@ -16,11 +16,19 @@ def check_for_updates() -> None:
 
 def version() -> None:
     """
-    Show TfMod version and check for updates
+    Show the current TfMod version and check for updates
     """
 
     print(f"TfMod v{TFMOD_VERSION}")
     check_for_updates()
+
+
+@command(name="version")
+def version_cmd(_cmd: Command) -> None:
+    """
+    Show the current TfMod version
+    """
+    version()
 
 
 @command()
@@ -49,8 +57,7 @@ def main() -> None:
 
     v = flag.Ptr(False)
 
-    flag.bool_var(v, "version", False, "Show TfMod version")
-    flag.bool_var(v, "v", False, "Alias for -version")
+    flag.bool_var(v, "version", False, 'An alias for the "version" subcommand.')
 
     flag.parse()
 
