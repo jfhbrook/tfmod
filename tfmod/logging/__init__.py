@@ -2,7 +2,7 @@ import datetime
 from enum import IntEnum
 import json
 import os
-from typing import Literal, Mapping, Optional
+from typing import Literal, Mapping, Optional, Self, Type
 
 from rich import print as pprint
 
@@ -21,7 +21,18 @@ class Level(IntEnum):
     WARN = 4
     ERROR = 5
 
-    def __str__(self) -> str:
+    @classmethod
+    def from_str(cls, level: str) -> "Level":
+        return {
+            "JSON": cls.JSON,
+            "TRACE": cls.TRACE,
+            "DEBUG": cls.DEBUG,
+            "INFO": cls.INFO,
+            "WARN": cls.WARN,
+            "ERROR": cls.ERROR,
+        }.get(level, cls.TRACE)
+
+    def __str__(self: Self) -> str:
         return {
             self.JSON: "JSON",
             self.TRACE: "TRACE",
@@ -129,10 +140,8 @@ def configure_logger(env: Mapping[str, str] = os.environ) -> None:
             logger = JSONLogger(Level.JSON)
         elif not env["TF_LOG"]:
             pass
-        elif env["TF_LOG"] not in Level:
-            logger.level = Level.TRACE
         else:
-            logger.level = Level[env["TF_LOG"]]
+            logger.level = Level.from_str(env["TF_LOG"])
 
 
 configure_logger()
