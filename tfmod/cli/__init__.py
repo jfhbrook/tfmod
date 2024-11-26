@@ -7,7 +7,6 @@ import flag
 from tfmod import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
 from tfmod.terraform import TfCommand
-from tfmod.terraform.vars import prompt_vars
 
 
 def check_for_updates() -> None:
@@ -40,17 +39,13 @@ def init(_cmd: Command) -> None:
     Initialize a new project
     """
 
-    variables = prompt_vars(
-        "init-command",
-        defaults=dict(name=os.path.basename(os.getcwd())),
-        ignore={"path"},
+    cmd = (
+        TfCommand("init-command", "apply")
+        .prompt_var("name", default=os.path.basename(os.getcwd()))
+        .prompt_var("provider_")
+        .prompt_var("version_")
+        .prompt_var("description")
     )
-
-    cmd = TfCommand("init-command", "apply")
-
-    for name, value in variables.items():
-        if value is not None:
-            cmd.var(name, value)
 
     cmd.run()
 
@@ -62,7 +57,7 @@ def config(_cmd: Command) -> None:
     """
 
     cmd = TfCommand("config-command", "apply")
-    cmd.command_args(flag.args)
+    cmd.args(flag.args)
 
     cmd.run()
 

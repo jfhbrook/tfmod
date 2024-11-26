@@ -6,30 +6,41 @@ import hcl2
 from rich import print as pprint
 
 from tfmod import MODULES_DIR
+from tfmod.terraform.value import dump_value, load_value, Value
 
 # Make the type checker happy
 hcl: Any = hcl2
 
 
-def prompt_var(default_: Optional[str]) -> str:
+def prompt_var(
+    name: str, description: Optional[str] = None, default: Optional[Value] = None
+) -> Value:
     """
     Prompt for a variable value
     """
 
+    pprint(f"[bold]var.{name}[/bold]")
+    if description:
+        pprint(f"  [bold]{description}[/bold]")
+    print("")
+
     msg = "Enter a value"
-    if default_:
-        msg += f" ({default_})"
+
+    if default is not None:
+        msg += f" ({dump_value(default)})"
     msg += ":"
+
     # rich.Prompt doesn't have the right behavior.
     #
     # I'd use a formatter from rich, but it doesn't expose one. This is
     # probably because it goes through great pains to handle terminal width
     # appropriately, something a format method can't do.
     try:
-        return input(f"\u001b[1m{msg}\u001b[0m ")
-    except KeyboardInterrupt:
+        result = input(f"\u001b[1m{msg}\u001b[0m ")
+    finally:
         print("")
-        raise
+
+    return load_value(result)
 
 
 @dataclass
@@ -38,9 +49,9 @@ class Variable:
     A Terraform variable
     """
 
-    description: Optional[str]
-    type: Optional[str]
-    default: Optional[Any]
+    description: Optional[str] = None
+    type: Optional[str] = None
+    default: Optional[Value] = None
 
 
 def load_variables(module: Path) -> Dict[str, Variable]:
@@ -62,42 +73,5 @@ def load_variables(module: Path) -> Dict[str, Variable]:
             type=contents.get("type", None),
             default=contents.get("default", None),
         )
-
-    return rv
-
-
-def prompt_vars(
-    module: str,
-    defaults: Optional[Dict[str, str]] = None,
-    ignore: Optional[Set[str]] = None,
-) -> Dict[str, str]:
-    """
-    Prompt for variable values in a module.
-
-    This function differs from Terraform's standard behavior in that it
-    prompts for variables, even if they have defaults.
-    """
-
-    defs = defaults if defaults else dict()
-    ign = ignore if ignore else set()
-
-    variables = load_variables(MODULES_DIR / module)
-
-    rv: Dict[str, str] = dict()
-    for name, var in variables.items():
-        if name in ign:
-            continue
-
-        default_: Any = defs[name] if name in defs else var.default
-        if type(default_) != str:
-            default_ = None
-
-        pprint(f"[bold]var.{name}[/bold]")
-        if var.description:
-            pprint(f"  [bold]{var.description}[/bold]")
-        print("")
-        value = prompt_var(default_)
-        rv[name] = value if value else default_
-        print("")
 
     return rv
