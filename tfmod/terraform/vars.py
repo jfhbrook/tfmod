@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, Set
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import hcl2
 from rich import print as pprint
@@ -28,6 +30,40 @@ def prompt_var(default_: Optional[str]) -> str:
     except KeyboardInterrupt:
         print("")
         raise
+
+
+@dataclass
+class Variable:
+    """
+    A Terraform variable
+    """
+
+    description: Optional[str]
+    type: Optional[str]
+    default: Optional[Any]
+
+
+def load_variables(module: Path) -> Dict[str, Variable]:
+    """
+    Load the variables defined in a module
+    """
+    with open(module / "variables.tf", "r") as f:
+        data: Dict[str, Any] = hcl.load(f)
+
+    rv: Dict[str, Variable] = dict()
+
+    for var in data["variable"]:
+        items: List[Tuple[str, Any]] = list(var.items())
+        assert len(items) == 1
+        name, contents = items[0]
+
+        rv[name] = Variable(
+            description=contents.get("description", None),
+            type=contents.get("type", None),
+            default=contents.get("default", None),
+        )
+
+    return rv
 
 
 def prompt_vars(

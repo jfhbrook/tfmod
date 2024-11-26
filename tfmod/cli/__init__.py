@@ -7,7 +7,7 @@ import flag
 from tfmod import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
 from tfmod.terraform import TfCommand
-from tfmod.vars import prompt_vars
+from tfmod.terraform.vars import prompt_vars
 
 
 def check_for_updates() -> None:
