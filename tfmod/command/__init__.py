@@ -59,6 +59,7 @@ def init(_cmd: Command) -> None:
         .prompt_var("provider_", default=provider)
         .prompt_var("version_", default=version)
         .prompt_var("description", default=description)
+        .auto_approve()
     )
 
     cmd.run()

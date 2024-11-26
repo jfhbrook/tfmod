@@ -74,7 +74,7 @@ class Terraform:
         """
         Automatically approve the plan
         """
-        self.var("auto-approve", True)
+        self._args += ["-auto-approve"]
         return self
 
     def args(self, args: List[str]) -> Self:
