@@ -1,3 +1,4 @@
+import os
 import os.path
 from pathlib import Path
 from subprocess import Popen
@@ -12,6 +13,14 @@ from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
 PathLike = Path | str
+
+
+def clear_file(path: Path) -> None:
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+    logger.info(f"{path} cleared.")
 
 
 class Terraform:
@@ -33,6 +42,11 @@ class Terraform:
         self._prompt_vars: Dict[str, Variable] = dict()
         self._var_files: List[str] = list()
         self._args: List[str] = list()
+
+    def cleared(self) -> Self:
+        clear_file(self._path / "terraform.tfstate")
+        clear_file(self._path / "terraform.tfstate.backup")
+        return self
 
     def env(self, name: str, value: Value) -> Self:
         self._env[name] = dump_value(value)
@@ -100,8 +114,6 @@ class Terraform:
 
     def _prompt(self) -> None:
         vars = load_variables(self._path)
-
-        print(self._module)
 
         for name, var in self._prompt_vars.items():
             # Some variable names are postfixed with a _ because the
