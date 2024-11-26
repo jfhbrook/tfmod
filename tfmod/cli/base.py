@@ -7,7 +7,6 @@ from typing import Callable, Dict, List, NoReturn, Optional
 import flag
 
 from tfmod.error import CliError, Exit, Help
-from tfmod.logging import configure_logger
 
 
 @dataclass
@@ -155,8 +154,6 @@ def cli(fn: Main) -> Main:
 
     @functools.wraps(fn)
     def cli() -> None:
-        configure_logger()
-
         try:
             fn()
         except Help:

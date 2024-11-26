@@ -6,7 +6,7 @@ from typing import Literal, Mapping, Optional
 
 from rich import print as pprint
 
-from tfmod.cli.base import Exit
+from tfmod.error import Exit
 
 
 class Level(IntEnum):
@@ -133,3 +133,6 @@ def configure_logger(env: Mapping[str, str] = os.environ) -> None:
             logger.level = Level.TRACE
         else:
             logger.level = Level[env["TF_LOG"]]
+
+
+configure_logger()
