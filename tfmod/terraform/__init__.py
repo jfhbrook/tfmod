@@ -1,6 +1,6 @@
 import os.path
 from pathlib import Path
-from subprocess import PIPE, Popen
+from subprocess import Popen
 from typing import Dict, List, Mapping, Optional, Self, Tuple
 
 from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR, TERRAFORM_BIN
@@ -77,14 +77,14 @@ class Terraform:
     def _prompt(self) -> None:
         vars = load_variables(self._module)
         for name, var in self._prompt_vars.items():
-            description = var.description
+            description: Optional[str] = var.description
             default = var.default
-            if name in vars:
-                description = (
-                    description if description is not None else vars[name].description
-                )
 
-                default = default if default is not None else vars[name].default
+            if name in vars and vars[name].description:
+                description = vars[name].description
+            if name in vars and vars[name].default:
+                default = vars[name].default
+
             self._vars[name] = dump_value(
                 prompt_var(name, description=description, default=default)
             )
