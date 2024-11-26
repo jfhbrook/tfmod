@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import Dict, List, Optional, Self, Tuple
 
 from tfmod import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR
-from tfmod.terraform.value import dump_value, load_value, Value
-from tfmod.terraform.vars import load_variables, prompt_var, Variable
+from tfmod.terraform.value import dump_value, Value
+from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
 PathLike = Path | str
 
 
-class TfCommand:
+class Terraform:
     def __init__(self, name: str, command: str = "apply") -> None:
         self._module: Path = MODULES_DIR / name
         self._command: str = command

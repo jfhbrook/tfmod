@@ -6,7 +6,7 @@ import flag
 
 from tfmod import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
-from tfmod.terraform import TfCommand
+from tfmod.terraform import Terraform
 
 
 def check_for_updates() -> None:
@@ -40,7 +40,7 @@ def init(_cmd: Command) -> None:
     """
 
     cmd = (
-        TfCommand("init-command", "apply")
+        Terraform("init-command")
         .prompt_var("name", default=os.path.basename(os.getcwd()))
         .prompt_var("provider_")
         .prompt_var("version_")
@@ -56,8 +56,7 @@ def config(_cmd: Command) -> None:
     Configure TfMod
     """
 
-    cmd = TfCommand("config-command", "apply")
-    cmd.args(flag.args)
+    cmd = Terraform("config-command").args(flag.args)
 
     cmd.run()
 
