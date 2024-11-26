@@ -7,14 +7,18 @@
 - [x] stub terraform runner
 - [x] version command - straightforward, hopefully
 - [x] init command
-- [ ] task related commands
+- [ ] fix error output
+  - `tfmod.Error` output based on message and docstring
+  - Other errors output FLAGRANT ERROR
+- [ ] sketch out publish
+  - it's time
+- [ ] sketch out unpublish
+- [ ] script related commands
   - [ ] run
   - [ ] lint
   - [ ] format
   - [ ] test
   - [ ] validate
-- [ ] sketch out publish
-- [ ] sketch out unpublish
 - [ ] config command
 - [ ] tests for logger
 - [ ] logger overhaul
