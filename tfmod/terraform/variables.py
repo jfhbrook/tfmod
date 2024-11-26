@@ -14,7 +14,7 @@ hcl: Any = hcl2
 
 def prompt_var(
     name: str, description: Optional[str] = None, default: Optional[Value] = None
-) -> Value:
+) -> Optional[Value]:
     """
     Prompt for a variable value
     """
@@ -42,6 +42,9 @@ def prompt_var(
         raise
     else:
         print("")
+
+    if result == "":
+        return default
 
     return load_value(result)
 

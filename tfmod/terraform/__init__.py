@@ -96,9 +96,9 @@ class Terraform:
             if name in vars and vars[name].default:
                 default = vars[name].default
 
-            self._vars[name] = dump_value(
-                prompt_var(name, description=description, default=default)
-            )
+            value = prompt_var(name, description=description, default=default)
+            if value is not None:
+                self._vars[name] = dump_value(value)
 
     def build(self) -> Tuple[List[str], Dict[str, str]]:
         """

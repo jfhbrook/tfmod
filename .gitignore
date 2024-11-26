@@ -14,3 +14,6 @@ wheels/
 .terraform.lock.hcl
 *.tfstate
 terraform.tfstate.backup
+
+# tfmod
+module.tfvars
