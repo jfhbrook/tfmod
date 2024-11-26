@@ -6,7 +6,7 @@ import flag
 
 from tfmod import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
-from tfmod.terraform import run_terraform
+from tfmod.terraform import TfCommand
 from tfmod.vars import prompt_vars
 
 
@@ -46,13 +46,13 @@ def init(_cmd: Command) -> None:
         ignore={"path"},
     )
 
-    args: List[str] = []
+    cmd = TfCommand("init-command", "apply")
 
     for name, value in variables.items():
         if value is not None:
-            args += ["-var", f"{name}={value}"]
+            cmd.var(name, value)
 
-    run_terraform("init-command", args + flag.args)
+    cmd.run()
 
 
 @command()
@@ -61,7 +61,10 @@ def config(_cmd: Command) -> None:
     Configure TfMod
     """
 
-    run_terraform("config-command", flag.args)
+    cmd = TfCommand("config-command", "apply")
+    cmd.command_args(flag.args)
+
+    cmd.run()
 
 
 @cli
