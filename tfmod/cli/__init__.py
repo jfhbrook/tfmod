@@ -1,10 +1,10 @@
-from typing import NoReturn
+from typing import List
 
 import flag
 
 from tfmod import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
-from tfmod.logging import logger
+from tfmod.vars import prompt_vars
 from tfmod.terraform import run_terraform
 
 
@@ -38,7 +38,15 @@ def init(_cmd: Command) -> None:
     Initialize a new project
     """
 
-    run_terraform("init-command", flag.args)
+    variables = prompt_vars("init-command")
+
+    args: List[str] = []
+
+    for name, value in variables.items():
+        if value is not None:
+            args += ["-var", f"{name}={value}"]
+
+    run_terraform("init-command", args + flag.args)
 
 
 @command()

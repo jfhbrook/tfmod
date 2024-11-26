@@ -56,5 +56,6 @@ def prompt_vars(module: str) -> Dict[str, str]:
         print("")
         value = prompt_var(default_)
         rv[name] = value if value else default_
+        print("")
 
     return rv
