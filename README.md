@@ -6,12 +6,7 @@
 - [x] cli abstraction with go-flag
 - [x] stub terraform runner
 - [x] version command - straightforward, hopefully
-- [ ] init command
-  - [x] terraform-like prompt that supports defaults
-  - [x] terraform module that generates init
-  - [x] make init command take module as argument
-  - [ ] clear state
-- [ ] config command
+- [x] init command
 - [ ] task related commands
   - [ ] run
   - [ ] lint
@@ -20,10 +15,12 @@
   - [ ] validate
 - [ ] sketch out publish
 - [ ] sketch out unpublish
+- [ ] config command
 - [ ] tests for logger
-- [ ] separate file for bash logging
-  - set up [bash_bundler](https://github.com/jfhbrook/bash_bundler)
-  - tests
+- [ ] logger overhaul
+  - [ ] separate file for bash logging
+    - set up [bash_bundler](https://github.com/jfhbrook/bash_bundler)
+  - [ ] tests
 - [ ] regroup
 
 ## potential commands - based loosely on relevant commands from npm
