@@ -23,7 +23,11 @@ def prompt_var(default_: Optional[str]) -> str:
     # I'd use a formatter from rich, but it doesn't expose one. This is
     # probably because it goes through great pains to handle terminal width
     # appropriately, something a format method can't do.
-    return input(f"\u001b[1m{msg}\u001b[0m ")
+    try:
+        return input(f"\u001b[1m{msg}\u001b[0m ")
+    except KeyboardInterrupt:
+        print("")
+        raise
 
 
 def prompt_vars(module: str) -> Dict[str, str]:
