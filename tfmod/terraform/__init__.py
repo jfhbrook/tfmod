@@ -7,6 +7,7 @@ from typing import Dict, List, Mapping, Optional, Self, Tuple
 from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR, TERRAFORM_BIN
 from tfmod.error import TerraformError
 from tfmod.logging import logger
+from tfmod.module import Module
 from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
@@ -87,13 +88,21 @@ class Terraform:
 
     def _prompt(self) -> None:
         vars = load_variables(self._module)
+        module: Optional[Module] = Module.load_optional()
+
         for name, var in self._prompt_vars.items():
+            # Some variable names are postfixed with a _ because the
+            # plain name is reserved in Terraform.
+            name_in_module = name[:-1] if name.endswith("_") else name
+
             description: Optional[str] = var.description
             default = var.default
 
             if name in vars and vars[name].description:
                 description = vars[name].description
-            if name in vars and vars[name].default:
+            if getattr(module, name_in_module, None) is not None:
+                default = getattr(module, name_in_module)
+            elif name in vars and vars[name].default:
                 default = vars[name].default
 
             value = prompt_var(name, description=description, default=default)
