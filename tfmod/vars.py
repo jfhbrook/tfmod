@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import hcl2
 from rich import print as pprint
@@ -30,13 +30,20 @@ def prompt_var(default_: Optional[str]) -> str:
         raise
 
 
-def prompt_vars(module: str) -> Dict[str, str]:
+def prompt_vars(
+    module: str,
+    defaults: Optional[Dict[str, str]] = None,
+    ignore: Optional[Set[str]] = None,
+) -> Dict[str, str]:
     """
     Prompt for variable values in a module.
 
     This function differs from Terraform's standard behavior in that it
     prompts for variables, even if they have defaults.
     """
+
+    defs = defaults if defaults else dict()
+    ign = ignore if ignore else set()
 
     with open(MODULES_DIR / module / "variables.tf", "r") as f:
         variables: Dict[str, List[Any]] = hcl.load(f)
@@ -48,9 +55,12 @@ def prompt_vars(module: str) -> Dict[str, str]:
 
         name, contents = items[0]
 
+        if name in ign:
+            continue
+
         description: Optional[str] = contents.get("description", None)
 
-        default_: Any = contents.get("default", None)
+        default_: Any = defs[name] if name in defs else contents.get("default", None)
         if type(default_) != str:
             default_ = None
 

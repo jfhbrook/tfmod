@@ -9,14 +9,16 @@ variable "name" {
   type        = string
 }
 
-variable "module_provider" {
+variable "provider_" {
   description = "The main provider used by your module"
   type        = string
+  default     = "aws"
 }
 
-variable "module_version" {
+variable "version_" {
   description = "The version of your module"
   type        = string
+  default     = "1.0.0"
 }
 
 variable "description" {

@@ -1,3 +1,5 @@
+import os
+import os.path
 from typing import List
 
 import flag
@@ -38,7 +40,11 @@ def init(_cmd: Command) -> None:
     Initialize a new project
     """
 
-    variables = prompt_vars("init-command")
+    variables = prompt_vars(
+        "init-command",
+        defaults=dict(name=os.path.basename(os.getcwd())),
+        ignore={"path"},
+    )
 
     args: List[str] = []
 
