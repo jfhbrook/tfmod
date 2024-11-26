@@ -1,4 +1,4 @@
-from tfmod.cli.main import main
+from tfmod.cli import main
 
 if __name__ == "__main__":
     main()
