@@ -96,6 +96,9 @@ class Logger:
         self.error(title, message)
         raise Exit(1)
 
+    def ok(self, message: str) -> None:
+        pprint(f"[green]{message}[/green]")
+
 
 class JSONLogger(Logger):
     # Higher precision - microseconds instead of milliseconds
