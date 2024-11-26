@@ -2,11 +2,12 @@ import datetime
 from enum import IntEnum
 import json
 import os
-from typing import Literal, Mapping, Optional, Self, Type
+import textwrap
+from typing import Literal, Mapping, NoReturn, Optional, Self
 
 from rich import print as pprint
 
-from tfmod.error import Exit
+from tfmod.error import Error, Exit
 
 
 class Level(IntEnum):
@@ -103,9 +104,27 @@ class Logger:
     def error(self, title: str, message: Optional[str] = None) -> None:
         self.show("Error", "red", title, message)
 
-    def fatal(self, title: str, message: Optional[str] = None) -> None:
+    def exception(self, exc: Error) -> None:
+        message: Optional[str] = None
+        if exc.__doc__:
+            message = textwrap.dedent(exc.__doc__)
+
+        self.error(str(exc), message)
+
+    def fatal(self, title: str, message: Optional[str] = None) -> NoReturn:
         self.error(title, message)
         raise Exit(1)
+
+    def flagrant(self, text: str) -> None:
+        banner = "FLAGRANT SYSTEM ERROR".center(79)
+        pprint(f"[white on blue]{banner}[/white on blue]")
+        pprint(f"[white on blue]{' ' * 79}[/white on blue]")
+        for line in text.split("\n"):
+            formatted = ("    " + line).ljust(79)
+            inside = formatted[:79]
+            outside = formatted[79:]
+            pprint(f"[white on blue]{inside}[/white on blue]{outside}")
+        pprint(f"[white on blue]{' ' * 79}[/white on blue]")
 
     def ok(self, message: str) -> None:
         pprint(f"[green]{message}[/green]")

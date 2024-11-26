@@ -2,11 +2,13 @@ from dataclasses import dataclass
 import functools
 import sys
 import textwrap
+import traceback
 from typing import Callable, Dict, List, NoReturn, Optional
 
 import flag
 
-from tfmod.error import CliError, Exit, Help
+from tfmod.error import CliError, Error, Exit, Help
+from tfmod.logging import logger
 
 
 @dataclass
@@ -162,10 +164,16 @@ def cli(fn: Main) -> Main:
         except Exit as exc:
             sys.exit(exc.exit_code)
         except CliError as exc:
-            print(exc)
+            print(str(exc))
             sys.exit(2)
+        except Error as exc:
+            logger.exception(exc)
+            sys.exit(1)
         except (KeyboardInterrupt, EOFError):
             pass
+        except:
+            logger.flagrant(traceback.format_exc())
+            sys.exit(1)
 
         # TODO: Nice formatting for plain Exceptions
 

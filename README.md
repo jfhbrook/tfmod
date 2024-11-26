@@ -7,9 +7,7 @@
 - [x] stub terraform runner
 - [x] version command - straightforward, hopefully
 - [x] init command
-- [ ] fix error output
-  - `tfmod.Error` output based on message and docstring
-  - Other errors output FLAGRANT ERROR
+- [x] fix error output
 - [ ] sketch out publish
   - it's time
 - [ ] sketch out unpublish
