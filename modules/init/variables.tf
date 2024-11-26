@@ -1,9 +1,3 @@
-variable "path" {
-  description = "The path to your module's module.tfvars"
-  type        = string
-  default     = null
-}
-
 variable "name" {
   description = "The name of your module"
   type        = string
@@ -24,10 +18,4 @@ variable "version_" {
 variable "description" {
   description = "A description for your module"
   type        = string
-}
-
-variable "module" {
-  description = "The module spec"
-  type        = map(any)
-  default     = null
 }

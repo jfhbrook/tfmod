@@ -3,8 +3,8 @@ import os.path
 
 import flag
 
-from tfmod.constants import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
+from tfmod.constants import TFMOD_VERSION
 from tfmod.terraform import Terraform
 
 
@@ -39,7 +39,7 @@ def init(_cmd: Command) -> None:
     """
 
     cmd = (
-        Terraform("init-command")
+        Terraform("init")
         .prompt_var("name", default=os.path.basename(os.getcwd()))
         .prompt_var("provider_")
         .prompt_var("version_")

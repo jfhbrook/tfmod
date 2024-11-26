@@ -1,9 +1,9 @@
 import os.path
 from pathlib import Path
-from subprocess import Popen
-from typing import Dict, List, Optional, Self, Tuple
+from subprocess import PIPE, Popen
+from typing import Dict, List, Mapping, Optional, Self, Tuple
 
-from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR
+from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR, TERRAFORM_BIN
 from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
@@ -109,9 +109,12 @@ class Terraform:
 
         return args + self._args, self._env
 
-    def run(self) -> None:
+    def run(self, env: Mapping[str, str] = os.environ) -> None:
         """
         Run the Terraform command
         """
-        args, env = self.build()
-        print(["terraform"] + args, env)
+        args, _env = self.build()
+        _env = dict(env, **_env)
+
+        with Popen([TERRAFORM_BIN] + args, env=_env) as proc:
+            print(proc.wait())
