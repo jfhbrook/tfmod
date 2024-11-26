@@ -81,28 +81,20 @@ def prompt_vars(
     defs = defaults if defaults else dict()
     ign = ignore if ignore else set()
 
-    with open(MODULES_DIR / module / "variables.tf", "r") as f:
-        variables: Dict[str, List[Any]] = hcl.load(f)
+    variables = load_variables(MODULES_DIR / module)
 
     rv: Dict[str, str] = dict()
-    for var in variables["variable"]:
-        items = list(var.items())
-        assert len(items) == 1
-
-        name, contents = items[0]
-
+    for name, var in variables.items():
         if name in ign:
             continue
 
-        description: Optional[str] = contents.get("description", None)
-
-        default_: Any = defs[name] if name in defs else contents.get("default", None)
+        default_: Any = defs[name] if name in defs else var.default
         if type(default_) != str:
             default_ = None
 
         pprint(f"[bold]var.{name}[/bold]")
-        if description:
-            pprint(f"  [bold]{description}[/bold]")
+        if var.description:
+            pprint(f"  [bold]{var.description}[/bold]")
         print("")
         value = prompt_var(default_)
         rv[name] = value if value else default_
