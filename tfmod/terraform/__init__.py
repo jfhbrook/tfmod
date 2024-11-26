@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 import os.path
 from pathlib import Path
+from subprocess import Popen
 from typing import Dict, List, Optional, Self, Tuple
 
-from tfmod import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR
+from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR
 from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 

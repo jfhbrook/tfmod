@@ -1,10 +1,9 @@
 import os
 import os.path
-from typing import List
 
 import flag
 
-from tfmod import TFMOD_VERSION
+from tfmod.constants import TFMOD_VERSION
 from tfmod.cli.base import cli, command, Command, exit, run
 from tfmod.terraform import Terraform
 

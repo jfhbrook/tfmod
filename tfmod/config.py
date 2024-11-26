@@ -1,6 +1,6 @@
 import os.path
 
-from tfmod import CONFIG_DIR, CONFIG_TFVARS
+from tfmod.constants import CONFIG_DIR, CONFIG_TFVARS
 
 TEMPLATE = """
 """
