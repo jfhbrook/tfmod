@@ -8,9 +8,9 @@
 - [x] version command - straightforward, hopefully
 - [ ] init command
   - [x] terraform-like prompt that supports defaults
-    - use [parser](https://pypi.org/project/python-hcl2/) to pull from `variables.tf`
-  - [ ] terraform module that generates init
-    - use [encode_tfvars function](https://developer.hashicorp.com/terraform/language/functions/terraform-encode_tfvars)
+  - [x] terraform module that generates init
+  - [x] make init command take module as argument
+  - [ ] clear state
 - [ ] config command
 - [ ] task related commands
   - [ ] run

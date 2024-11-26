@@ -22,10 +22,12 @@ class Terraform:
         interval: float = 0.1,
         timeout: Optional[float] = None,
     ) -> None:
-        self._module: Path = MODULES_DIR / name
+        self._path: Path = MODULES_DIR / name
         self._command: str = command
         self._interval: float = interval
         self._timeout: Optional[float] = timeout
+        self._loaded_module: bool = False
+        self.__module: Optional[Module] = None
         self._env: Dict[str, str] = dict()
         self._vars: Dict[str, str] = dict()
         self._prompt_vars: Dict[str, Variable] = dict()
@@ -64,6 +66,16 @@ class Terraform:
             self.var_file(str(CONFIG_TFVARS))
         return self
 
+    @property
+    def _module(self) -> Optional[Module]:
+        """
+        The contents of the current module.tfvars, if any
+        """
+        if not self._loaded_module:
+            self.__module = Module.load_optional()
+            self._loaded_module = True
+        return self.__module
+
     def module(self) -> Self:
         """
         Load the current module.tfvars
@@ -87,8 +99,9 @@ class Terraform:
         return self
 
     def _prompt(self) -> None:
-        vars = load_variables(self._module)
-        module: Optional[Module] = Module.load_optional()
+        vars = load_variables(self._path)
+
+        print(self._module)
 
         for name, var in self._prompt_vars.items():
             # Some variable names are postfixed with a _ because the
@@ -100,8 +113,8 @@ class Terraform:
 
             if name in vars and vars[name].description:
                 description = vars[name].description
-            if getattr(module, name_in_module, None) is not None:
-                default = getattr(module, name_in_module)
+            if getattr(self._module, name_in_module, None) is not None:
+                default = getattr(self._module, name_in_module)
             elif name in vars and vars[name].default:
                 default = vars[name].default
 
@@ -117,7 +130,7 @@ class Terraform:
         self._prompt()
 
         args: List[str] = []
-        args.append(f"-chdir={self._module}")
+        args.append(f"-chdir={self._path}")
         args.append(self._command)
 
         for file in self._var_files:

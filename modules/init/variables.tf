@@ -26,3 +26,14 @@ variable "description" {
   type        = string
   default     = null
 }
+
+variable "module" {
+  description = "The current module spec"
+  type = object({
+    name     = optional(string)
+    provider = optional(string)
+    version  = optional(string)
+    scripts  = optional(map(list(string)))
+  })
+  default = {}
+}
