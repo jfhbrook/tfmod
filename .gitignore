@@ -13,3 +13,4 @@ wheels/
 .terraform
 .terraform.lock.hcl
 *.tfstate
+terraform.tfstate.backup

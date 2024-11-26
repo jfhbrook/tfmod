@@ -1,16 +1,14 @@
 terraform {
-  required_version = ">= 1.7.2"
+  required_version = ">= 1.8"
 
   required_providers {
-    shell = {
-      source  = "scottwinkler/shell"
-      version = "~> 1.7.10"
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.5.2"
     }
-  }
-}
 
-provider "shell" {
-  environment = {
-    tfmod_path = "${path.module}/../../"
+    terraform = {
+      source = "terraform.io/builtin/terraform"
+    }
   }
 }

@@ -24,5 +24,5 @@ variable "version_" {
 variable "description" {
   description = "A description for your module"
   type        = string
-  default     = 3
+  default     = null
 }
