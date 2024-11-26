@@ -6,6 +6,7 @@ from typing import Dict, List, Mapping, Optional, Self, Tuple
 
 from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR, TERRAFORM_BIN
 from tfmod.error import TerraformError
+from tfmod.logging import logger
 from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
@@ -127,10 +128,14 @@ class Terraform:
         """
         Run the Terraform command
         """
-        args, _env = self.build()
+        _args, _env = self.build()
         _env = dict(env, **_env)
 
-        with Popen([TERRAFORM_BIN] + args, env=_env) as proc:
+        args = [TERRAFORM_BIN] + _args
+
+        logger.info(f"Running Terraform with args: {_args}")
+
+        with Popen(args, env=_env) as proc:
             try:
                 while True:
                     exit_code: Optional[int] = proc.poll()
