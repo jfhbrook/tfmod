@@ -58,6 +58,16 @@ class Module:
     scripts: Dict[str, Script]
 
     @classmethod
+    def load_optional(
+        cls: Type[Self], path: Path = Path(os.getcwd())
+    ) -> Optional[Self]:
+        try:
+            return cls.load(path)
+        except FileNotFoundError as exc:
+            logger.debug(str(exc))
+            return None
+
+    @classmethod
     def load(cls: Type[Self], path: Path = Path(os.getcwd())) -> Self:
         with open(path / "module.tfvars", "r") as f:
             var = hcl.load(f).get("module", None)

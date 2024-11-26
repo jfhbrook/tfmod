@@ -1,3 +1,9 @@
+variable "path" {
+  description = "The path to the module.tfvars file"
+  type        = number
+  default     = null
+}
+
 variable "name" {
   description = "The name of your module"
   type        = string
@@ -18,4 +24,5 @@ variable "version_" {
 variable "description" {
   description = "A description for your module"
   type        = string
+  default     = 3
 }

@@ -1,10 +1,12 @@
 import os
 import os.path
+from typing import Optional
 
 import flag
 
 from tfmod.cli.base import cli, command, Command, exit, run
 from tfmod.constants import TFMOD_VERSION
+from tfmod.module import Module
 from tfmod.terraform import Terraform
 
 
@@ -38,12 +40,25 @@ def init(_cmd: Command) -> None:
     Initialize a new project
     """
 
+    name: str = os.path.basename(os.getcwd())
+    provider: Optional[str] = None
+    version: Optional[str] = None
+    description: Optional[str] = None
+
+    module: Optional[Module] = Module.load_optional()
+
+    if module:
+        name = module.name if module.name else name
+        provider = module.provider
+        version = module.version
+        description = module.description
+
     cmd = (
         Terraform("init")
-        .prompt_var("name", default=os.path.basename(os.getcwd()))
-        .prompt_var("provider_")
-        .prompt_var("version_")
-        .prompt_var("description")
+        .prompt_var("name", default=name)
+        .prompt_var("provider_", default=provider)
+        .prompt_var("version_", default=version)
+        .prompt_var("description", default=description)
     )
 
     cmd.run()
