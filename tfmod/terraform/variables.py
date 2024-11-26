@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import hcl2
 from rich import print as pprint
 
-from tfmod import MODULES_DIR
+from tfmod.interrupts import interrupt_received
 from tfmod.terraform.value import dump_value, load_value, Value
 
 # Make the type checker happy
@@ -37,7 +37,10 @@ def prompt_var(
     # appropriately, something a format method can't do.
     try:
         result = input(f"\u001b[1m{msg}\u001b[0m ")
-    finally:
+    except (KeyboardInterrupt, EOFError):
+        interrupt_received()
+        raise
+    else:
         print("")
 
     return load_value(result)

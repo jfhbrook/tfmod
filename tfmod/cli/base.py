@@ -164,9 +164,8 @@ def cli(fn: Main) -> Main:
         except CliError as exc:
             print(exc)
             sys.exit(2)
-        except KeyboardInterrupt:
-            # TODO: This should be getting handled further upstream.
-            print("Interrupt received.")
+        except (KeyboardInterrupt, EOFError):
+            pass
 
         # TODO: Nice formatting for plain Exceptions
 
