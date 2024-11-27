@@ -12,7 +12,7 @@
   - private flag (behavior TK as I learn the registry's restrictions)
 - [ ] bash shituation
   - [ ] separate files
-  - [ ] combine with jinja2 template
+  - [ ] combine with terraform templating
 - [ ] stub commands for things implemented in bash
 - [ ] confirm prompt
   - clean up bash impl
