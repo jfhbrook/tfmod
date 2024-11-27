@@ -1,11 +1,19 @@
+from contextlib import contextmanager
 import os
 import os.path
 from pathlib import Path
+import shutil
 from subprocess import Popen
 from time import sleep
-from typing import Dict, List, Mapping, Optional, Self, Tuple
+from typing import Dict, Generator, List, Mapping, Optional, Self, Tuple
 
-from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR, TERRAFORM_BIN
+from tfmod.constants import (
+    CONFIG_TFVARS,
+    MODULE_TFVARS,
+    MODULES_DIR,
+    STATE_DIR,
+    TERRAFORM_BIN,
+)
 from tfmod.error import TerraformError
 from tfmod.logging import logger
 from tfmod.spec import Spec
@@ -13,6 +21,22 @@ from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
 PathLike = Path | str
+
+
+# TODO: Wrap in an Error
+def makedirs(path: PathLike) -> None:
+    logger.debug(f"Creating directory {path}")
+    os.makedirs(path, exist_ok=True)
+
+
+# TODO: Wrap in an Error
+def move(src: PathLike, dst: PathLike) -> None:
+    try:
+        shutil.move(src, dst)
+    except FileNotFoundError as exc:
+        logger.debug(f"Failure to move {src} to {dst}: {exc}")
+    else:
+        logger.info(f"Moved {src} to {dst}")
 
 
 def clear_file(path: Path) -> None:
@@ -31,7 +55,9 @@ class Terraform:
         interval: float = 0.1,
         timeout: Optional[float] = None,
     ) -> None:
+        self._name: str = name
         self._path: Path = MODULES_DIR / name
+        self._workspace_path: Optional[Path] = None
         self._command: str = command
         self._interval: float = interval
         self._timeout: Optional[float] = timeout
@@ -42,6 +68,10 @@ class Terraform:
         self._prompt_vars: Dict[str, Variable] = dict()
         self._var_files: List[str] = list()
         self._args: List[str] = list()
+
+    def workspace(self, path=STATE_DIR / "workspace") -> Self:
+        self._workspace_path = path
+        return self
 
     def cleared(self) -> Self:
         clear_file(self._path / "terraform.tfstate")
@@ -112,6 +142,27 @@ class Terraform:
         self._args += args
         return self
 
+    @contextmanager
+    def _workspace(self) -> Generator[None, None, None]:
+        files = ["terraform.tfstate", "terraform.tfstate.backup"]
+        workspace_path: Optional[Path] = None
+
+        if self._workspace_path:
+            workspace_path = self._workspace_path / os.getcwd()[1:] / self._name
+
+        if workspace_path:
+            logger.info(f"Loading workspace at {workspace_path}")
+            makedirs(workspace_path)
+            for file in files:
+                move(workspace_path / file, self._path / file)
+
+        yield
+
+        if workspace_path:
+            logger.info(f"Saving to workspace at {workspace_path}")
+            for file in files:
+                move(self._path / file, workspace_path)
+
     def _prompt(self) -> None:
         vars = load_variables(self._path)
 
@@ -162,22 +213,23 @@ class Terraform:
         """
         Run the Terraform command
         """
-        _args, _env = self.build()
-        _env = dict(env, **_env)
+        with self._workspace():
+            _args, _env = self.build()
+            _env = dict(env, **_env)
 
-        args = [TERRAFORM_BIN] + _args
+            args = [TERRAFORM_BIN] + _args
 
-        logger.info(f"Running Terraform with args: {_args}")
+            logger.info(f"Running Terraform with args: {_args}")
 
-        with Popen(args, env=_env) as proc:
-            try:
-                while True:
-                    exit_code: Optional[int] = proc.poll()
-                    if exit_code is not None:
-                        self._finish(exit_code)
-                        return
-                    sleep(self._interval)
-            except KeyboardInterrupt:
-                exit_code = proc.wait(self._timeout)
-                self._finish(proc.wait(timeout=self._timeout))
-                return
+            with Popen(args, env=_env) as proc:
+                try:
+                    while True:
+                        exit_code: Optional[int] = proc.poll()
+                        if exit_code is not None:
+                            self._finish(exit_code)
+                            return
+                        sleep(self._interval)
+                except KeyboardInterrupt:
+                    exit_code = proc.wait(self._timeout)
+                    self._finish(proc.wait(timeout=self._timeout))
+                    return

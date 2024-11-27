@@ -2,8 +2,6 @@
 
 ## TODOs
 
-- [ ] store terraform state in workspace and swap it in/out
-- [ ] auto-approve flag
 - [ ] module spec addons
   - namespace
   - git main branch

@@ -1,6 +1,6 @@
 locals {
   path    = coalesce(var.path, "${path.cwd}/module.tfvars")
-  scripts = try(var.module.scripts, {})
+  scripts = var.module.scripts == null ? {} : var.module.scripts
   content = provider::terraform::encode_tfvars({
     module = {
       name        = var.name

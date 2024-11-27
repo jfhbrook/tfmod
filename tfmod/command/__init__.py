@@ -40,7 +40,7 @@ def init(_cmd: Command) -> None:
 
     cmd = (
         Terraform("init")
-        .cleared()
+        .workspace()
         .spec()
         .prompt_var("name", default=os.path.basename(os.getcwd()))
         .prompt_var("provider_")

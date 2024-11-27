@@ -19,6 +19,8 @@ TFMOD_VERSION: str = "???"
 with open(PACKAGE_DIR / "pyproject.toml", "r") as f:
     TFMOD_VERSION = toml.load(f)["project"]["version"]
 
+STATE_DIR: Path = Path(os.path.expanduser("~/.local/state/tfmod"))
+
 _terraform_bin = which("terraform")
 
 if _terraform_bin is None:
