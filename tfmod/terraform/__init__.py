@@ -8,7 +8,7 @@ from typing import Dict, List, Mapping, Optional, Self, Tuple
 from tfmod.constants import CONFIG_TFVARS, MODULE_TFVARS, MODULES_DIR, TERRAFORM_BIN
 from tfmod.error import TerraformError
 from tfmod.logging import logger
-from tfmod.module import Module
+from tfmod.spec import Spec
 from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
@@ -35,8 +35,8 @@ class Terraform:
         self._command: str = command
         self._interval: float = interval
         self._timeout: Optional[float] = timeout
-        self._loaded_module: bool = False
-        self.__module: Optional[Module] = None
+        self._loaded_spec: bool = False
+        self.__spec: Optional[Spec] = None
         self._env: Dict[str, str] = dict()
         self._vars: Dict[str, str] = dict()
         self._prompt_vars: Dict[str, Variable] = dict()
@@ -81,18 +81,18 @@ class Terraform:
         return self
 
     @property
-    def _module(self) -> Optional[Module]:
+    def _spec(self) -> Optional[Spec]:
         """
-        The contents of the current module.tfvars, if any
+        The contents of the current spec.tfvars, if any
         """
-        if not self._loaded_module:
-            self.__module = Module.load_optional()
-            self._loaded_module = True
-        return self.__module
+        if not self._loaded_spec:
+            self.__spec = Spec.load_optional()
+            self._loaded_spec = True
+        return self.__spec
 
-    def module(self) -> Self:
+    def spec(self) -> Self:
         """
-        Load the current module.tfvars
+        Load the current spec.tfvars
         """
         if os.path.isfile(MODULE_TFVARS):
             self.var_file(str(MODULE_TFVARS))
@@ -118,15 +118,15 @@ class Terraform:
         for name, var in self._prompt_vars.items():
             # Some variable names are postfixed with a _ because the
             # plain name is reserved in Terraform.
-            name_in_module = name[:-1] if name.endswith("_") else name
+            name_in_spec = name[:-1] if name.endswith("_") else name
 
             description: Optional[str] = var.description
             default = var.default
 
             if name in vars and vars[name].description:
                 description = vars[name].description
-            if getattr(self._module, name_in_module, None) is not None:
-                default = getattr(self._module, name_in_module)
+            if getattr(self._spec, name_in_spec, None) is not None:
+                default = getattr(self._spec, name_in_spec)
             elif name in vars and vars[name].default:
                 default = vars[name].default
 

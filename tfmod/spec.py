@@ -49,7 +49,7 @@ object({
 
 
 @dataclass
-class Module:
+class Spec:
     name: Optional[str]
     provider: Optional[str]
     version: Optional[str]
