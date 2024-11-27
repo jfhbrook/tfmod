@@ -2,68 +2,88 @@
 
 ## TODOs
 
-- [x] do up installer
-- [x] cli abstraction with go-flag
-- [x] stub terraform runner
-- [x] version command - straightforward, hopefully
-- [x] init command
-- [x] fix error output
-- [ ] sketch out publish
-  - it's time
-- [ ] sketch out unpublish
+- [ ] does terraform write to stdout or stderr?
+- [ ] infer init params from directory name
+- [ ] store terraform state in directory and swap it in/out
+- [ ] auto-approve flag
+- [ ] module spec addons
+  - namespace
+  - git main branch
+  - private flag (behavior TK as I learn the registry's restrictions)
+- [ ] bash shituation
+  - [ ] separate files
+  - [ ] combine with jinja2 template
+- [ ] stub commands for things implemented in bash
+- [ ] confirm prompt
+  - clean up bash impl
+- [ ] config
+  - git prefer https or ssh
+  - git prefer main branch
+- [ ] publish
+  - module.tfvars
+    - if no exist, exit and insist on a `tfmod init`
+    - validate defined properties
+    - validate/parse version
+  - git repository
+    - if not a repo, git init
+    - validate that branch is main branch
+      - warn/confirm before continuing
+    - if dirty, prompt for add and commit
+    - git repo should be clean
+  - github repository
+    - construct repo name from module.tfvars
+      - warn if directory name does not match what's in module.tfvars
+    - if a git remote for github
+      - parse/safe remote name
+      - parse repo
+    - if github repo does not exist
+      - shell into `gh` to create it
+      - add as remote
+    - check/update description based on module.tfvars
+  - validate git/github related things
+    - module.tfvars vs directory name
+    - module.tfvars vs github repo name
+    - module.tfvars vs git remote url
+  - validate module structure
+    - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
+  - tagenpush
+    - create x.y.z tag
+    - create/force x.y tag
+    - create/force x tag
+    - TODO: dist tag? how does npm do this?
+    - git push origin main --tags
+  - if package not on registry api (and not private)
+    - open page for publishing
+- [ ] tests
+  - do after publish is working, since that's the main functionality and the
+    APIs should have solidified by then
+  - do them for bash too
+- [ ] login
+  - log github cli login status
+  - open <https://registry.terraform.io/sign-in>
+- [ ] whoami
+  - github whoami mostly
+- [ ] viewing commands
+  - [ ] docs - open terraform registry page in browser
+  - [ ] namespace - open terraform registry page for namespace in browser
+  - [ ] repo - open github repo in browser
+  - [ ] unpublish - open appropriate page, with directions, in browser
+- [ ] ping
+  - github
+  - terraform registry
 - [ ] script related commands
   - [ ] run
   - [ ] lint
-  - [ ] format
+  - [ ] fmt/format
   - [ ] test
   - [ ] validate
-- [ ] config command
-- [ ] tests for logger
-- [ ] logger overhaul
-  - [ ] separate file for bash logging
-    - set up [bash_bundler](https://github.com/jfhbrook/bash_bundler)
-  - [ ] tests
-- [ ] regroup
+- [ ] doctor
+  - "is installed correctly", for now
+- [ ] tagging (latest, beta etc)
+  - TODO: how does npm implement dist-tag?
+  - also implement npm's dist-tag behavior on publish
+- [ ] what now?
 
-## potential commands - based loosely on relevant commands from npm
-
-- adduser
-- clean-install
-- config
-- dist-tag
-- docs - open terraform registry page in web browser
-- doctor - check health
-- init
-- login - for logging into github, terraform registry, etc
-- logout
-- ping - ping the various apis
-- profile - edit tf registry profile?
-- publish - the big one
-  - check that git is squeaky clean
-  - offer to create git repo if no remote set
-  - update repository description
-  - do validation checks
-  - create git tags
-  - publish branch and tags
-  - if module not "published" according to terraform API, open the relevant
-    page in the web browser
-- repo - open github repo in web browser
-- run - run a script
-  - defaults for fmt, lint, etc
-  - print script before running it (like npm)
-- test - run the test script
-- unpublish
-  - validate that package published in the first place
-  - open page for package that allows for unpublish
-- validate
-  - make sure everything follows standard module structure
-  - check github for description
-  - check that repo matches naming convention
-  - check that provider is valid
-- version
-- whoami - who am I logged in as?
-- fmt
-- lint
 
 ## resources
 
