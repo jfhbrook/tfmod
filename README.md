@@ -2,8 +2,7 @@
 
 ## TODOs
 
-- [ ] infer init params from directory name
-- [ ] store terraform state in directory and swap it in/out
+- [ ] store terraform state in workspace and swap it in/out
 - [ ] auto-approve flag
 - [ ] module spec addons
   - namespace
