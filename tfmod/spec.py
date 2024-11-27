@@ -14,11 +14,22 @@ hcl: Any = hcl2
 Script = List[str]
 
 
-def warn_value(variable: str, type: str) -> None:
+def warn_type(variable: str, type: str) -> None:
+    a = "a"
+    if type[0] in "aeiou":
+        a = "an"
     logger.warn(
         f"Invalid value for {variable}",
         f"""This value is not compatible with the module's type
-constraint: a {type} is required.""",
+constraint: {a} {type} is required.""",
+    )
+
+
+def warn_attribute(variable: str, attribute: str) -> None:
+    logger.warn(
+        f"Invalid value for {variable}",
+        f"""This value is not compatible with the module's type
+constraint: attribute "{attribute}" is required.""",
     )
 
 
@@ -30,22 +41,7 @@ class WarnScript:
         if self._warned[name]:
             return
         self._warned[name] = True
-        warn_value(f"{name} script", "list(string)")
-
-
-MODULE_TYPE = """
-object({
-  name = string,
-  provider = string,
-  version = string,
-  description = string,
-  scripts = map(list(string))
-})
-""".replace(
-    "\n", ""
-).replace(
-    ",", ", "
-)
+        warn_type(f"{name} script", "list(string)")
 
 
 @dataclass
@@ -73,7 +69,7 @@ class Spec:
             var = hcl.load(f).get("module", None)
 
         if not var:
-            warn_value("module", MODULE_TYPE)
+            warn_type("module", "object")
             return cls(
                 name=None, provider=None, version=None, description=None, scripts=dict()
             )
@@ -85,7 +81,7 @@ class Spec:
         if "scripts" in var:
             defined_scripts = var["scripts"]
             if type(defined_scripts) != dict:
-                warn_value("scripts", "map")
+                warn_type("scripts", "map")
             else:
                 for name, defined_script in defined_scripts.items():
                     if type(defined_script) != list:

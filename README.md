@@ -2,8 +2,6 @@
 
 ## TODOs
 
-- [x] get flag to write to stdout
-- [ ] Fix warning output for spec validation
 - [ ] infer init params from directory name
 - [ ] store terraform state in directory and swap it in/out
 - [ ] auto-approve flag
