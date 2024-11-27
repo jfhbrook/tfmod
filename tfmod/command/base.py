@@ -154,6 +154,8 @@ def cli(fn: Main) -> Main:
     Handle CLI errors
     """
 
+    flag.command_line.output = sys.stdout
+
     @functools.wraps(fn)
     def cli() -> None:
         try:

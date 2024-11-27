@@ -2,7 +2,7 @@
 
 ## TODOs
 
-- [ ] does terraform write to stdout or stderr?
+- [x] get flag to write to stdout
 - [ ] infer init params from directory name
 - [ ] store terraform state in directory and swap it in/out
 - [ ] auto-approve flag
