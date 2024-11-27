@@ -172,7 +172,7 @@ def cli(fn: Main) -> Main:
         except (KeyboardInterrupt, EOFError):
             pass
         except:
-            logger.flagrant(traceback.format_exc())
+            logger.panic(traceback.format_exc())
             sys.exit(1)
 
         # TODO: Nice formatting for plain Exceptions

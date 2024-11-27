@@ -111,11 +111,7 @@ class Logger:
 
         self.error(str(exc), message)
 
-    def fatal(self, title: str, message: Optional[str] = None) -> NoReturn:
-        self.error(title, message)
-        raise Exit(1)
-
-    def flagrant(self, text: str) -> None:
+    def panic(self, text: str) -> None:
         banner = "FLAGRANT SYSTEM ERROR".center(79)
         pprint(f"[white on blue]{banner}[/white on blue]")
         pprint(f"[white on blue]{' ' * 79}[/white on blue]")
