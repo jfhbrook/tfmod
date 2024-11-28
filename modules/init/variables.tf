@@ -9,6 +9,11 @@ variable "name" {
   type        = string
 }
 
+variable "namespace" {
+  description = "The namespace for your module"
+  type        = string
+}
+
 variable "provider_" {
   description = "The main provider used by your module"
   type        = string

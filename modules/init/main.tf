@@ -5,6 +5,7 @@ locals {
     module = {
       name        = var.name
       provider    = var.provider_
+      namespace   = var.namespace
       version     = var.version_
       description = var.description
 

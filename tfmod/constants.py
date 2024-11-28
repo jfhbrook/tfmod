@@ -27,3 +27,5 @@ if _terraform_bin is None:
     raise Error('"terraform" could not be found.')
 
 TERRAFORM_BIN: str = _terraform_bin
+
+GH_CONFIG_DIR: Path = Path(os.path.expanduser("~/.config/gh/"))

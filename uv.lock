@@ -883,6 +883,7 @@ version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "go-flag" },
+    { name = "pyyaml" },
     { name = "rich" },
     { name = "tf-registry" },
     { name = "toml" },
@@ -908,6 +909,7 @@ requires-dist = [
     { name = "isort", marker = "extra == 'dev'" },
     { name = "jupyter-console", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "tf-registry" },
     { name = "toml" },
