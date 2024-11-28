@@ -35,10 +35,15 @@ variable "description" {
 variable "module" {
   description = "The current module spec"
   type = object({
-    name     = optional(string)
-    provider = optional(string)
-    version  = optional(string)
-    scripts  = optional(map(list(string)))
+    name      = optional(string)
+    namespace = optional(string)
+    provider  = optional(string)
+    version   = optional(string)
+    private   = optional(bool)
+    scripts   = optional(map(list(string)))
+    git = optional(object({
+      main_branch = optional(string)
+    }))
   })
   default = {}
 }

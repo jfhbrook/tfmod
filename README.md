@@ -2,10 +2,6 @@
 
 ## TODOs
 
-- [ ] module spec addons
-  - namespace
-  - git main branch
-  - private flag (behavior TK as I learn the registry's restrictions)
 - [ ] bash shituation
   - [ ] separate files
   - [ ] combine with terraform templating

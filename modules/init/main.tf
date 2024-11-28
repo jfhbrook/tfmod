@@ -10,7 +10,11 @@ locals {
       description = var.description
 
       scripts = local.scripts
-  } })
+      git = {
+        main_branch = "main"
+      }
+    }
+  })
 }
 
 resource "local_file" "module" {
