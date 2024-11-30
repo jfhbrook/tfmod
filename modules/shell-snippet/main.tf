@@ -1,4 +1,4 @@
 locals {
-  raw = file(var.path)
+  raw = var.snippet
   snippet = replace(local.raw, "#!${interpreter}", "")
 }
