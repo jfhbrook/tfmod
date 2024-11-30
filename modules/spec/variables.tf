@@ -11,4 +11,8 @@ variable "module" {
       main_branch = optional(string)
     }))
   })
+  validation {
+    condition = len(regexall("\\d+\\.\\d+\\.\\d+", "1.2.3")) > 0
+    error_message = "The version must follow simplified semver (ie. 1.2.3)"
+  }
 }
