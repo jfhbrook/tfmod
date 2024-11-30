@@ -80,16 +80,16 @@ class Spec:
 
         if "scripts" in var:
             defined_scripts = var["scripts"]
-            if type(defined_scripts) != dict:
+            if type(defined_scripts) is not dict:
                 warn_type("scripts", "map")
             else:
                 for name, defined_script in defined_scripts.items():
-                    if type(defined_script) != list:
+                    if type(defined_script) is not list:
                         warn_script(name)
                     else:
                         script: List[str] = list()
                         for line in defined_script:
-                            if type(line) != str:
+                            if type(line) is not str:
                                 warn_script(name)
                             script.append(str(line))
                         scripts[name] = script

@@ -12,12 +12,17 @@ function log {
   level="${1}"
   shift
 
+  # I *think* this echo is needed to do what I want?
+  # shellcheck disable=SC2116
   message="$(echo "$@")"
 
   # NOTE: Terraform shows fractional seconds. We don't have that, so we
   # cheese it.
   if [[ "${TF_LOG}" == 'JSON' ]]; then
     ts="$(date +"%Y-%m-%dT%H:%M:%S.000000%z")"
+    # TODO: I may be able to follow shellcheck's suggestion here, but I'm
+    # skeptical...
+    # shellcheck disable=SC2001
     message="$(echo "${message}" | sed 's/"/\\"/g')"
     echo '{"@level":"'"${level}"'","@message":"'"${message}"',"@timestamp":'"${ts}"'}'
   else

@@ -66,7 +66,9 @@ def print_global_defaults() -> None:
 
         # TODO: Wrap usage at 79 chars
         print(
-            f"  -{fl.name}{'=' + value_name if value_name is not None else ''}      {fl.usage}"
+            f"  -{fl.name}"
+            + ("=" + value_name if value_name is not None else "")
+            + fl.usage
         )
         b: List[str] = []
         b += f"  -{fl.name}"
@@ -173,7 +175,7 @@ def cli(fn: Main) -> Main:
             sys.exit(1)
         except (KeyboardInterrupt, EOFError):
             pass
-        except Exception as exc:
+        except Exception:
             logger.panic(traceback.format_exc())
             sys.exit(1)
 

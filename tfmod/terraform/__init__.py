@@ -200,7 +200,7 @@ class Terraform:
             args.append(f"-var-file={file}")
 
         for name, value in self._vars.items():
-            args.append(f"-var")
+            args.append("-var")
             args.append(f"{name}={value}")
 
         return args + self._args, self._env

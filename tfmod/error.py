@@ -16,7 +16,7 @@ class Exit(Error):
         if exit_code:
             message = f"TfMod exited with an error (code: {exit_code})"
         else:
-            message = f"TfMod exited successfully"
+            message = "TfMod exited successfully"
         super().__init__(message)
         self.exit_code = exit_code
 

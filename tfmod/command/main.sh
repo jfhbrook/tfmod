@@ -1,6 +1,7 @@
-cd ~/.local/state/tfmod && [ -d .venv ] \
-  || fatal 'TfMod is not installed correctly' \
-           'To install TfMod, run "tfmod update"'
+if ! cd ~/.local/state/tfmod || ! [ -d .venv ]; then
+  fatal 'TfMod is not installed correctly' \
+        'To install TfMod, run "tfmod update"'
+fi
 
 # rather than using uv, just use the virtualenv directly...
 
