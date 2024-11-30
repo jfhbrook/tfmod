@@ -24,13 +24,20 @@ from tfmod.terraform.variables import load_variables, Variable
 PathLike = Path | str
 
 
-# TODO: Wrap in an Error
 def makedirs(path: PathLike) -> None:
     logger.debug(f"Creating directory {path}")
     os.makedirs(path, exist_ok=True)
 
 
-# TODO: Wrap in an Error
+def copy(src: PathLike, dst: PathLike) -> None:
+    try:
+        shutil.copyfile(src, dst)
+    except FileNotFoundError as exc:
+        logger.debug(f"Failure to copy {src} to {dst}: {exc}")
+    else:
+        logger.info(f"Moved {src} to {dst}")
+
+
 def move(src: PathLike, dst: PathLike) -> None:
     try:
         shutil.move(src, dst)
@@ -58,7 +65,7 @@ class Terraform:
     ) -> None:
         self._name: str = name
         self._path: Path = MODULES_DIR / name
-        self._workspace_path: Optional[Path] = None
+        self._state_path: Optional[Path] = None
         self._command: str = command
         self._interval: float = interval
         self._timeout: Optional[float] = timeout
@@ -70,8 +77,8 @@ class Terraform:
         self._var_files: List[str] = list()
         self._args: List[str] = list()
 
-    def workspace(self, path=STATE_DIR / "workspace") -> Self:
-        self._workspace_path = path
+    def isolated_state(self, path=STATE_DIR / "state") -> Self:
+        self._state_path = path
         return self
 
     def cleared(self) -> Self:
@@ -144,25 +151,25 @@ class Terraform:
         return self
 
     @contextmanager
-    def _workspace(self) -> Generator[None, None, None]:
+    def _state(self) -> Generator[None, None, None]:
         files = ["terraform.tfstate", "terraform.tfstate.backup"]
-        workspace_path: Optional[Path] = None
+        state_path: Optional[Path] = None
 
-        if self._workspace_path:
-            workspace_path = self._workspace_path / os.getcwd()[1:] / self._name
+        if self._state_path:
+            state_path = self._state_path / os.getcwd()[1:] / self._name
 
-        if workspace_path:
-            logger.info(f"Loading workspace at {workspace_path}")
-            makedirs(workspace_path)
+        if state_path:
+            logger.info(f"Loading state at {state_path}")
+            makedirs(state_path)
             for file in files:
-                move(workspace_path / file, self._path / file)
+                move(state_path / file, self._path / file)
 
         yield
 
-        if workspace_path:
-            logger.info(f"Saving to workspace at {workspace_path}")
+        if state_path:
+            logger.info(f"Saving to state at {state_path}")
             for file in files:
-                move(self._path / file, workspace_path)
+                move(self._path / file, state_path)
 
     def _prompt(self) -> None:
         vars = load_variables(self._path)
@@ -214,7 +221,7 @@ class Terraform:
         """
         Run the Terraform command
         """
-        with self._workspace():
+        with self._state():
             _args, _env = self.build()
             _env = dict(env, **_env)
 

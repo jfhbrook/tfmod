@@ -64,7 +64,7 @@ def init(_cmd: Command) -> None:
 
     cmd = (
         Terraform("init")
-        .workspace()
+        .isolated_state()
         .spec()
         .prompt_var("namespace", default=default_namespace)
         .prompt_var("name", default=os.path.basename(os.getcwd()))
