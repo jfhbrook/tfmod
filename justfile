@@ -1,5 +1,7 @@
 set dotenv-load := true
 
+root-modules := "./modules/init ./modules/entrypoint"
+
 # By default, run checks and tests, then format and lint
 default:
   @just format
@@ -13,7 +15,7 @@ default:
 
 # Setup project
 setup:
-  for module in ./modules/init ./modules/entrypoint; do terraform "-chdir=${module}" init -upgrade; done
+  for module in {{ root-modules }}; do terraform "-chdir=${module}" init -upgrade; done
   uv sync -U --extra dev
   uv pip install -e .
 
@@ -37,7 +39,7 @@ format:
 
 # Lint with flake8
 lint:
-  # cd ./modules/tfmod && tflint
+  for module in ./modules/*; do echo "=== linting ${module} ===" && (cd ${module} && tflint); done
   uv run flake8 ./tfmod ./tests
   uv run validate-pyproject ./pyproject.toml
   shellcheck install.sh
@@ -46,7 +48,7 @@ lint:
 # Check type annotations with pyright
 check:
   uv run npx pyright@latest
-  for module in modules/*; do terraform "-chdir=${module}" validate; done
+  for module in {{ root-modules }}; do echo "=== validating ${module} ===" terraform "-chdir=${module}" validate; done
 
 # Run tests with pytest
 test *argv:
