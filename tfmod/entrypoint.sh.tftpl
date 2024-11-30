@@ -6,13 +6,7 @@ ${PRELUDE}
 
 ${PARSE_ARGS}
 
-# unwise takes priority over everything
 if [[ "$${COMMAND}" == 'unwise' ]]; then
-  if [ -n "$${SHOW_HELP}" ]; then
-    echo "$${UNWISE_HELP}"
-    exit 0
-  fi
-
   ${UNWISE}
 fi
 
@@ -23,19 +17,7 @@ fi
 
 # If we're not installing, run
 if [[ "$${COMMAND}" != 'update' ]]; then
-  cd ~/.local/state/tfmod || fatal-not-installed
-  [ -d .venv ] || fatal-not-installed
-
-  # rather than using uv, just use the virtualenv directly...
-
-  # shellcheck disable=SC1091
-  source .venv/bin/activate
-  exec python3 -m tfmod "$${ARGV[@]}"
-fi
-
-if [ -n "$${SHOW_HELP}" ]; then
-  echo "$${UPDATE_HELP}"
-  exit 0
+  ${MAIN}
 fi
 
 ${LOGGING}

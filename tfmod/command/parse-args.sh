@@ -1,9 +1,12 @@
 TF_LOG="${TF_LOG:-WARN}"
+# Save arguments to pass directly to tfmod
 ARGV="$*"
 COMMAND=''
 SHOW_HELP=''
 
-## TODO: Populate template with output from python entrypoint
+# TODO: Populate template with output from python entrypoint
+# TODO: Make behavior match python entrypoint as close as possible
+# TODO: Leverage tfmod in python for most help text
 
 HELP='Usage: tfmod [OPTIONS] [COMMAND]
 
@@ -45,5 +48,20 @@ done
 
 if [ -z "${COMMAND}" ]; then
   echo "${HELP}"
+  exit 0
+fi
+
+if [ -n "${SHOW_HELP}" ]; then
+  case "${COMMAND:-}" in
+    update)
+      echo "${UPDATE_HELP}"
+    ;;
+    unwise)
+      echo "${UNWISE_HELP}"
+    ;;
+    *)
+      echo "${HELP}"
+    ;;
+  esac
   exit 0
 fi
