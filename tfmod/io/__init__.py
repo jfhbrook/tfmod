@@ -117,7 +117,9 @@ class Logger:
             formatted = ("    " + line).ljust(79)
             inside = formatted[:79]
             outside = formatted[79:]
-            pprint(f"[white on blue]{inside}[/white on blue]{outside}")
+            pprint(
+                f"[white on blue]{inside}[/white on blue]" f"[white]{outside}[/white]"
+            )
         pprint(f"[white on blue]{' ' * 79}[/white on blue]")
 
     def ok(self, message: str) -> None:

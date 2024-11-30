@@ -2,9 +2,8 @@
 
 ## TODOs
 
-- [ ] fix ugly error output
-  - suspect error is not of expected subclass
 - [ ] fix bug in help error handling in go-flag
+  - suspect error is not of expected subclass
 - [ ] leverage python cli help
   - [ ] implement stub commands for update and unwise
   - [ ] template help output in parse-args
