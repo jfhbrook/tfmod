@@ -3,50 +3,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import hcl2
-from rich import print as pprint
 
-from tfmod.interrupts import interrupt_received
-from tfmod.terraform.value import dump_value, load_value, Value
+from tfmod.terraform.value import Value
 
 # Make the type checker happy
 hcl: Any = hcl2
-
-
-def prompt_var(
-    name: str, description: Optional[str] = None, default: Optional[Value] = None
-) -> Optional[Value]:
-    """
-    Prompt for a variable value
-    """
-
-    pprint(f"[bold]var.{name}[/bold]")
-    if description:
-        pprint(f"  [bold]{description}[/bold]")
-    print("")
-
-    msg = "Enter a value"
-
-    if default is not None:
-        msg += f" ({dump_value(default)})"
-    msg += ":"
-
-    # rich.Prompt doesn't have the right behavior.
-    #
-    # I'd use a formatter from rich, but it doesn't expose one. This is
-    # probably because it goes through great pains to handle terminal width
-    # appropriately, something a format method can't do.
-    try:
-        result = input(f"\u001b[1m{msg}\u001b[0m ")
-    except (KeyboardInterrupt, EOFError):
-        interrupt_received()
-        raise
-    else:
-        print("")
-
-    if result == "":
-        return default
-
-    return load_value(result)
 
 
 @dataclass

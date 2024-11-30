@@ -4,6 +4,7 @@
 COLOR_RED='\e[0;31m'
 COLOR_YELLOW='\e[0;33m'
 COLOR_GREEN='\e[0;32m'
+COLOR_BOLD='\e[0;1m'
 COLOR_RESET='\e[0m'
 TOP_BAR='╷'
 MIDDLE_BAR='│'

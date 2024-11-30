@@ -2,10 +2,6 @@
 
 ## TODOs
 
-- [ ] confirm prompt
-  - clean up bash impl
-- [ ] command quoting
-  - clean up bash impl
 - [ ] publish
   - module.tfvars
     - if no exist, exit and insist on a `tfmod init`
@@ -56,6 +52,8 @@
     - git prefer https or ssh
     - git prefer main branch
   - but can at least show the `gh` config, yeah?
+- [ ] command quoting
+  - clean up bash impl
 - [ ] login
   - log github cli login status
   - open <https://registry.terraform.io/sign-in>

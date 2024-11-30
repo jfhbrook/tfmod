@@ -9,6 +9,7 @@ locals {
   snippets = {
     prelude = "tfmod/prelude.sh"
     logging = "tfmod/io/logging.sh"
+    prompt  = "tfmod/io/prompt.sh"
     update  = "tfmod/command/update.sh"
     unwise  = "tfmod/command/unwise.sh"
     main    = "tfmod/command/main.sh"

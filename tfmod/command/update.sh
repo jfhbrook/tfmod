@@ -21,20 +21,6 @@ function fatal-update {
   fatal "${ERR_UPDATE}" "${ERR_UPDATE_MSG}"
 }
 
-# Confirm y/n
-function confirm {
-  local choice
-  read -r -p "${1} (y/N) " choice
-  case "${choice}" in
-    y|yes|Y|YES)
-      return 0
-      ;;
-    *)
-      fatal 'Cowardly refusing to continue.'
-      ;;
-  esac
-}
-
 # OS detection
 
 function is-macos {
