@@ -8,7 +8,7 @@ from tfmod.terraform import Terraform
 
 
 def validate_spec() -> None:
-    cmd = Terraform("spec", "plan").spec()
+    cmd = Terraform("spec").isolated_state().spec().auto_approve()
     cmd.run()
 
 
