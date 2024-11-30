@@ -1,9 +1,11 @@
+import os
 from typing import Any, cast
 
 from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
+from tfmod.gh import gh_client
 from tfmod.git import git_add, git_commit, git_init, git_is_dirty, GitRepo
 from tfmod.io import logger, prompt_confirm
-from tfmod.spec import parse_version, Spec
+from tfmod.spec import Spec
 from tfmod.terraform import Terraform
 from tfmod.version import Version
 
@@ -43,7 +45,7 @@ def load_git() -> GitRepo:
     if git_is_dirty():
         if prompt_confirm("Would you like to add and commit changes?"):
             git_add(".")
-            git_commit("Committed by TfMod")
+            git_commit()
         else:
             raise GitDirtyError("All files must be committed to continue.")
 
@@ -53,9 +55,10 @@ def load_git() -> GitRepo:
     return repo
 
 
-def load_github() -> None:
-    # TODO construct repo name from module.tfvars
-    # - warn if directory name does not match what's in module.tfvars
+def load_github(spec: Spec, git: GitRepo) -> None:
+    name = spec.repo_name()
+    client = gh_client()
+    # TODO: Pull/parse git remotes from GitRepo
     # TODO if a git remote for github
     # - parse/save remote name
     # - parse repo
@@ -64,6 +67,9 @@ def load_github() -> None:
     # - add as remote
     # TODO: check/update description based on module.tfvars
 
+    # required return values:
+    # - github repo namespace
+    # - github repo name
     pass
 
 
@@ -71,7 +77,10 @@ def update_description(description: str) -> None:
     raise NotImplementedError("update_description()")
 
 
-def validate_git(spec: Spec, git: GitRepo, github: Any) -> None:
+def validate_git(path: str, spec: Spec, git: GitRepo, github: Any) -> None:
+    # spec vs directory name
+    # spec vs github repo name
+    # spec vs git remote url
     raise NotImplementedError("validate_git()")
 
 
@@ -79,7 +88,7 @@ def validate_module() -> None:
     raise NotImplementedError("validate_module()")
 
 
-def tag_and_push() -> None:
+def tag_and_push(version: Version) -> None:
     raise NotImplementedError("tag_and_push")
 
 
@@ -96,18 +105,19 @@ def publish() -> None:
 
     spec = load_spec()
     version = Version.parse(cast(str, spec.version))
+    description = cast(str, spec.description)
+
     git = load_git()
-    github: Any = load_github()
+    github: Any = load_github(spec, git)
 
-    if not spec.description:
-        logger.warn("No description specified for spec")
-    elif spec.description != github.description:
-        update_description(spec.description)
+    if description != github.description:
+        update_description(description)
 
-    validate_git(spec, git, github)
+    validate_git(path=os.getcwd(), spec=spec, git=git, github=github)
+
     validate_module()
 
-    tag_and_push()
+    tag_and_push(version)
 
     if not is_package_available():
         open_package_url()

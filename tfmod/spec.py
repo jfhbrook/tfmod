@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Self, Type
 
 import hcl2
 
+from tfmod.error import SpecValueError
 from tfmod.io import logger
 
 # Make the type checker happy
@@ -101,6 +102,13 @@ class Spec:
             description=var.get("description", None),
             scripts=scripts,
         )
+
+    def repo_name(self) -> str:
+        if not self.provider:
+            raise SpecValueError("Module provider not specified")
+        if not self.name:
+            raise SpecValueError("Module name not specified")
+        return f"terraform-{self.provider}-{self.name}"
 
 
 Version = Any

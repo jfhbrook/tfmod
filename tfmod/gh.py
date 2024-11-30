@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
 
+from github import Auth, Github
 from yaml import load
 
 try:
@@ -68,3 +69,12 @@ def get_gh_user(hosts: Optional[GhHosts]) -> Optional[str]:
             logger.debug("No user defined in gh hosts")
     else:
         logger.debug("github.com not found in gh hosts")
+
+
+def gh_auth_token(host: str = "github.com", user: Optional[str] = None) -> Auth.Token:
+    raise NotImplementedError("gh_auth_token()")
+
+
+def gh_client(host: str = "github.com", user: Optional[str] = None) -> Github:
+    auth = gh_auth_token(host, user)
+    return Github(auth=auth)

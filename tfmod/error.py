@@ -36,6 +36,13 @@ class TerraformError(Error):
         self.exit_code: int = exit_code
 
 
+class SpecValueError(Error):
+    """
+    The contents of the module.tfvars file are invalid for this operation. Ensure your
+    module.tfvars file is complete and try again.
+    """
+
+
 class SpecNotFoundError(Error):
     """
     TfMod requires a module.tfvars file to continue. You can initialize a module.tfvars

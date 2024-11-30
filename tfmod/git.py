@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
 
 @dataclass
@@ -24,5 +24,5 @@ def git_add(path: str) -> None:
     raise NotImplementedError("git_add()")
 
 
-def git_commit(message: str) -> None:
+def git_commit(message: Optional[str] = None) -> None:
     raise NotImplementedError("git_commit()")

@@ -8,6 +8,7 @@ class Version:
     A simplified semantic version. Hashicorp says they use semantic
     versioning, but they don't advertise support of the full spec.
     """
+
     major = int
     minor = int
     semver = int
