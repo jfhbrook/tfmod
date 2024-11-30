@@ -2,8 +2,6 @@
 
 ## TODOs
 
-- [ ] fix bug in help error handling in go-flag
-  - suspect error is not of expected subclass
 - [ ] leverage python cli help
   - [ ] implement stub commands for update and unwise
   - [ ] template help output in parse-args
@@ -79,6 +77,8 @@
 - [ ] tagging (latest, beta etc)
   - TODO: how does npm implement dist-tag?
   - also implement npm's dist-tag behavior on publish
+- [ ] HOLD: weird help parsing error
+  - it showed up and later magically went away. is this recurring?
 - [ ] what now?
 
 
