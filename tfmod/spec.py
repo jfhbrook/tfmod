@@ -101,3 +101,13 @@ class Spec:
             description=var.get("description", None),
             scripts=scripts,
         )
+
+    def validate(self) -> None:
+        raise NotImplementedError("spec.validate()")
+
+
+Version = Any
+
+
+def parse_version(spec: Spec) -> Version:
+    raise NotImplementedError("parse_version(spec)")

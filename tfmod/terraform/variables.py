@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import hcl2
 
-from tfmod.terraform.value import Value
+from tfmod.io import prompt
+from tfmod.terraform.value import dump_value, load_value, Value
 
 # Make the type checker happy
 hcl: Any = hcl2
@@ -42,3 +43,24 @@ def load_variables(module: Path) -> Dict[str, Variable]:
         )
 
     return rv
+
+
+def prompt_var(
+    name: str, description: Optional[str] = None, default: Optional[Value] = None
+) -> Optional[Value]:
+    """
+    Prompt for a variable value
+    """
+
+    msg = "Enter a value"
+
+    if default is not None:
+        msg += f" ({dump_value(default)})"
+    msg += ":"
+
+    result = prompt(f"var.{name}", msg, description)
+
+    if not result:
+        return default
+
+    return load_value(result)

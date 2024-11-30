@@ -34,3 +34,24 @@ class TerraformError(Error):
     def __init__(self, exit_code: int) -> None:
         super().__init__(f"Terraform experienced an error (code: {exit_code})")
         self.exit_code: int = exit_code
+
+
+class SpecNotFoundError(Error):
+    """
+    TfMod requires a module.tfvars file to continue. You can initialize a module.tfvars
+    file by running "tfmod init".
+    """
+
+
+class GitRepoNotFoundError(Error):
+    """
+    TfMod count not find a git repository at this location. To initialize a git
+    repository, run "git init".
+    """
+
+
+class GitDirtyError(Error):
+    """
+    TfMod detected uncommitted changes in the current project and will not
+    continue. To override this behavior, set the -allow-dirty flag.
+    """

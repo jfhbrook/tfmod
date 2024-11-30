@@ -4,11 +4,11 @@ from typing import Optional
 
 import flag
 
-from tfmod.command.base import cli, command, Command, exit, run
+from tfmod.command.base import cli, command, exit, run
 from tfmod.command.publish import publish as _publish
 from tfmod.constants import TFMOD_VERSION
 from tfmod.error import Error
-from tfmod.gh import GhHosts, load_gh_hosts
+from tfmod.gh import get_gh_user, GhHosts, load_gh_hosts_optional
 from tfmod.io import logger
 from tfmod.terraform import Terraform
 
@@ -43,25 +43,14 @@ def init() -> None:
     Initialize a new project
     """
 
-    hosts: Optional[GhHosts] = None
-    try:
-        hosts = load_gh_hosts()
-        logger.info("Loaded gh hosts")
-    except FileNotFoundError:
-        logger.debug("gh hosts.yml not found")
-
+    hosts: Optional[GhHosts] = load_gh_hosts_optional()
     default_namespace: Optional[str] = None
 
-    if hosts:
-        if "github.com" in hosts:
-            host = hosts["github.com"]
-            if host.user:
-                logger.info(f"Using gh user {host.user} as the default namespace")
-                default_namespace = host.user
-            else:
-                logger.debug("No user defined in gh hosts")
-        else:
-            logger.debug("github.com not found in gh hosts")
+    gh_user: Optional[str] = get_gh_user(hosts)
+
+    if gh_user:
+        logger.info(f"Using gh user {gh_user} as the default namespace")
+        default_namespace = gh_user
 
     cmd = (
         Terraform("init")

@@ -16,10 +16,9 @@ from tfmod.constants import (
 )
 from tfmod.error import TerraformError
 from tfmod.io import logger
-from tfmod.io.prompt import prompt_var
 from tfmod.spec import Spec
 from tfmod.terraform.value import dump_value, Value
-from tfmod.terraform.variables import load_variables, Variable
+from tfmod.terraform.variables import load_variables, prompt_var, Variable
 
 PathLike = Path | str
 

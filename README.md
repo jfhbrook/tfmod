@@ -17,7 +17,7 @@
     - construct repo name from module.tfvars
       - warn if directory name does not match what's in module.tfvars
     - if a git remote for github
-      - parse/safe remote name
+      - parse/save remote name
       - parse repo
     - if github repo does not exist
       - shell into `gh` to create it
