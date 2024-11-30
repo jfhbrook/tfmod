@@ -231,7 +231,7 @@ function install-tfmod {
         terraform -no-color "-chdir=${module}" init -upgrade
       done)
   echo 'Updating Python dependencies...'
-  (set -euo pipefail cd ~/.local/state/tfmod \
+  (set -euo pipefail; cd ~/.local/state/tfmod \
     && rm -rf .venv \
     && "${UV_BIN}" sync 2>&1)
 
