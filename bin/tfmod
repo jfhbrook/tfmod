@@ -54,7 +54,7 @@ function fatal {
 
 TF_LOG="${TF_LOG:-WARN}"
 # Save arguments to pass directly to tfmod
-ARGV="$$*"
+ARGV="$*"
 COMMAND=''
 SHOW_HELP=''
 
