@@ -228,7 +228,7 @@ function install-tfmod {
   (set -euo pipefail; cd ~/.local/state/tfmod \
     && for module in ./modules/*; do \
         echo "- modules/$(basename "${module}")"
-        terraform -no-color "-chdir=${module}" init -upgrade
+        terraform "-chdir=${module}" init -upgrade
       done)
   echo 'Updating Python dependencies...'
   (set -euo pipefail; cd ~/.local/state/tfmod \
