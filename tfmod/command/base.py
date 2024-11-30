@@ -10,6 +10,8 @@ import flag
 from tfmod.error import CliError, Error, Exit, Help
 from tfmod.io import logger
 
+CommandRunner = Callable[[], None]
+
 
 @dataclass
 class Command:
@@ -19,13 +21,11 @@ class Command:
 
     name: str
     help: str
-    command: "Callable[[Command], None]"
+    command: CommandRunner
 
     def run(self) -> None:
-        self.command(self)
+        self.command()
 
-
-CommandRunner = Callable[[Command], None]
 
 COMMANDS: Dict[str, Command] = dict()
 

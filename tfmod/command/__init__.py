@@ -5,6 +5,7 @@ from typing import Optional
 import flag
 
 from tfmod.command.base import cli, command, Command, exit, run
+from tfmod.command.publish import publish as _publish
 from tfmod.constants import TFMOD_VERSION
 from tfmod.error import Error
 from tfmod.gh import GhHosts, load_gh_hosts
@@ -29,7 +30,7 @@ def version() -> None:
 
 
 @command(name="version")
-def version_cmd(_cmd: Command) -> None:
+def version_cmd() -> None:
     """
     Show the current TfMod version
     """
@@ -37,7 +38,7 @@ def version_cmd(_cmd: Command) -> None:
 
 
 @command()
-def init(_cmd: Command) -> None:
+def init() -> None:
     """
     Initialize a new project
     """
@@ -78,7 +79,16 @@ def init(_cmd: Command) -> None:
 
 
 @command()
-def config(_cmd: Command) -> None:
+def publish() -> None:
+    """
+    Publish the current
+    """
+
+    _publish()
+
+
+@command()
+def config() -> None:
     """
     Configure TfMod
     """
@@ -89,7 +99,7 @@ def config(_cmd: Command) -> None:
 
 
 @command()
-def update(_cmd: Command) -> None:
+def update() -> None:
     """
     Install or update TfMod and its dependencies
     """
@@ -99,7 +109,7 @@ def update(_cmd: Command) -> None:
 
 
 @command()
-def unwise(_cmd: Command) -> None:
+def unwise() -> None:
     """
     Remove TfMod and its files.
     """
