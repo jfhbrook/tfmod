@@ -15,7 +15,7 @@ from tfmod.constants import (
     TERRAFORM_BIN,
 )
 from tfmod.error import TerraformError
-from tfmod.logging import logger
+from tfmod.io import logger
 from tfmod.spec import Spec
 from tfmod.terraform.value import dump_value, Value
 from tfmod.terraform.variables import load_variables, prompt_var, Variable

@@ -8,7 +8,7 @@ from typing import Callable, Dict, List, NoReturn, Optional
 import flag
 
 from tfmod.error import CliError, Error, Exit, Help
-from tfmod.logging import logger
+from tfmod.io import logger
 
 
 @dataclass

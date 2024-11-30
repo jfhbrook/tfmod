@@ -2,26 +2,7 @@
 
 set -euo pipefail
 
-# Enough logging to launch TfMod
-
-function error {
-  echo -e '\e[0;31m│\e[0m'
-  echo -e '\e[0;31m│ Error:\e[0m' "$${1}"
-
-  if [ -n "$${2:-}" ]; then
-    echo -e '\e[0;31m│\e[0m'
-    echo "$${2}" | while read -r line; do
-      echo -e '\e[0;31m│\e[0m ' "$${line}"
-    done
-  fi
-
-  echo -e '\e[0;31m│\e[0m'
-}
-
-function fatal {
-  error "$@"
-  exit 1
-}
+${PRELUDE}
 
 ERR_NOT_INSTALLED="TfMod is not installed correctly"
 ERR_NOT_INSTALLED_MSG="To install TfMod, run 'tfmod update'"
@@ -70,7 +51,7 @@ if [[ "$${COMMAND}" == 'unwise' ]]; then
 
   rm -rf ~/.local/state/TfMod
   rm -f "$${BASH_SOURCE[0]}"
-  info 'TfMod is uninstalled'
+  echo -e "$${COLOR_GREEN}TfMod is uninstalled$${COLOR_RESET}"
   exit 0
 fi
 
@@ -104,72 +85,7 @@ if [ -n "$${SHOW_HELP}" ]; then
   exit 0
 fi
 
-# More logging functions
-
-function log {
-  # TODO: Terraform shows fractional seconds...
-  TS="$(date +"%Y-%m-%dT%H:%M:%S%z")"
-  local level
-  level="$${1}"
-  shift
-  echo "$${TS} $${level}" "$@" 1>&2
-}
-
-function is-trace {
-  [[ "$${TF_LOG}" == 'TRACE' ]]
-}
-
-function is-debug {
-  [[ "$${TF_LOG}" == 'DEBUG' ]] || is-trace
-}
-
-function is-info {
-  [[ "$${TF_LOG}" == 'INFO' ]] || is-debug
-}
-
-function is-warn {
-  [[ "$${TF_LOG}" == 'WARN' ]] || is-info
-}
-
-function debug {
-  if is-debug; then
-    log '[DEBUG]' "$@"
-  fi
-}
-
-function info {
-  if is-info; then
-    log '[INFO] ' "$@"
-  fi
-}
-
-function warn {
-  if is-warn; then
-    log '[WARN] ' "$@"
-  fi
-}
-
-function ok {
-  echo -e "\e[0;92m$${1}\e[0m"
-}
-
-function quote {
-  if ! is-info; then
-    return 0
-  fi
-  while read -r line; do
-    echo "  │ $${line}"
-  done
-}
-
-# Ensure log level is set correctly
-case "$${TF_LOG}" in
-  TRACE|DEBUG|INFO|WARN|ERROR)
-    ;;
-  *)
-    TF_LOG='WARN'
-    log-warn "Unknown log level $${TF_LOG}"
-esac
+${LOGGING}
 
 UPDATE_OK='TfMod has been successfully updated!
 
@@ -179,7 +95,7 @@ your first project. All TfMod commands should now work.
 To update TfMod in the future, run "tfmod update"!'
 
 function update-ok {
-  ok "$${UPDATE_OK}"
+  echo -e "$${COLOR_GREEN}$${UPDATE_OK}$${COLOR_RESET}"
 }
 
 ERR_UPDATE='Failed to install or update TfMod'

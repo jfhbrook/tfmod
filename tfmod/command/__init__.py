@@ -7,7 +7,7 @@ import flag
 from tfmod.command.base import cli, command, Command, exit, run
 from tfmod.constants import TFMOD_VERSION
 from tfmod.gh import GhHosts, load_gh_hosts
-from tfmod.logging import logger
+from tfmod.io import logger
 from tfmod.terraform import Terraform
 
 

@@ -3,11 +3,11 @@ from enum import IntEnum
 import json
 import os
 import textwrap
-from typing import Literal, Mapping, NoReturn, Optional, Self
+from typing import Literal, Mapping, Optional, Self
 
 from rich import print as pprint
 
-from tfmod.error import Error, Exit
+from tfmod.error import Error
 
 
 class Level(IntEnum):
@@ -69,9 +69,7 @@ class Logger:
         lvl = f"[{str(level)}]".ljust(7)
         print(f"{self.timestamp()} {lvl} {message}")
 
-    def show(
-        self, level: str, color: Color, title: str, message: Optional[str]
-    ) -> None:
+    def show(self, level: str, color: Color, title: str, body: Optional[str]) -> None:
         pprint(
             "\n".join(
                 [
@@ -80,8 +78,8 @@ class Logger:
                 ]
             )
         )
-        if message:
-            for line in message.split("\n"):
+        if body:
+            for line in body.split("\n"):
                 pprint(f"[{color}]{MIDDLE_BAR} [/{color}] {line}")
         pprint(f"[{color}]{BOTTOM_BAR}[/{color}]")
 

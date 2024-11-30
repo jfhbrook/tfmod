@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Self, Type
 
 import hcl2
 
-from tfmod.logging import logger
+from tfmod.io import logger
 
 # Make the type checker happy
 hcl: Any = hcl2
