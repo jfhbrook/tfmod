@@ -11,36 +11,7 @@ function fatal-not-installed {
   fatal "$${ERR_NOT_INSTALLED}" "$${ERR_NOT_INSTALLED_MSG}"
 }
 
-TF_LOG="$${TF_LOG:-WARN}"
-ARGV="$*"
-COMMAND=''
-SHOW_HELP=''
-
-UNWISE_HELP='Usage: TfMod unwise
-
-Remove TfMod and all its files.'
-
-UPDATE_HELP='Usage: TfMod update
-
-Install or update TfMod and its dependencies.'
-
-while [[ $# -gt 0 ]]; do
-  case "$${1}" in
-    -h|-help|--help)
-      SHOW_HELP=1
-      shift
-      ;;
-    update|unwise)
-      if [ -z "$${COMMAND}" ]; then
-        COMMAND="$${1}"
-      fi
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
+${PARSE_ARGS}
 
 # unwise takes priority over everything
 if [[ "$${COMMAND}" == 'unwise' ]]; then

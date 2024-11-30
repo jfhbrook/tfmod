@@ -160,7 +160,9 @@ def cli(fn: Main) -> Main:
     def cli() -> None:
         try:
             fn()
-        except Help:
+        # TODO: This is not actually catching flag.Error. But flag.Error should
+        # be getting caught and handled in go-flag anyway. That's a bug!
+        except (flag.Error, Help):
             usage()
             sys.exit(0)
         except Exit as exc:

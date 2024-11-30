@@ -5,6 +5,7 @@
 - [ ] bash shituation
   - [ ] separate files
   - [ ] combine with terraform templating
+- [ ] fix bug in help error handling in go-flag
 - [ ] stub commands for things implemented in bash
 - [ ] confirm prompt
   - clean up bash impl
