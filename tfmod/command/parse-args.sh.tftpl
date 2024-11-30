@@ -26,11 +26,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ -z "$${COMMAND}" ]; then
-  echo "$${HELP_MAIN}"
-  exit 0
-fi
-
 if [ -n "$${SHOW_HELP}" ]; then
   case "$${COMMAND:-}" in
     update)
