@@ -14,7 +14,7 @@ function update-ok {
 ERR_UPDATE='Failed to install or update TfMod'
 ERR_UPDATE_MSG='This is probably a bug in TfMod. File an issue at:
 
-    https://github.com/jfhbrook/TfMod/issues
+    https://github.com/jfhbrook/tfmod/issues
 '
 
 function fatal-update {
@@ -217,7 +217,7 @@ function install-tfmod {
 
   if [ ! -d ~/.local/state/tfmod ]; then
     echo 'Installing TfMod to ~/.local/state/tfmod...'
-    (cd ~/.local/state && git clone git@github.com:jfhbrook/TfMod.git 1>&1)
+    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git 1>&1)
   else
     echo 'Updating TfMod source in ~/.local/state/tfmod...'
     (cd ~/.local/state/tfmod && git pull origin 2>&1)
@@ -240,7 +240,7 @@ function install-tfmod {
     mkdir -p ~/.local/bin
     cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
   fi
-  chmod +x ~/.local/bin/TfMod
+  chmod +x ~/.local/bin/tfmod
 }
 
 function check-path {
