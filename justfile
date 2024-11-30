@@ -11,10 +11,10 @@ default:
 # Installing, updating and upgrading dependencies
 #
 
-# Sync project
-sync:
-  for module in ./modules/*; do terraform "-chdir=${module}" init -upgrade; done
-  uv sync --extra dev
+# Setup project
+setup:
+  for module in ./modules/init ./modules/entrypoint; do terraform "-chdir=${module}" init -upgrade; done
+  uv sync -U --extra dev
   uv pip install -e .
 
 #
@@ -68,26 +68,18 @@ console:
   uv run jupyter console
 
 #
-# Package publishing
+# Builds
 #
 
-# Build the package
+# Build the entrypoint
 build:
-  uv build
+  terraform -chdir=./modules/entrypoint apply -auto-approve
 
 _clean-build:
-  rm -rf dist
-
-# Tag the release in git
-tag:
-  git tag -a "$(uv run python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')" -m "Release $(uv run python3 -c 'import toml; print(toml.load(open("pyproject.toml", "r"))["project"]["version"])')"
-
-# Publish the release
-publish: build
-  ./scripts/publish.sh
+  terraform -chdir=./modules/entrypoint destroy -auto-approve
 
 # Clean up loose files
-clean: _clean-test
+clean: _clean-test _clean-build
   rm -rf go-tfmod.egg-info
   rm -f tfmod/*.pyc
   rm -rf tfmod/__pycache__

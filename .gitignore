@@ -15,5 +15,8 @@ wheels/
 *.tfstate
 terraform.tfstate.backup
 
+# Entrypoint
+bin/tfmod
+
 # tfmod
 module.tfvars

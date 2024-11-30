@@ -6,12 +6,12 @@ set -euo pipefail
 
 function error {
   echo -e '\e[0;31m│\e[0m'
-  echo -e '\e[0;31m│ Error:\e[0m' "${1}"
+  echo -e '\e[0;31m│ Error:\e[0m' "$${1}"
 
-  if [ -n "${2:-}" ]; then
+  if [ -n "$${2:-}" ]; then
     echo -e '\e[0;31m│\e[0m'
-    echo "${2}" | while read -r line; do
-      echo -e '\e[0;31m│\e[0m ' "${line}"
+    echo "$${2}" | while read -r line; do
+      echo -e '\e[0;31m│\e[0m ' "$${line}"
     done
   fi
 
@@ -27,10 +27,10 @@ ERR_NOT_INSTALLED="TfMod is not installed correctly"
 ERR_NOT_INSTALLED_MSG="To install TfMod, run 'tfmod update'"
 
 function fatal-not-installed {
-  fatal "${ERR_NOT_INSTALLED}" "${ERR_NOT_INSTALLED_MSG}"
+  fatal "$${ERR_NOT_INSTALLED}" "$${ERR_NOT_INSTALLED_MSG}"
 }
 
-TF_LOG="${TF_LOG:-WARN}"
+TF_LOG="$${TF_LOG:-WARN}"
 ARGV="$*"
 COMMAND=''
 SHOW_HELP=''
@@ -44,14 +44,14 @@ UPDATE_HELP='Usage: TfMod update
 Install or update TfMod and its dependencies.'
 
 while [[ $# -gt 0 ]]; do
-  case "${1}" in
+  case "$${1}" in
     -h|-help|--help)
       SHOW_HELP=1
       shift
       ;;
     update|unwise)
-      if [ -z "${COMMAND}" ]; then
-        COMMAND="${1}"
+      if [ -z "$${COMMAND}" ]; then
+        COMMAND="$${1}"
       fi
       shift
       ;;
@@ -62,14 +62,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 # unwise takes priority over everything
-if [[ "${COMMAND}" == 'unwise' ]]; then
-  if [ -n "${SHOW_HELP}" ]; then
-    echo "${UNWISE_HELP}"
+if [[ "$${COMMAND}" == 'unwise' ]]; then
+  if [ -n "$${SHOW_HELP}" ]; then
+    echo "$${UNWISE_HELP}"
     exit 0
   fi
 
   rm -rf ~/.local/state/TfMod
-  rm -f "${BASH_SOURCE[0]}"
+  rm -f "$${BASH_SOURCE[0]}"
   info 'TfMod is uninstalled'
   exit 0
 fi
@@ -80,7 +80,7 @@ if [ ! -d ~/.local/state/TfMod ]; then
 fi
 
 # If we're not installing, run
-if [[ "${COMMAND}" != 'update' ]]; then
+if [[ "$${COMMAND}" != 'update' ]]; then
   cd ~/.local/state/TfMod || fatal-not-installed
   [ -d .venv ] || fatal-not-installed
 
@@ -88,7 +88,7 @@ if [[ "${COMMAND}" != 'update' ]]; then
 
   # shellcheck disable=SC1091
   source .venv/bin/activate
-  exec python3 -m TfMod "${ARGV[@]}"
+  exec python3 -m tfmod "$${ARGV[@]}"
 fi
 
 #
@@ -99,8 +99,8 @@ fi
 # make things imperceptibly faster
 #
 
-if [ -n "${SHOW_HELP}" ]; then
-  echo "${UPDATE_HELP}"
+if [ -n "$${SHOW_HELP}" ]; then
+  echo "$${UPDATE_HELP}"
   exit 0
 fi
 
@@ -110,25 +110,25 @@ function log {
   # TODO: Terraform shows fractional seconds...
   TS="$(date +"%Y-%m-%dT%H:%M:%S%z")"
   local level
-  level="${1}"
+  level="$${1}"
   shift
-  echo "${TS} ${level}" "$@" 1>&2
+  echo "$${TS} $${level}" "$@" 1>&2
 }
 
 function is-trace {
-  [[ "${TF_LOG}" == 'TRACE' ]]
+  [[ "$${TF_LOG}" == 'TRACE' ]]
 }
 
 function is-debug {
-  [[ "${TF_LOG}" == 'DEBUG' ]] || is-trace
+  [[ "$${TF_LOG}" == 'DEBUG' ]] || is-trace
 }
 
 function is-info {
-  [[ "${TF_LOG}" == 'INFO' ]] || is-debug
+  [[ "$${TF_LOG}" == 'INFO' ]] || is-debug
 }
 
 function is-warn {
-  [[ "${TF_LOG}" == 'WARN' ]] || is-info
+  [[ "$${TF_LOG}" == 'WARN' ]] || is-info
 }
 
 function debug {
@@ -150,7 +150,7 @@ function warn {
 }
 
 function ok {
-  echo -e "\e[0;92m${1}\e[0m"
+  echo -e "\e[0;92m$${1}\e[0m"
 }
 
 function quote {
@@ -158,17 +158,17 @@ function quote {
     return 0
   fi
   while read -r line; do
-    echo "  │ ${line}"
+    echo "  │ $${line}"
   done
 }
 
 # Ensure log level is set correctly
-case "${TF_LOG}" in
+case "$${TF_LOG}" in
   TRACE|DEBUG|INFO|WARN|ERROR)
     ;;
   *)
     TF_LOG='WARN'
-    log-warn "Unknown log level ${TF_LOG}"
+    log-warn "Unknown log level $${TF_LOG}"
 esac
 
 UPDATE_OK='TfMod has been successfully updated!
@@ -179,7 +179,7 @@ your first project. All TfMod commands should now work.
 To update TfMod in the future, run "tfmod update"!'
 
 function update-ok {
-  ok "${UPDATE_OK}"
+  ok "$${UPDATE_OK}"
 }
 
 ERR_UPDATE='Failed to install or update TfMod'
@@ -189,14 +189,14 @@ ERR_UPDATE_MSG='This is probably a bug in TfMod. File an issue at:
 '
 
 function fatal-update {
-  fatal "${ERR_UPDATE}" "${ERR_UPDATE_MSG}"
+  fatal "$${ERR_UPDATE}" "$${ERR_UPDATE_MSG}"
 }
 
 # Confirm y/n
 function confirm {
   local choice
-  read -r -p "${1} (y/N) " choice
-  case "${choice}" in
+  read -r -p "$${1} (y/N) " choice
+  case "$${choice}" in
     y|yes|Y|YES)
       return 0
       ;;
@@ -209,7 +209,7 @@ function confirm {
 # OS detection
 
 function is-macos {
-  if [[ "${OSTYPE}" == "darwin"* ]]; then
+  if [[ "$${OSTYPE}" == "darwin"* ]]; then
     debug 'MacOS detected'
     return 0
   fi
@@ -223,19 +223,19 @@ function is-macos {
 TERRAFORM_IN_PATH=''
 
 function has-bin {
-  if [ "${1}" == 'terraform' ] && [ -n "${TERRAFORM_IN_PATH}" ]; then
+  if [ "$${1}" == 'terraform' ] && [ -n "$${TERRAFORM_IN_PATH}" ]; then
     return 0
   fi
 
-  if which "${1}" > /dev/null 2>&1; then
-    info "Found ${1} at $(which "${1}")"
-    if [ "${1}" == 'terraform' ]; then
+  if which "$${1}" > /dev/null 2>&1; then
+    info "Found $${1} at $(which "$${1}")"
+    if [ "$${1}" == 'terraform' ]; then
       TERRAFORM_IN_PATH=1
     fi
     return 0
   fi
 
-  info "Could not find ${1}"
+  info "Could not find $${1}"
   return 1
 }
 
@@ -245,16 +245,16 @@ function use-package {
   local cmd
   local pkg
 
-  cmd="${1}"
-  pkg="${2:-${1}}"
+  cmd="$${1}"
+  pkg="$${2:-$${1}}"
 
-  if ! has-bin "${cmd}"; then
-    PACKAGES+=("${pkg}")
+  if ! has-bin "$${cmd}"; then
+    PACKAGES+=("$${pkg}")
   fi
 }
 
 function no-packages {
-  [ ${#PACKAGES[@]} -eq 0 ]
+  [ $${#PACKAGES[@]} -eq 0 ]
 }
 
 # homebrew based installs
@@ -276,13 +276,13 @@ function brew-install {
   fi
 
   echo 'Installing the following homebrew formulas:'
-  for formula in "${HOMEBREW_FORMULAS[@]}"; do
-    echo "- ${formula}"
+  for formula in "$${HOMEBREW_FORMULAS[@]}"; do
+    echo "- $${formula}"
   done
 
   # Homebrew doesn't prompt by default
   if confirm 'Would you like to install these formulas with homebrew?'; then
-    brew install "${HOMEBREW_FORMULAS[@]}" | quote
+    brew install "$${HOMEBREW_FORMULAS[@]}" | quote
     return 0
   fi
   return 1
@@ -292,12 +292,12 @@ function brew-install {
 
 function apt-install {
   if no-packages; then return 0; fi
-  sudo apt install "${PACKAGES[@]}"
+  sudo apt install "$${PACKAGES[@]}"
 }
 
 function dnf-install {
   if no-packages; then return 0; fi
-  sudo dnf install "${PACKAGES[@]}"
+  sudo dnf install "$${PACKAGES[@]}"
 }
 
 # do it up
@@ -338,29 +338,29 @@ function install-packages {
 UV_BIN=''
 
 function find-uv {
-  if [ -n "${UV_BIN}" ]; then
+  if [ -n "$${UV_BIN}" ]; then
     return 0
   fi
 
   if which uv &> /dev/null; then
     UV_BIN="$(which uv)"
-  elif [ -f "${XDG_BIN_HOME}/uv" ]; then
-    UV_BIN="${XDG_BIN_HOME}/uv"
-  elif [ -f "${XDG_DATA_HOME}/../bin/uv" ]; then
-    UV_BIN="$(realpath "${XDG_DATA_HOME}/../bin/uv")"
-  elif [ -f "${HOME}/.local/bin/uv" ]; then
-    UV_BIN="${HOME}/.local/bin/uv"
+  elif [ -f "$${XDG_BIN_HOME}/uv" ]; then
+    UV_BIN="$${XDG_BIN_HOME}/uv"
+  elif [ -f "$${XDG_DATA_HOME}/../bin/uv" ]; then
+    UV_BIN="$(realpath "$${XDG_DATA_HOME}/../bin/uv")"
+  elif [ -f "$${HOME}/.local/bin/uv" ]; then
+    UV_BIN="$${HOME}/.local/bin/uv"
   fi
 
-  if [ -n "${UV_BIN}" ]; then
-    info "found uv at ${UV_BIN}"
+  if [ -n "$${UV_BIN}" ]; then
+    info "found uv at $${UV_BIN}"
     return 0
   fi
   return 1
 }
 
 function assert-uv {
-  if [ -z "${UV_BIN}" ]; then
+  if [ -z "$${UV_BIN}" ]; then
     fatal 'Could not find uv'
   fi
 }
@@ -412,15 +412,15 @@ function install-TfMod {
   echo 'Updating Terraform modules...'
   (set -euo pipefail; cd ~/.local/state/TfMod \
     && for module in ./modules/*; do \
-        echo "- modules/$(basename "${module}")"
-        terraform -no-color "-chdir=${module}" init -upgrade | quote
+        echo "- modules/$(basename "$${module}")"
+        terraform -no-color "-chdir=$${module}" init -upgrade | quote
       done)
   echo 'Updating Python dependencies...'
   (set -euo pipefail cd ~/.local/state/TfMod \
     && rm -rf .venv \
-    && "${UV_BIN}" sync 2>&1 | quote)
+    && "$${UV_BIN}" sync 2>&1 | quote)
 
-  if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
+  if [ -z "$${CALLED_FROM_INSTALLER:-}" ]; then
     echo 'Copying TfMod to ~/.local/bin/tfmod...'
     mkdir -p ~/.local/bin
     cp ~/.local/state/TfMod/bin/tfmod ~/.local/bin/tfmod
@@ -434,7 +434,7 @@ function check-path {
     warn 'shell profile (ie ~/.bashrc, ~/.zshrc):'
     warn
     # shellcheck disable=SC2016
-    warn '    export PATH="${PATH}:${HOME}/.local/bin"'
+    warn '    export PATH="$${PATH}:$${HOME}/.local/bin"'
     warn
   fi
 }
