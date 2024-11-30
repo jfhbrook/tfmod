@@ -2,16 +2,16 @@
 
 ## TODOs
 
-- [ ] bash shituation
-  - [ ] separate files
-  - [ ] combine with terraform templating
+- [ ] fix ugly error output
+  - suspect error is not of expected subclass
 - [ ] fix bug in help error handling in go-flag
-- [ ] stub commands for things implemented in bash
+- [ ] leverage python cli help
+  - [ ] implement stub commands for update and unwise
+  - [ ] template help output in parse-args
 - [ ] confirm prompt
   - clean up bash impl
-- [ ] config
-  - git prefer https or ssh
-  - git prefer main branch
+- [ ] command quoting
+  - clean up bash impl
 - [ ] publish
   - module.tfvars
     - if no exist, exit and insist on a `tfmod init`
@@ -51,6 +51,11 @@
   - do after publish is working, since that's the main functionality and the
     APIs should have solidified by then
   - do them for bash too
+- [ ] config
+  - needs so far kinda sorted by `gh` config
+    - git prefer https or ssh
+    - git prefer main branch
+  - but can at least show the `gh` config, yeah?
 - [ ] login
   - log github cli login status
   - open <https://registry.terraform.io/sign-in>
