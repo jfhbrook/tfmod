@@ -4,6 +4,12 @@ from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
 from tfmod.git import git_add, git_commit, git_init, git_is_dirty, GitRepo
 from tfmod.io import logger, prompt_confirm
 from tfmod.spec import parse_version, Spec
+from tfmod.terraform import Terraform
+
+
+def validate_spec(spec: Spec) -> None:
+    cmd = Terraform("spec").isolated_state().spec().auto_approve()
+    cmd.run()
 
 
 def load_spec() -> Spec:
@@ -12,7 +18,7 @@ def load_spec() -> Spec:
     except FileNotFoundError:
         raise SpecNotFoundError("No module.tfvars found")
 
-    spec.validate()
+    validate_spec(spec)
 
     version = parse_version(spec)
 

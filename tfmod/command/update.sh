@@ -212,6 +212,8 @@ alternately, consider the tool '\'tfswitch\'':
     https://tfswitch.warrensbox.com/'
 }
 
+TF_MODULES="init spec"
+
 function install-tfmod {
   mkdir -p ~/.local/state
 
@@ -226,9 +228,9 @@ function install-tfmod {
   assert-uv
   echo 'Updating Terraform modules...'
   (set -euo pipefail; cd ~/.local/state/tfmod \
-    && for module in ./modules/*; do \
+    && for module in ${TF_MODULES}; do \
         echo "- modules/$(basename "${module}")"
-        terraform "-chdir=${module}" init -upgrade
+        terraform "-chdir=modules/${module}" init -upgrade
       done)
   echo 'Updating Python dependencies...'
   (set -euo pipefail; cd ~/.local/state/tfmod \

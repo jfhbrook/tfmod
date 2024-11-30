@@ -102,9 +102,6 @@ class Spec:
             scripts=scripts,
         )
 
-    def validate(self) -> None:
-        raise NotImplementedError("spec.validate()")
-
 
 Version = Any
 

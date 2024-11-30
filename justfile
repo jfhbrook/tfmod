@@ -1,6 +1,6 @@
 set dotenv-load := true
 
-root-modules := "./modules/init ./modules/entrypoint"
+root-modules := "./modules/init ./modules/entrypoint ./modules/spec"
 
 # By default, run checks and tests, then format and lint
 default:
