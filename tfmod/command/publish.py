@@ -7,8 +7,8 @@ from tfmod.spec import parse_version, Spec
 from tfmod.terraform import Terraform
 
 
-def validate_spec(spec: Spec) -> None:
-    cmd = Terraform("spec").isolated_state().spec().auto_approve()
+def validate_spec() -> None:
+    cmd = Terraform("spec", "plan").spec()
     cmd.run()
 
 
@@ -17,8 +17,6 @@ def load_spec() -> Spec:
         spec = Spec.load()
     except FileNotFoundError:
         raise SpecNotFoundError("No module.tfvars found")
-
-    validate_spec(spec)
 
     version = parse_version(spec)
 
@@ -95,6 +93,8 @@ def open_package_url() -> None:
 
 
 def publish() -> None:
+    validate_spec()
+
     spec = load_spec()
     git = load_git()
     github: Any = load_github()
