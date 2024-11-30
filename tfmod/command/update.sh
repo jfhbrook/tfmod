@@ -212,15 +212,15 @@ alternately, consider the tool '\'tfswitch\'':
     https://tfswitch.warrensbox.com/'
 }
 
-function install-TfMod {
+function install-tfmod {
   mkdir -p ~/.local/state
 
   if [ ! -d ~/.local/state/tfmod ]; then
     echo 'Installing TfMod to ~/.local/state/tfmod...'
-    (cd ~/.local/state && git clone git@github.com:jfhbrook/TfMod.git 1>&1 | quote)
+    (cd ~/.local/state && git clone git@github.com:jfhbrook/TfMod.git 1>&1)
   else
     echo 'Updating TfMod source in ~/.local/state/tfmod...'
-    (cd ~/.local/state/tfmod && git pull origin 2>&1 | quote)
+    (cd ~/.local/state/tfmod && git pull origin 2>&1)
   fi
   find-uv
   assert-uv
@@ -228,12 +228,12 @@ function install-TfMod {
   (set -euo pipefail; cd ~/.local/state/tfmod \
     && for module in ./modules/*; do \
         echo "- modules/$(basename "${module}")"
-        terraform -no-color "-chdir=${module}" init -upgrade | quote
+        terraform -no-color "-chdir=${module}" init -upgrade
       done)
   echo 'Updating Python dependencies...'
   (set -euo pipefail cd ~/.local/state/tfmod \
     && rm -rf .venv \
-    && "${UV_BIN}" sync 2>&1 | quote)
+    && "${UV_BIN}" sync 2>&1)
 
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
     echo 'Copying TfMod to ~/.local/bin/tfmod...'
@@ -258,7 +258,7 @@ function install {
   install-packages
   install-terraform
   install-uv
-  install-TfMod
+  install-tfmod
   check-path
   update-ok
 }
