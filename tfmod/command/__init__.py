@@ -6,6 +6,7 @@ import flag
 
 from tfmod.command.base import cli, command, Command, exit, run
 from tfmod.constants import TFMOD_VERSION
+from tfmod.error import Error
 from tfmod.gh import GhHosts, load_gh_hosts
 from tfmod.io import logger
 from tfmod.terraform import Terraform
@@ -85,6 +86,26 @@ def config(_cmd: Command) -> None:
     cmd = Terraform("config-command").args(flag.args)
 
     cmd.run()
+
+
+@command()
+def update(_cmd: Command) -> None:
+    """
+    Install or update TfMod and its dependencies
+    """
+
+    # TODO: Better error
+    raise Error("This command is implemented in Bash")
+
+
+@command()
+def unwise(_cmd: Command) -> None:
+    """
+    Remove TfMod and its files.
+    """
+
+    # TODO: Better error
+    raise Error("This command is implemented in Bash")
 
 
 @cli

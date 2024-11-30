@@ -1,0 +1,47 @@
+TF_LOG="$${TF_LOG:-WARN}"
+# Save arguments to pass directly to tfmod
+ARGV="$$*"
+COMMAND=''
+SHOW_HELP=''
+
+HELP_MAIN='${HELP_MAIN}'
+HELP_UPDATE='${HELP_UPDATE}'
+HELP_UNWISE='${HELP_UNWISE}'
+
+while [[ $# -gt 0 ]]; do
+  case "$${1}" in
+    -h|-help|--help)
+      SHOW_HELP=1
+      shift
+      ;;
+    update|unwise)
+      if [ -z "$${COMMAND}" ]; then
+        COMMAND="$${1}"
+      fi
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$${COMMAND}" ]; then
+  echo "$${HELP_MAIN}"
+  exit 0
+fi
+
+if [ -n "$${SHOW_HELP}" ]; then
+  case "$${COMMAND:-}" in
+    update)
+      echo "$${HELP_UPDATE}"
+    ;;
+    unwise)
+      echo "$${HELP_UNWISE}"
+    ;;
+    *)
+      echo "$${HELP}"
+    ;;
+  esac
+  exit 0
+fi

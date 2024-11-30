@@ -2,9 +2,6 @@
 
 ## TODOs
 
-- [ ] leverage python cli help
-  - [ ] implement stub commands for update and unwise
-  - [ ] template help output in parse-args
 - [ ] confirm prompt
   - clean up bash impl
 - [ ] command quoting
@@ -44,6 +41,12 @@
     - git push origin main --tags
   - if package not on registry api (and not private)
     - open page for publishing
+- [ ] unwise/update bug involving malformed directory
+  - I somehow to got things in a state where tfmod was empty except for
+    state files
+  - that predictably broke a ton of stuff
+- [ ] update does not error when I expect it to
+  - I think this is because of how subshells work
 - [ ] tests
   - do after publish is working, since that's the main functionality and the
     APIs should have solidified by then
