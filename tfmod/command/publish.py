@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any, cast
 
 from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
 from tfmod.git import git_add, git_commit, git_init, git_is_dirty, GitRepo
 from tfmod.io import logger, prompt_confirm
 from tfmod.spec import parse_version, Spec
 from tfmod.terraform import Terraform
+from tfmod.version import Version
 
 
 def validate_spec() -> None:
@@ -17,8 +18,6 @@ def load_spec() -> Spec:
         spec = Spec.load()
     except FileNotFoundError:
         raise SpecNotFoundError("No module.tfvars found")
-
-    version = parse_version(spec)
 
     return spec
 
@@ -96,6 +95,7 @@ def publish() -> None:
     validate_spec()
 
     spec = load_spec()
+    version = Version.parse(cast(str, spec.version))
     git = load_git()
     github: Any = load_github()
 
