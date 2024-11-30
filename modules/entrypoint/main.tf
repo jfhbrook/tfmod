@@ -1,21 +1,25 @@
 locals {
   entrypoint = "${path.module}/../../tfmod/entrypoint.sh.tftpl"
-  prelude    = file("${path.module}/../../tfmod/io/prelude.sh")
-  logging    = file("${path.module}/../../tfmod/io/logging.sh")
-  parse_args = file("${path.module}/../../tfmod/command/parse-args.sh")
-  update     = file("${path.module}/../../tfmod/command/update.sh")
-  unwise     = file("${path.module}/../../tfmod/command/unwise.sh")
-  main       = file("${path.module}/../../tfmod/command/main.sh")
+  snippets = {
+    prelude    = "tfmod/prelude.sh"
+    logging    = "tfmod/io/logging.sh"
+    parse_args = "tfmod/command/parse-args.sh"
+    update     = "tfmod/command/update.sh"
+    unwise     = "tfmod/command/unwise.sh"
+    main       = "tfmod/command/main.sh"
+  }
+}
+
+module "snippet" {
+  source   = "../shell-snippet"
+  for_each = local.snippets
+  snippet  = file("${path.module}/../../${each.value}")
+  path     = "tfmod/${split("tfmod/", each.value)[1]}"
 }
 
 resource "local_file" "entrypoint" {
   content = templatefile(local.entrypoint, {
-    PRELUDE    = local.prelude
-    LOGGING    = local.logging
-    PARSE_ARGS = local.parse_args
-    UPDATE     = local.update
-    UNWISE     = local.unwise
-    MAIN       = local.main
+    for name, mod in module.snippet : upper(name) => mod.snippet
   })
   filename = "${path.module}/../../bin/tfmod"
 }

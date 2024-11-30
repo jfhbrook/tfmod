@@ -1,4 +1,10 @@
 locals {
-  raw     = var.snippet
-  snippet = replace(local.raw, "#!${var.interpreter}", "")
+  banner  = <<EOT
+
+#
+# include: ${var.path}
+#
+
+EOT
+  snippet = "${local.banner}${replace(var.snippet, "#!${var.interpreter}", "")}"
 }

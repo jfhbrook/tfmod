@@ -39,7 +39,7 @@ format:
 
 # Lint with flake8
 lint:
-  for module in ./modules/*; do echo "=== linting ${module} ===" && (cd ${module} && tflint); done
+  for module in ./modules/*; do echo "${module}:" && (cd ${module} && tflint); done
   uv run flake8 ./tfmod ./tests
   uv run validate-pyproject ./pyproject.toml
   shellcheck install.sh
@@ -48,7 +48,7 @@ lint:
 # Check type annotations with pyright
 check:
   uv run npx pyright@latest
-  for module in {{ root-modules }}; do echo "=== validating ${module} ===" terraform "-chdir=${module}" validate; done
+  for module in {{ root-modules }}; do echo "${module}:" terraform "-chdir=${module}" validate; done
 
 # Run tests with pytest
 test *argv:
