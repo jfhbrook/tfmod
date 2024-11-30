@@ -75,10 +75,10 @@ console:
 
 # Build the entrypoint
 build:
-  terraform -chdir=./modules/entrypoint apply -auto-approve
+  uv run terraform -chdir=./modules/entrypoint apply -auto-approve
 
 _clean-build:
-  terraform -chdir=./modules/entrypoint destroy -auto-approve
+  uv run terraform -chdir=./modules/entrypoint destroy -auto-approve
 
 # Clean up loose files
 clean: _clean-test _clean-build

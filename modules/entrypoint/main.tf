@@ -1,5 +1,13 @@
 locals {
   entrypoint = "${path.module}/../../tfmod/entrypoint.sh.tftpl"
+  commands = [
+    "",
+    "version",
+    "init",
+    "config",
+    "update",
+    "unwise"
+  ]
   snippets = {
     prelude    = "tfmod/prelude.sh"
     logging    = "tfmod/io/logging.sh"
@@ -15,6 +23,12 @@ module "snippet" {
   for_each = local.snippets
   snippet  = file("${path.module}/../../${each.value}")
   path     = "tfmod/${split("tfmod/", each.value)[1]}"
+}
+
+module "help" {
+  source   = "../command-help"
+  for_each = toset(local.commands)
+  command  = each.key
 }
 
 resource "local_file" "entrypoint" {

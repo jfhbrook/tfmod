@@ -160,9 +160,7 @@ def cli(fn: Main) -> Main:
     def cli() -> None:
         try:
             fn()
-        # TODO: This is not actually catching flag.Error. But flag.Error should
-        # be getting caught and handled in go-flag anyway. That's a bug!
-        except (flag.Error, Help):
+        except Help:
             usage()
             sys.exit(0)
         except Exit as exc:
@@ -175,7 +173,7 @@ def cli(fn: Main) -> Main:
             sys.exit(1)
         except (KeyboardInterrupt, EOFError):
             pass
-        except:
+        except Exception as exc:
             logger.panic(traceback.format_exc())
             sys.exit(1)
 
