@@ -113,5 +113,6 @@ def gh_client(host: str = "github.com", user: Optional[str] = None) -> Github:
 def gh_repo_create(name: str) -> None:
     gh_interactive(["repo", "create", name])
 
+
 def gh_repo_description(description: str) -> None:
     gh_interactive(["repo", "edit", "--description", description])

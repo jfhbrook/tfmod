@@ -112,8 +112,14 @@ class GitRepo:
             argv.append("-f")
         git_interactive(argv)
 
-    def push(self, remote: str, branch: str, tags=False) -> None:
-        argv = ["push", remote, branch]
+    def push(
+        self, remote: str, branch: Optional[str] = None, tags=False, force=False
+    ) -> None:
+        argv = ["push", remote]
+        if branch:
+            argv.append(branch)
         if tags:
             argv.append("--tags")
+        if force:
+            argv.append("--force")
         git_interactive(argv)

@@ -13,7 +13,13 @@ from tfmod.error import (
     GitRepoNotFoundError,
     PublishError,
 )
-from tfmod.gh import get_gh_user, gh_client, gh_repo_create, load_gh_hosts_optional, gh_repo_description
+from tfmod.gh import (
+    get_gh_user,
+    gh_client,
+    gh_repo_create,
+    gh_repo_description,
+    load_gh_hosts_optional,
+)
 from tfmod.git import GitRepo
 from tfmod.io import logger
 from tfmod.spec import Spec
@@ -292,7 +298,8 @@ def tag_and_push_actions(version: Version) -> List[Action]:
     major = str(version.major)
 
     return [
-        Action(type="~", name=f"git tag {patch} -f", run=lambda: git.tag(patch, force=True)),
+        # TODO: -force flag, and/or validate if this tag exists
+        Action(type="+", name=f"git tag {patch} -f", run=lambda: git.tag(patch)),
         Action(
             type="~", name=f"git tag {minor} -f", run=lambda: git.tag(minor, force=True)
         ),
@@ -301,8 +308,13 @@ def tag_and_push_actions(version: Version) -> List[Action]:
         ),
         Action(
             type="~",
-            name=f"git push {remote} {branch} --tags",
-            run=lambda: git.push(remote, branch, tags=True),
+            name=f"git push {remote} {branch}",
+            run=lambda: git.push(remote, branch),
+        ),
+        Action(
+            type="~",
+            name=f"git push {remote} --tags --force",
+            run=lambda: git.push(remote, tags=True, force=True),
         ),
     ]
 
