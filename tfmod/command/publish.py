@@ -3,7 +3,7 @@ from typing import Any, cast
 
 from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
 from tfmod.gh import gh_client
-from tfmod.git import git_add, git_commit, git_init, git_is_dirty, GitRepo
+from tfmod.git import GitRepo
 from tfmod.io import prompt_confirm
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
@@ -29,8 +29,7 @@ def load_git() -> GitRepo:
         repo = GitRepo.load()
     except GitRepoNotFoundError:
         if prompt_confirm("Would you like to initialize a git repo?"):
-            git_init()
-            repo = GitRepo.load()
+            repo = GitRepo.init()
         else:
             raise
 
@@ -42,14 +41,14 @@ def load_git() -> GitRepo:
     #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
 
     # TODO: -allow-dirty flag
-    if git_is_dirty():
+    if repo.dirty():
         if prompt_confirm("Would you like to add and commit changes?"):
-            git_add(".")
-            git_commit()
+            repo.add(".")
+            repo.commit()
         else:
             raise GitDirtyError("All files must be committed to continue.")
 
-    if git_is_dirty():
+    if repo.dirty():
         raise GitDirtyError("All files must be committed to continue.")
 
     return repo

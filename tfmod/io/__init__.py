@@ -112,19 +112,18 @@ class Logger:
 
     def panic(self, text: str) -> None:
         banner = "FLAGRANT SYSTEM ERROR".center(79)
-        message = textwrap.dedent(
-            """TfMod an unexpected, fatal error. This is a bug in TfMod.
+        message = "TfMod experienced an unexpected, fatal error."
+        bug_report = textwrap.dedent(
+            """
             Consider filing an issue at:
 
-            https://github.com/jfhbrook/tfmod/issues
-        """
+                https://github.com/jfhbrook/tfmod/issues
+            """
         )
 
         pprint(f"[white on blue]{banner}[/white on blue]")
         pprint(f"[white on blue]{' ' * 79}[/white on blue]")
-        pprint(
-            "[white on blue]" + textwrap.fill(message, width=79) + "[/white on blue]"
-        )
+        pprint(f"[white on blue]{message.ljust(79)}[/white on blue]")
 
         for line in text.split("\n"):
             formatted = ("    " + line).ljust(79)
@@ -134,6 +133,9 @@ class Logger:
                 f"[white on blue]{inside}[/white on blue]" f"[white]{outside}[/white]"
             )
         pprint(f"[white on blue]{' ' * 79}[/white on blue]")
+
+        for line in bug_report.split("\n"):
+            pprint(f"[white on blue]{line.ljust(79)}[/white on blue]")
 
     def ok(self, message: str) -> None:
         pprint(f"[green]{message}[/green]")

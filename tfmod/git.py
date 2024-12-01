@@ -1,13 +1,39 @@
 from dataclasses import dataclass
 import os
 import re
+import shlex
 import subprocess
-from typing import Dict, Literal, Optional
+from typing import Dict, List, Literal, Optional
 
 from tfmod.constants import GIT_BIN
 from tfmod.error import GitError
 
 Direction = Literal["fetch"] | Literal["push"]
+
+
+def run_git(command: List[str], path: str = os.getcwd()) -> str:
+    argv = [GIT_BIN] + command
+    proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=True)
+    print(proc.stderr.decode("unicode_escape"))
+    try:
+        proc.check_returncode()
+    except subprocess.CalledProcessError as exc:
+        raise GitError(
+            f'"{shlex.join(argv)}" exited unsuccessfully (status: {exc.returncode})'
+        )
+    else:
+        if proc.stderr:
+            print(proc.stderr)
+    # NOTE: This *may* not technically be safe to do, but here's hoping...
+    return proc.stdout.decode("unicode_escape")
+
+
+def run_git_no_capture(command: List[str], path: str = os.getcwd()) -> None:
+    proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=False)
+    try:
+        proc.check_returncode()
+    except subprocess.CalledProcessError as exc:
+        raise GitError(str(exc))
 
 
 @dataclass
@@ -22,20 +48,13 @@ class GitRemote:
         raise NotImplementedError("GitRemote#parse()")
 
 
-def git_remote(path: str = os.getcwd()):
-    proc = subprocess.run([GIT_BIN, "remote", "-v"], cwd=path, capture_output=True)
-    print(proc.stderr)
-    try:
-        proc.check_returncode()
-    except subprocess.CalledProcessError as exc:
-        raise GitError(str(exc))
-    else:
-        if proc.stderr:
-            print(proc.stderr)
-    out = proc.stdout.decode("unicode_escape")
+def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
+    out = run_git(["remote", "-v"], path)
 
     remotes: Dict[str, Dict[str, str]] = dict()
     for line in out.split("\n"):
+        if line == "":
+            continue
         name, url, direction = re.split(r"\s+", line)
         direction = direction[1:-1]
         if name not in remotes:
@@ -45,27 +64,36 @@ def git_remote(path: str = os.getcwd()):
     return {name: GitRemote(**kwargs) for name, kwargs in remotes.items()}
 
 
+def git_current_branch(path: str = os.getcwd()) -> str:
+    return run_git(["rev-parse", "--abbrev-ref", "HEAD"], path)
+
+
 @dataclass
 class GitRepo:
-    remotes: Dict[str, str]
+    remotes: Dict[str, GitRemote]
     current_branch: str
+    path: str
 
     @classmethod
-    def load(cls) -> "GitRepo":
-        raise NotImplementedError("GitRepo.load()")
+    def load(cls, path: str = os.getcwd()) -> "GitRepo":
+        remotes = git_remote(path)
+        current_branch = git_current_branch(path)
 
+        return GitRepo(remotes=remotes, current_branch=current_branch, path=path)
 
-def git_init() -> None:
-    raise NotImplementedError("git_init()")
+    @classmethod
+    def init(cls, path: str = os.getcwd()) -> "GitRepo":
+        run_git_no_capture(["init"], path)
+        return cls.load(path)
 
+    def dirty(self) -> bool:
+        raise NotImplementedError("git_is_dirty()")
 
-def git_is_dirty() -> None:
-    raise NotImplementedError("git_is_dirty()")
+    def add(self, what: str) -> None:
+        run_git_no_capture(["add", what], self.path)
 
-
-def git_add(path: str) -> None:
-    raise NotImplementedError("git_add()")
-
-
-def git_commit(message: Optional[str] = None) -> None:
-    raise NotImplementedError("git_commit()")
+    def commit(self, message: Optional[str] = None) -> None:
+        argv = ["commit"]
+        if message:
+            argv += ["-m", message]
+        run_git_no_capture(argv, self.path)
