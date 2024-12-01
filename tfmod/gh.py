@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import cache
 import os
 from pathlib import Path
 import shlex
@@ -16,7 +17,7 @@ except ImportError:
 from tfmod.constants import GH_BIN, GH_CONFIG_DIR
 from tfmod.error import GhError
 from tfmod.io import logger
-from tfmod.process import run_out
+from tfmod.process import run_interactive, run_out
 
 
 @dataclass
@@ -86,6 +87,14 @@ def gh_out(command: List[str], path: str = os.getcwd()) -> str:
         )
 
 
+def gh_interactive(command: List[str], path: str = os.getcwd()) -> None:
+    argv = [GH_BIN] + command
+    try:
+        run_interactive(argv, cwd=path)
+    except CalledProcessError as exc:
+        raise GhError(str(exc))
+
+
 # TODO: What happens if I log out?
 def gh_auth_token(host: str = "github.com", user: Optional[str] = None) -> Auth.Token:
     argv = ["auth", "token", "-h", host]
@@ -95,6 +104,11 @@ def gh_auth_token(host: str = "github.com", user: Optional[str] = None) -> Auth.
     return Auth.Token(gh_out(argv).strip())
 
 
+@cache
 def gh_client(host: str = "github.com", user: Optional[str] = None) -> Github:
     auth = gh_auth_token(host, user)
     return Github(auth=auth)
+
+
+def gh_repo_create(name: str) -> None:
+    gh_interactive(["repo", "create", name])

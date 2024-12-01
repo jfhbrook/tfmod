@@ -81,9 +81,8 @@ class GitRepo:
         return GitRepo(remotes=remotes, current_branch=current_branch, path=path)
 
     @classmethod
-    def init(cls, path: str = os.getcwd()) -> "GitRepo":
+    def init(cls, path: str = os.getcwd()) -> None:
         git_interactive(["init"], path)
-        return cls.load(path)
 
     def status(self) -> None:
         git_interactive(["status"], self.path)
@@ -104,3 +103,6 @@ class GitRepo:
         if message:
             argv += ["-m", message]
         git_interactive(argv, self.path)
+
+    def add_remote(self, name: str, url: str) -> None:
+        git_interactive(["remote", "add", name, url], self.path)

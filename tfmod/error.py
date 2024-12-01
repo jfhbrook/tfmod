@@ -25,6 +25,10 @@ class CliError(Error):
     pass
 
 
+class ApprovalInterruptError(Error):
+    pass
+
+
 class TerraformError(Error):
     """
     Terraform exited unsuccessfully. Ensure that the configuration is correct.

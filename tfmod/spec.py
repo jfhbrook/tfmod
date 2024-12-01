@@ -48,6 +48,7 @@ class WarnScript:
 @dataclass
 class Spec:
     name: Optional[str]
+    namespace: Optional[str]
     provider: Optional[str]
     version: Optional[str]
     description: Optional[str]
@@ -72,7 +73,12 @@ class Spec:
         if not var:
             warn_type("module", "object")
             return cls(
-                name=None, provider=None, version=None, description=None, scripts=dict()
+                name=None,
+                namespace=None,
+                provider=None,
+                version=None,
+                description=None,
+                scripts=dict(),
             )
 
         scripts: Dict[str, Script] = dict()
@@ -97,6 +103,7 @@ class Spec:
 
         return cls(
             name=var.get("name", None),
+            namespace=var.get("namespace", None),
             provider=var.get("provider", None),
             version=var.get("version", None),
             description=var.get("description", None),
