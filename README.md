@@ -80,6 +80,7 @@ Hoo boy...
     - In particular, a `Dependency` abc with `may`, `must` and `validate`
       methods
     - Possibly a type for `Callable[[], List[Action]]`
+    - There's a PR
   - `shlex` names
   - Detect if tag exists, only `--force` if necessary
   - Validate that provider is official/recognized
