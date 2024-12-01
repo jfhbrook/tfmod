@@ -95,3 +95,13 @@ class PublishError(Error):
     """
     TfMod encountered an error when trying to publish your module.
     """
+
+class WorkflowError(Exception):
+    """
+    An exception occurred while executing the workflow.
+    """
+
+class DependencyError(WorkflowError):
+    """
+    An exception occurred while resolving a dependency.
+    """

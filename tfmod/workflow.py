@@ -1,9 +1,10 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Callable, List, Literal, Tuple
+from typing import Any, Callable, List, Literal, Optional, Self, Tuple
 
 from rich import print as pprint
 
-from tfmod.error import ApprovalInterruptError
+from tfmod.error import DependencyError, ApprovalInterruptError
 from tfmod.io import prompt_confirm
 
 ActionType = Literal["+"] | Literal["~"] | Literal["-"]
@@ -35,6 +36,37 @@ ACTION_MARKER = {
     "~": "[yellow]~[/yellow]",
     "-": "[red]-[/red]",
 }
+
+
+class Dependency[T](ABC):
+    """
+    A dependency.
+    """
+
+    def __init__(self: Self) -> None:
+        self._cached: Optional[T] = None
+
+    def may(self: Self) -> Optional[T]:
+        if self._cached is not None:
+            return self._cached
+        maybe = self._get()
+        if maybe is not None:
+            self._cached = maybe
+        return maybe
+
+    def must(self: Self) -> T:
+        maybe = self.may()
+        if not maybe:
+            raise DependencyError("Dependency can not be resolved")
+        return maybe
+
+    @abstractmethod
+    def _get(self: Self) -> Optional[T]:
+        raise NotImplementedError("_get")
+
+    @abstractmethod
+    def _validate(self: Self, obj: T) -> None:
+        raise NotImplementedError("_validate")
 
 
 def no_changes(actions: List[Action]) -> bool:

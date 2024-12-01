@@ -5,7 +5,6 @@ from typing import cast, Dict, List, Optional, Tuple
 from github.Repository import Repository
 from giturlparse import GitUrlParsed
 
-from tfmod.action import Action, run_actions
 from tfmod.error import (
     Error,
     GhRemoteNotFoundError,
@@ -25,6 +24,7 @@ from tfmod.io import logger
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
 from tfmod.version import Version
+from tfmod.workflow import Action, Dependency, run_actions
 
 #
 # Hoo boy...
