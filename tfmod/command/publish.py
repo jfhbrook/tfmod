@@ -337,7 +337,9 @@ def is_package_available() -> bool:
 
 
 def open_package_url() -> None:
-    raise NotImplementedError("open_package_url")
+    print("""To publish your package, go to:
+
+    https://registry.terraform.io/github/create""")
 
 
 def publish() -> None:
