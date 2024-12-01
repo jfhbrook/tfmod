@@ -7,11 +7,12 @@ from typing import Dict, List, Literal, Optional
 
 from tfmod.constants import GIT_BIN
 from tfmod.error import GitError
+from tfmod.io import logger
 
 Direction = Literal["fetch"] | Literal["push"]
 
 
-def run_git(command: List[str], path: str = os.getcwd()) -> str:
+def git_out(command: List[str], path: str = os.getcwd()) -> str:
     argv = [GIT_BIN] + command
     proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=True)
     print(proc.stderr.decode("unicode_escape"))
@@ -28,7 +29,16 @@ def run_git(command: List[str], path: str = os.getcwd()) -> str:
     return proc.stdout.decode("unicode_escape")
 
 
-def run_git_no_capture(command: List[str], path: str = os.getcwd()) -> None:
+def git_test(command: List[str], path: str = os.getcwd()) -> bool:
+    argv = [GIT_BIN] + command
+    proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=True)
+    logger.trace(f"Running: {shlex.join(argv)}")
+    logger.trace(proc.stderr.decode("unicode_escape"))
+
+    return proc.returncode == 0
+
+
+def git_interactive(command: List[str], path: str = os.getcwd()) -> None:
     proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=False)
     try:
         proc.check_returncode()
@@ -49,7 +59,7 @@ class GitRemote:
 
 
 def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
-    out = run_git(["remote", "-v"], path).strip()
+    out = git_out(["remote", "-v"], path).strip()
 
     remotes: Dict[str, Dict[str, str]] = dict()
     for line in out.split("\n"):
@@ -63,7 +73,7 @@ def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
 
 
 def git_current_branch(path: str = os.getcwd()) -> str:
-    return run_git(["rev-parse", "--abbrev-ref", "HEAD"], path).strip()
+    return git_out(["rev-parse", "--abbrev-ref", "HEAD"], path).strip()
 
 
 @dataclass
@@ -81,17 +91,22 @@ class GitRepo:
 
     @classmethod
     def init(cls, path: str = os.getcwd()) -> "GitRepo":
-        run_git_no_capture(["init"], path)
+        git_interactive(["init"], path)
         return cls.load(path)
 
+    # This dirty check is courtesy an answer on this StackOverflow post:
+    #
+    #    https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
+
     def dirty(self) -> bool:
-        raise NotImplementedError("git_is_dirty()")
+        lines = git_out(["status", "--porcelain"], self.path).strip()
+        return len(lines) > 0
 
     def add(self, what: str) -> None:
-        run_git_no_capture(["add", what], self.path)
+        git_interactive(["add", what], self.path)
 
     def commit(self, message: Optional[str] = None) -> None:
         argv = ["commit"]
         if message:
             argv += ["-m", message]
-        run_git_no_capture(argv, self.path)
+        git_interactive(argv, self.path)
