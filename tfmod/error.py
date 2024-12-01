@@ -87,3 +87,11 @@ class GhRemoteNotFoundError(GhError):
     TfMod was unable to find a GitHub remote for this repository. Make sure
     that a git remote is defined that is hosted by GitHub.
     """
+
+
+# A generic error for the publish task.
+# TODO: This error message could be improved.
+class PublishError(Error):
+    """
+    TfMod encountered an error when trying to publish your module.
+    """

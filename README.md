@@ -3,7 +3,6 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] fix dumb errors
   - [ ] validate directory
     - get name and namespace from directory name
   - [ ] validate module

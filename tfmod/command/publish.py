@@ -7,11 +7,11 @@ from giturlparse import GitUrlParsed
 
 from tfmod.action import Action, run_actions
 from tfmod.error import (
-    ApprovalInterruptError,
     Error,
     GhRemoteNotFoundError,
     GitDirtyError,
     GitRepoNotFoundError,
+    PublishError,
 )
 from tfmod.gh import get_gh_user, gh_client, gh_repo_create, load_gh_hosts_optional
 from tfmod.git import GitRepo
@@ -78,6 +78,14 @@ def try_user() -> Optional[str]:
     return get_gh_user(hosts)
 
 
+@cache
+def must_user() -> str:
+    user = try_user()
+    if not user:
+        raise PublishError('GitHub user not found in "gh" CLI\'s configuration')
+    return user
+
+
 def try_repository() -> Optional[Repository]:
     try:
         return _must_repository()
@@ -109,11 +117,7 @@ def must_remote() -> GitUrlParsed:
     Find which git remote points to GitHub. If none seem to, raise an exception.
     """
     spec = must_spec()
-    git = try_git()
-
-    if not git:
-        # TODO
-        raise Error("lol")
+    git = must_git()
 
     remotes: Dict[str, GitUrlParsed] = {
         name: remote.parse() for name, remote in git.remotes.items()
@@ -216,11 +220,7 @@ def _remote_actions() -> List[Action]:
 
     # TODO: Pull this from... git config?
     git_protocol = "ssh"
-    user = try_user()
-    if not user:
-        # TODO: Better error
-        raise Error("Need user to continue")
-
+    user = must_user()
     git_url = f"git@github.com:{user}/{repo_name}"
 
     actions: List[Action] = list()
