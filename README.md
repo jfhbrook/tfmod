@@ -3,40 +3,29 @@
 ## TODOs
 
 - [ ] publish
-  - module.tfvars
-    - if no exist, exit and insist on a `tfmod init`
-    - validate defined properties
-    - validate/parse version
-  - git repository
-    - if not a repo, git init
+  - [ ] get name and namespace from git remote
+  - [ ] get name and namespace from directory name
+  - [ ] push actions to single layer
+  - [ ] validate name/namespace between module.tfvars and following match:
+    - directory name
+    - git remote
+  - [ ] find repo with github client and module.tfvars name/namespace
+  - [ ] when no remote and no repo, create repo w/ `gh`
+  - [ ] when no remote and repo, add as remote
+  - [ ] check/update description for git repo
+  - [ ] validate on main branch
     - validate that branch is main branch
-      - warn/confirm before continuing
-    - if dirty, prompt for add and commit
-    - git repo should be clean
-  - github repository
-    - construct repo name from module.tfvars
-      - warn if directory name does not match what's in module.tfvars
-    - if a git remote for github
-      - parse/save remote name
-      - parse repo
-    - if github repo does not exist
-      - shell into `gh` to create it
-      - add as remote
-    - check/update description based on module.tfvars
-  - validate git/github related things
-    - module.tfvars vs directory name
-    - module.tfvars vs github repo name
-    - module.tfvars vs git remote url
-  - validate module structure
+  - [ ] validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
-  - tagenpush
+  - [ ] tagenpush
     - create x.y.z tag
     - create/force x.y tag
     - create/force x tag
     - TODO: dist tag? how does npm do this?
     - git push origin main --tags
-  - if package not on registry api (and not private)
-    - open page for publishing
+  - [ ] open publish page (if module not available)
+  - [ ] check if module is available through API
+  - [ ] `-force` flag
 - [ ] unwise/update bug involving malformed directory
   - I somehow to got things in a state where tfmod was empty except for
     state files
