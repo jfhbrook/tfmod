@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, NoReturn, Optional
 
 import flag
 
-from tfmod.error import CliError, Error, Exit, Help
+from tfmod.error import CliError, Error, Exit, Help, TerraformError
 from tfmod.io import logger
 
 CommandRunner = Callable[[], None]
@@ -170,6 +170,10 @@ def cli(fn: Main) -> Main:
         except CliError as exc:
             print(str(exc))
             sys.exit(2)
+        except TerraformError as exc:
+            # In theory, Terraform should report its own errors
+            logger.debug(traceback.format_exc())
+            sys.exit(1)
         except Error as exc:
             logger.exception(exc)
             sys.exit(1)
@@ -178,8 +182,6 @@ def cli(fn: Main) -> Main:
         except Exception:
             logger.panic(traceback.format_exc())
             sys.exit(1)
-
-        # TODO: Nice formatting for plain Exceptions
 
     return cli
 

@@ -124,15 +124,15 @@ class Logger:
         pprint(f"[white on blue]{banner}[/white on blue]")
         pprint(f"[white on blue]{' ' * 79}[/white on blue]")
         pprint(f"[white on blue]{message.ljust(79)}[/white on blue]")
+        pprint(f"[white on blue]{' ' * 79}[/white on blue]")
 
-        for line in text.split("\n"):
+        for line in text.split("\n")[1:-1]:
             formatted = ("    " + line).ljust(79)
             inside = formatted[:79]
             outside = formatted[79:]
             pprint(
                 f"[white on blue]{inside}[/white on blue]" f"[white]{outside}[/white]"
             )
-        pprint(f"[white on blue]{' ' * 79}[/white on blue]")
 
         for line in bug_report.split("\n"):
             pprint(f"[white on blue]{line.ljust(79)}[/white on blue]")

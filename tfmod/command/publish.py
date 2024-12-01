@@ -40,7 +40,7 @@ def load_git() -> GitRepo:
     #
     #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
 
-    # TODO: -allow-dirty flag
+    # TODO: -force flag
     if repo.dirty():
         if prompt_confirm("Would you like to add and commit changes?"):
             repo.add(".")
