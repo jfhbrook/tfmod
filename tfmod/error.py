@@ -59,7 +59,7 @@ class GitError(Error):
 
 class GitRepoNotFoundError(GitError):
     """
-    TfMod count not find a git repository at this location. To initialize a git
+    TfMod could not find a git repository at this location. To initialize a git
     repository, run "git init".
     """
 
@@ -75,4 +75,11 @@ class GhError(Error):
     """
     TfMod encountered an error when trying to use the gh CLI. Check your configuration
     and try again.
+    """
+
+
+class GhRemoteNotFoundError(GhError):
+    """
+    TfMod was unable to find a GitHub remote for this repository. Make sure
+    that a git remote is defined that is hosted by GitHub.
     """

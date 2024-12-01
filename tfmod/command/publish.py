@@ -1,7 +1,14 @@
 import os
-from typing import Any, cast
+from typing import Any, cast, Dict, Optional
 
-from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
+from giturlparse import GitUrlParsed
+
+from tfmod.error import (
+    GhRemoteNotFoundError,
+    GitDirtyError,
+    GitRepoNotFoundError,
+    SpecNotFoundError,
+)
 from tfmod.gh import gh_client
 from tfmod.git import GitRepo
 from tfmod.io import prompt_actions
@@ -40,6 +47,7 @@ def load_git() -> GitRepo:
     #
     #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
 
+    # TODO: Move to a separate stage
     # TODO: -force flag
     if repo.dirty():
         print("Repository contains uncommitted changes:")
@@ -57,16 +65,39 @@ def load_git() -> GitRepo:
     return repo
 
 
+def find_github_remote(git: GitRepo) -> GitUrlParsed:
+    remotes: Dict[str, GitUrlParsed] = {
+        name: remote.parse() for name, remote in git.remotes.items()
+    }
+
+    remote: Optional[GitUrlParsed] = None
+
+    if "origin" in remotes and remotes["origin"].platform == "github":
+        remote = remotes["origin"]
+    else:
+        for name, rem in remotes.items():
+            if name == "origin":
+                continue
+            if rem.platform == "github":
+                remote = rem
+    if not remote:
+        raise GhRemoteNotFoundError("GitHub remote not found")
+
+
 def load_github(spec: Spec, git: GitRepo) -> None:
     name = spec.repo_name()
+
+    try:
+        remote = find_github_remote(git)
+    except GhRemoteNotFoundError as exc:
+        # - shell into `gh` to create it
+        # - add as remote
+        raise NotImplementedError("load_github") from exc
+
+    # pull out repo namespace
+    # pull out repo name
+
     client = gh_client()
-    # TODO: Pull/parse git remotes from GitRepo
-    # TODO if a git remote for github
-    # - parse/save remote name
-    # - parse repo
-    # TODO if github repo does not exist
-    # - shell into `gh` to create it
-    # - add as remote
     # TODO: check/update description based on module.tfvars
 
     # required return values:

@@ -5,6 +5,8 @@ import shlex
 from subprocess import CalledProcessError
 from typing import Dict, List, Literal, Optional
 
+import giturlparse
+
 from tfmod.constants import GIT_BIN
 from tfmod.error import GitError
 from tfmod.io import logger
@@ -41,9 +43,10 @@ class GitRemote:
     fetch_url: str
     push_url: str
 
-    def parse(self, direction: Direction = "push"):
+    def parse(self, direction: Direction = "push") -> giturlparse.GitUrlParsed:
         url = self.push_url if direction == "push" else self.fetch_url
-        raise NotImplementedError("GitRemote#parse()")
+        # TODO: Error handling
+        return giturlparse.parse(url)
 
 
 def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
