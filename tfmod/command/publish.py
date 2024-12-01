@@ -4,7 +4,7 @@ from typing import Any, cast
 from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
 from tfmod.gh import gh_client
 from tfmod.git import GitRepo
-from tfmod.io import prompt_confirm
+from tfmod.io import prompt_actions
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
 from tfmod.version import Version
@@ -28,7 +28,7 @@ def load_git() -> GitRepo:
     try:
         repo = GitRepo.load()
     except GitRepoNotFoundError:
-        if prompt_confirm("Would you like to initialize a git repo?"):
+        if prompt_actions([("+", "git init")]):
             repo = GitRepo.init()
         else:
             raise
@@ -42,7 +42,7 @@ def load_git() -> GitRepo:
 
     # TODO: -force flag
     if repo.dirty():
-        if prompt_confirm("Would you like to add and commit changes?"):
+        if prompt_actions([("~", "git add ."), ("~", "git commit")]):
             repo.add(".")
             repo.commit()
         else:

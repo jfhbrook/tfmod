@@ -3,7 +3,7 @@ from enum import IntEnum
 import json
 import os
 import textwrap
-from typing import Literal, Mapping, Optional, Self
+from typing import List, Literal, Mapping, Optional, Self, Tuple
 
 from rich import print as pprint
 
@@ -184,9 +184,9 @@ def prompt(
     A general prompt
     """
 
-    pprint(f"[bold]{name}[/bold]")
+    pprint(f"[bold white]{name}[/bold white]")
     if description:
-        pprint(f"[bold]{textwrap.indent(description, " ")}[/bold]")
+        pprint(f"[bold white]{textwrap.indent(description, " ")}[/bold white]")
     print("")
 
     # rich.Prompt doesn't have the right behavior.
@@ -204,14 +204,7 @@ def prompt(
     return result
 
 
-DEFAULT_CONFIRM_QUESTION = "Do you want to perform these actions?"
-DEFAULT_CONFIRM_DESCRIPTION = """TfMod will perform the actions described above.
-Only 'yes' will be accepted to approve."""
-
-
-def prompt_confirm(
-    question: str = DEFAULT_CONFIRM_QUESTION, description=DEFAULT_CONFIRM_DESCRIPTION
-) -> bool:
+def prompt_confirm(question: str, description: str) -> bool:
     """
     Prompt to confirm y/N
     """
@@ -221,3 +214,69 @@ def prompt_confirm(
     if result in ["y", "Y", "yes", "YES"]:
         return True
     return False
+
+
+ActionType = Literal["+"] | Literal["~"] | Literal["-"]
+Action = Tuple[ActionType, str]
+
+
+def _action_types(actions: List[Action]) -> Tuple[int, int, int]:
+    create: int = 0
+    update: int = 0
+    destroy: int = 0
+    for action_type, _ in actions:
+        if action_type == "+":
+            create += 1
+        elif action_type == "~":
+            update += 1
+        elif action_type == "-":
+            destroy += 1
+    return create, update, destroy
+
+
+ACTION_MARKER = {
+    "+": "[green]+[/green]",
+    "~": "[yellow]~[/yellow]",
+    "-": "[red]-[/red]",
+}
+
+
+def no_changes(actions: List[Action]) -> bool:
+    if not actions:
+        pprint("[green]No changes.[/green] Your module matches the configuration.")
+        return True
+    return False
+
+
+def prompt_actions(actions: List[Action]) -> bool:
+    assert not no_changes(actions)
+
+    create, update, destroy = _action_types(actions)
+    print(
+        "TfMod generated the following execution plan. "
+        "Actions are indicated with the following symbols:"
+    )
+
+    if create:
+        pprint("  [green]+[/green] create")
+    if update:
+        pprint("  [yellow]~[/yellow] update in-place")
+    if destroy:
+        pprint("  [red]-[/red] destroy")
+
+    print("")
+    print("TfMod will perform the following actions:")
+    print("")
+
+    for action_type, action in actions:
+        pprint(f"  {ACTION_MARKER[action_type]} {action}")
+
+    print("")
+
+    print(f"Plan: {create} to add, {update} to change, {destroy} to destroy.")
+    print("")
+    return prompt_confirm(
+        "Do you want to perform these actions?",
+        """TfMod will perform the actions described above.
+Only 'yes' will be accepted to approve.""",
+    )
