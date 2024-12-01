@@ -3,13 +3,7 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] validate directory
-    - get name and namespace from directory name
-  - [ ] validate module
-  - [ ] validate on main branch
-  - [ ] validate github remote
   - [ ] check/update description for git repo
-  - [ ] tag and push
   - [ ] tagenpush
     - create x.y.z tag
     - create/force x.y tag
@@ -24,9 +18,13 @@
   - do after publish is working, since that's the main functionality and the
     APIs should have solidified by then
   - do them for bash too
-- [ ] Publish part 2
+- [ ] Publish part 2 (pushing back because part 1 is way too big and I need
+      a sensible milestone)
+  - [ ] validate directory name
   - [ ] validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
+  - [ ] validate on main branch
+  - [ ] validate github remote
   - [ ] open publish page (if module not available)
   - [ ] check if module is available through API
   - [ ] `-force` flag
