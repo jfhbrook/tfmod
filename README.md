@@ -75,8 +75,6 @@ Hoo boy...
   - snapshots for io
   - `bats` for bash, maybe a custom pytest runner
 - [ ] publishing improvements
-  - Validate that provider is official/recognized
-    - This seems to be a requirement to publish to Hashicorp
   - Validate directory name
   - Validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>

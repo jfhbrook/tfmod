@@ -52,6 +52,7 @@ class Spec:
     provider: Optional[str]
     version: Optional[str]
     description: Optional[str]
+    private: bool
 
     scripts: Dict[str, Script]
 
@@ -78,6 +79,7 @@ class Spec:
                 provider=None,
                 version=None,
                 description=None,
+                private=False,
                 scripts=dict(),
             )
 
@@ -107,6 +109,7 @@ class Spec:
             provider=var.get("provider", None),
             version=var.get("version", None),
             description=var.get("description", None),
+            private=var.get("private", False),
             scripts=scripts,
         )
 
