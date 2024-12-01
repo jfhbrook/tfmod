@@ -212,10 +212,7 @@ class RemoteResource(Resource[Remote]):
 
 
 #
-# Actions. These functions return lists of Actions depending on whether
-# their dependencies exist or not. These call "try" functions for tests, and
-# call "must" functions when prior actions are expected to have resolved those
-# entities.
+# Actions.
 #
 
 
