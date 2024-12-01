@@ -27,8 +27,7 @@ class CliError(Error):
 
 class TerraformError(Error):
     """
-    Terraform exited with an unsuccessful status. Ensure that the configuration
-    is correct.
+    Terraform exited unsuccessfully. Ensure that the configuration is correct.
     """
 
     def __init__(self, exit_code: int) -> None:
@@ -50,15 +49,23 @@ class SpecNotFoundError(Error):
     """
 
 
-class GitRepoNotFoundError(Error):
+class GitError(Error):
+    """
+    TfMod encountered an error when trying to use git. Consider filing an issue at:
+
+        https://github.com/jfhbrook/tfmod/issues
+    """
+
+
+class GitRepoNotFoundError(GitError):
     """
     TfMod count not find a git repository at this location. To initialize a git
     repository, run "git init".
     """
 
 
-class GitDirtyError(Error):
+class GitDirtyError(GitError):
     """
     TfMod detected uncommitted changes in the current project and will not
-    continue. To override this behavior, set the -allow-dirty flag.
+    continue. To override this behavior, set the -force flag.
     """
