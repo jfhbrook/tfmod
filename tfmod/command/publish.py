@@ -110,7 +110,7 @@ class PathResource(Resource[str]):
 
     def validate(self: Self, resource: str) -> None:
         spec = must(SpecResource)
-        expected = f"terraform-{spec.provider}-{spec.name}"
+        expected = spec.repo_name()
         actual = Path(resource).name
 
         if expected != actual:
@@ -189,16 +189,26 @@ class RemoteResource(Resource[Remote]):
         return remote_name, remote
 
     def validate(self: Self, resource: Remote) -> None:
-        # _, remote = resource
-        # spec = must(SpecResource)
+        _, remote = resource
+        spec = must(SpecResource)
 
-        # namespace = (cast(str, spec.namespace),)
-        # name = (spec.repo_name(),)
-        # remote_namespace = (remote.user,)
-        # remote_name = (remote.name,)
+        expected_namespace = cast(str, spec.namespace)
+        actual_namespace = remote.user
+        expected_name = spec.repo_name()
+        actual_name = remote.name
 
-        # TODO
-        pass
+        if expected_namespace != actual_namespace:
+            logger.warn(
+                title=f'GitHub namespace "{actual_namespace}" does not match '
+                "module.tfvars",
+                message=f'The expected namespace is "{expected_namespace}".',
+            )
+        if expected_name != actual_name:
+            logger.warn(
+                title=f'Repository name "{actual_name}" does not match module.tfvars',
+                message=f""""The project should to be named \"{expected_name}\", in
+                order to match the conventions of the Terraform registry.""",
+            )
 
 
 #
