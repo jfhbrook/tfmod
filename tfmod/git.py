@@ -49,12 +49,10 @@ class GitRemote:
 
 
 def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
-    out = run_git(["remote", "-v"], path)
+    out = run_git(["remote", "-v"], path).strip()
 
     remotes: Dict[str, Dict[str, str]] = dict()
     for line in out.split("\n"):
-        if line == "":
-            continue
         name, url, direction = re.split(r"\s+", line)
         direction = direction[1:-1]
         if name not in remotes:
@@ -65,7 +63,7 @@ def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
 
 
 def git_current_branch(path: str = os.getcwd()) -> str:
-    return run_git(["rev-parse", "--abbrev-ref", "HEAD"], path)
+    return run_git(["rev-parse", "--abbrev-ref", "HEAD"], path).strip()
 
 
 @dataclass
