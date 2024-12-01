@@ -58,18 +58,6 @@ ARGV="$*"
 COMMAND=''
 SHOW_HELP=''
 
-HELP_MAIN='Usage: tfmod [OPTIONS] [COMMAND]
-
-Commands:
-  version          Show the current TfMod version
-  init          Initialize a new project
-  publish          Publish the current
-  config          Configure TfMod
-  update          Install or update TfMod and its dependencies
-  unwise          Remove TfMod and its files.
-
-Global options (use these before the subcommand, if any):
-  -versionAn alias for the "version" subcommand.'
 HELP_UPDATE='Usage: tfmod [OPTIONS] update
 
 Install or update TfMod and its dependencies'
@@ -143,7 +131,7 @@ fi
 
 # rather than using uv, just use the virtualenv directly...
 
-# shellcheck disable=SC1091
+# shellcheck disable=SC1090
 source ~/.local/state/tfmod/.venv/bin/activate
 exec python3 -m tfmod "${ARGV[@]}"
 
