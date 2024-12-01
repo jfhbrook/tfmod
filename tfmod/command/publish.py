@@ -1,6 +1,6 @@
 from functools import cache
 import os
-from typing import cast, Dict, List, Optional
+from typing import cast, Dict, List, Optional, Tuple
 
 from github.Repository import Repository
 from giturlparse import GitUrlParsed
@@ -104,7 +104,7 @@ def _must_repository() -> Repository:
     return client.get_user(cast(str, spec.namespace)).get_repo(spec.repo_name())
 
 
-def try_remote() -> Optional[GitUrlParsed]:
+def try_remote() -> Optional[Tuple[str, GitUrlParsed]]:
     try:
         return _must_remote()
     except Error as exc:
@@ -113,11 +113,11 @@ def try_remote() -> Optional[GitUrlParsed]:
 
 
 @cache
-def must_remote() -> GitUrlParsed:
+def must_remote() -> Tuple[str, GitUrlParsed]:
     return _must_remote()
 
 
-def _must_remote() -> GitUrlParsed:
+def _must_remote() -> Tuple[str, GitUrlParsed]:
     """
     Find which git remote points to GitHub. If none seem to, raise an exception.
     """
@@ -129,15 +129,16 @@ def _must_remote() -> GitUrlParsed:
     }
 
     remote: Optional[GitUrlParsed] = None
+    remote_name: str = ""
 
     if "origin" in remotes and remotes["origin"].platform == "github":
         remote = remotes["origin"]
+        remote_name = "origin"
     else:
         for name, rem in remotes.items():
-            if name == "origin":
-                break
             if rem.platform == "github":
                 remote = rem
+                remote_name = name
                 break
     if not remote:
         raise GhRemoteNotFoundError("GitHub remote not found")
@@ -149,7 +150,7 @@ def _must_remote() -> GitUrlParsed:
         remote_name=remote.name,
     )
 
-    return remote
+    return remote_name, remote
 
 
 #
@@ -284,14 +285,14 @@ def tag_and_push_actions(version: Version) -> List[Action]:
     Return actions that would tag and push to git.
     """
     git = must_git()
-    remote = must_remote().name
+    remote, _ = must_remote()
     branch = git.current_branch
     patch = f"{version.major}.{version.minor}.{version.patch}"
     minor = f"{version.major}.{version.minor}"
     major = str(version.major)
 
     return [
-        Action(type="+", name=f"git tag {patch}", run=lambda: git.tag(patch)),
+        Action(type="~", name=f"git tag {patch} -f", run=lambda: git.tag(patch, force=True)),
         Action(
             type="~", name=f"git tag {minor} -f", run=lambda: git.tag(minor, force=True)
         ),

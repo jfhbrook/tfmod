@@ -3,9 +3,6 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] get happy path working
-    - Suspect a LOT of issues with the github client. It's a disaster, I may
-      need to use requests directly because jesus fucking christ
   - [ ] identify less happy paths, stub tests
     - A lot of them are uncommon, oops
 - [ ] tests
