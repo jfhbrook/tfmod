@@ -94,6 +94,9 @@ class GitRepo:
         git_interactive(["init"], path)
         return cls.load(path)
 
+    def status(self) -> None:
+        git_interactive(["status"], self.path)
+
     # This dirty check is courtesy an answer on this StackOverflow post:
     #
     #    https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git

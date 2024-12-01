@@ -42,6 +42,9 @@ def load_git() -> GitRepo:
 
     # TODO: -force flag
     if repo.dirty():
+        print("Repository contains uncommitted changes:")
+        repo.status()
+
         if prompt_actions([("~", "git add ."), ("~", "git commit")]):
             repo.add(".")
             repo.commit()
