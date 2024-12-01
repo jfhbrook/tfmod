@@ -3,27 +3,31 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] refactor for cached gets
+  - [ ] fix dumb errors
   - [ ] validate directory
+    - get name and namespace from directory name
   - [ ] validate module
   - [ ] validate on main branch
   - [ ] validate github remote
   - [ ] check/update description for git repo
   - [ ] tag and push
-  - [ ] get name and namespace from directory name
-  - [ ] validate module structure
-    - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
   - [ ] tagenpush
     - create x.y.z tag
     - create/force x.y tag
     - create/force x tag
-    - TODO: dist tag? how does npm do this?
     - git push origin main --tags
-  - [ ] identify happy path, get happy path working
+  - [ ] get happy path working
     - Suspect a LOT of issues with the github client. It's a disaster, I may
       need to use requests directly because jesus fucking christ
-  - [ ] identify less happy paths, get them specced out
+  - [ ] identify less happy paths, stub tests
     - A lot of them are uncommon, oops
+- [ ] tests
+  - do after publish is working, since that's the main functionality and the
+    APIs should have solidified by then
+  - do them for bash too
+- [ ] Publish part 2
+  - [ ] validate module structure
+    - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
   - [ ] open publish page (if module not available)
   - [ ] check if module is available through API
   - [ ] `-force` flag
@@ -31,17 +35,12 @@
   - I somehow to got things in a state where tfmod was empty except for
     state files
   - that predictably broke a ton of stuff
-- [ ] tests
-  - do after publish is working, since that's the main functionality and the
-    APIs should have solidified by then
-  - do them for bash too
 - [ ] config
   - needs so far kinda sorted by `gh` config and/or `git` config
     - git prefer https or ssh
     - git prefer main branch
   - but can at least show the `gh` config, yeah?
-- [ ] command quoting
-  - clean up bash impl
+- [ ] fix command output quoting (both python and bash)
 - [ ] login
   - log github cli login status
   - open <https://registry.terraform.io/sign-in>
