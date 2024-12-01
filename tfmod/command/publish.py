@@ -13,7 +13,7 @@ from tfmod.error import (
     GitRepoNotFoundError,
     PublishError,
 )
-from tfmod.gh import get_gh_user, gh_client, gh_repo_create, load_gh_hosts_optional
+from tfmod.gh import get_gh_user, gh_client, gh_repo_create, load_gh_hosts_optional, gh_repo_description
 from tfmod.git import GitRepo
 from tfmod.io import logger
 from tfmod.spec import Spec
@@ -268,13 +268,13 @@ def description_actions() -> List[Action]:
 
 def _description_actions() -> List[Action]:
     spec = must_spec()
-    repo = must_repository()
+    description = cast(str, spec.description)
 
     return [
         Action(
             type="~",
-            name="(edit GitHub repository description)",
-            run=lambda: repo.edit(description=cast(str, spec.description)),
+            name=f"gh repo edit --description {description}",
+            run=lambda: gh_repo_description(description),
         )
     ]
 
