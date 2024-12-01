@@ -106,13 +106,18 @@ def _must_repository() -> Repository:
 
 def try_remote() -> Optional[GitUrlParsed]:
     try:
-        return must_remote()
+        return _must_remote()
     except Error as exc:
         logger.debug(str(exc))
         return None
 
 
+@cache
 def must_remote() -> GitUrlParsed:
+    return _must_remote()
+
+
+def _must_remote() -> GitUrlParsed:
     """
     Find which git remote points to GitHub. If none seem to, raise an exception.
     """
@@ -130,9 +135,10 @@ def must_remote() -> GitUrlParsed:
     else:
         for name, rem in remotes.items():
             if name == "origin":
-                continue
+                break
             if rem.platform == "github":
                 remote = rem
+                break
     if not remote:
         raise GhRemoteNotFoundError("GitHub remote not found")
 
@@ -279,11 +285,27 @@ def tag_and_push_actions(version: Version) -> List[Action]:
     """
     Return actions that would tag and push to git.
     """
-    # silent action:
-    # validate_mopped()
-    # lazy_repo = load_git
-    # lazy_remote = lambda: github_remote(spec, load_git())
-    raise NotImplementedError("tag_and_push")
+    git = must_git()
+    remote = must_remote().name
+    branch = git.current_branch
+    patch = f"{version.major}.{version.minor}.{version.patch}"
+    minor = f"{version.major}.{version.minor}"
+    major = str(version.major)
+
+    return [
+        Action(type="+", name=f"git tag {patch}", run=lambda: git.tag(patch)),
+        Action(
+            type="~", name=f"git tag {minor} -f", run=lambda: git.tag(minor, force=True)
+        ),
+        Action(
+            type="~", name=f"git tag {major} -f", run=lambda: git.tag(major, force=True)
+        ),
+        Action(
+            type="~",
+            name=f"git push {remote} {branch} --tags",
+            run=lambda: git.push(remote, branch, tags=True),
+        ),
+    ]
 
 
 #

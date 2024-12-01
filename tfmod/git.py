@@ -106,3 +106,15 @@ class GitRepo:
 
     def add_remote(self, name: str, url: str) -> None:
         git_interactive(["remote", "add", name, url], self.path)
+
+    def tag(self, name: str, force=False) -> None:
+        argv = ["tag", name]
+        if force:
+            argv.append("-f")
+        git_interactive(argv)
+
+    def push(self, remote: str, branch: str, tags=False) -> None:
+        argv = ["push", remote, branch]
+        if tags:
+            argv.append("--tags")
+        git_interactive(argv)
