@@ -4,7 +4,7 @@ from typing import Any, Callable, List, Literal, Optional, Self, Tuple
 
 from rich import print as pprint
 
-from tfmod.error import DependencyError, ApprovalInterruptError
+from tfmod.error import ApplyInterruptError, ResourceError
 from tfmod.io import prompt_confirm
 
 ActionType = Literal["+"] | Literal["~"] | Literal["-"]
@@ -15,6 +15,9 @@ class Action:
     type: ActionType
     name: str
     run: Callable[[], Any]
+
+
+Plan = List[Action]
 
 
 def _action_types(actions: List[Action]) -> Tuple[int, int, int]:
@@ -38,9 +41,9 @@ ACTION_MARKER = {
 }
 
 
-class Dependency[T](ABC):
+class Resource[T](ABC):
     """
-    A dependency.
+    A resource.
     """
 
     def __init__(self: Self) -> None:
@@ -57,7 +60,7 @@ class Dependency[T](ABC):
     def must(self: Self) -> T:
         maybe = self.may()
         if not maybe:
-            raise DependencyError("Dependency can not be resolved")
+            raise ResourceError("Resource can not be resolved")
         return maybe
 
     @abstractmethod
@@ -69,14 +72,14 @@ class Dependency[T](ABC):
         raise NotImplementedError("_validate")
 
 
-def no_changes(actions: List[Action]) -> bool:
-    if not actions:
+def no_changes(plan: Plan) -> bool:
+    if not plan:
         pprint("[green]No changes.[/green] Your module matches the configuration.")
         return True
     return False
 
 
-def prompt_actions(actions: List[Action]) -> bool:
+def prompt_apply(actions: List[Action]) -> bool:
     assert not no_changes(actions)
 
     create, update, destroy = _action_types(actions)
@@ -110,12 +113,12 @@ Only 'yes' will be accepted to approve.""",
     )
 
 
-def run_actions(actions: List[Action]) -> None:
-    if no_changes(actions):
+def apply(plan: Plan) -> None:
+    if no_changes(plan):
         return
 
-    if prompt_actions(actions):
-        for action in actions:
+    if prompt_apply(plan):
+        for action in plan:
             action.run()
     else:
-        raise ApprovalInterruptError("error asking for approval: interrupted")
+        raise ApplyInterruptError("error asking for approval: interrupted")

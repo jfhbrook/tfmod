@@ -25,10 +25,6 @@ class CliError(Error):
     pass
 
 
-class ApprovalInterruptError(Error):
-    pass
-
-
 class TerraformError(Error):
     """
     Terraform exited unsuccessfully. Ensure that the configuration is correct.
@@ -96,12 +92,26 @@ class PublishError(Error):
     TfMod encountered an error when trying to publish your module.
     """
 
-class WorkflowError(Exception):
+
+class PlanError(Error):
     """
-    An exception occurred while executing the workflow.
+    TfMod encountered an error while creating the plan.
     """
 
-class DependencyError(WorkflowError):
+
+class ApplyError(PlanError):
     """
-    An exception occurred while resolving a dependency.
+    TfMod encountered an error while applying the plan.
+    """
+
+
+class ApplyInterruptError(ApplyError):
+    """
+    TfMod was interrupted while applying the plan.
+    """
+
+
+class ResourceError(PlanError):
+    """
+    An exception occurred while resolving a resource.
     """

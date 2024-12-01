@@ -21,10 +21,10 @@ from tfmod.gh import (
 )
 from tfmod.git import GitRepo
 from tfmod.io import logger
+from tfmod.plan import Action, apply, Plan, Resource
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
 from tfmod.version import Version
-from tfmod.workflow import Action, Dependency, run_actions
 
 #
 # Hoo boy...
@@ -337,9 +337,11 @@ def is_package_available() -> bool:
 
 
 def open_package_url() -> None:
-    print("""To publish your package, go to:
+    print(
+        """To publish your package, go to:
 
-    https://registry.terraform.io/github/create""")
+    https://registry.terraform.io/github/create"""
+    )
 
 
 def publish() -> None:
@@ -348,13 +350,15 @@ def publish() -> None:
 
     validate_module()
 
-    run_actions(
+    plan: Plan = (
         git_actions()
         + mop_actions()
         + remote_actions()
         + description_actions()
         + tag_and_push_actions(version)
     )
+
+    apply(plan)
 
     if not is_package_available():
         open_package_url()
