@@ -69,54 +69,61 @@ MIT. See the LICENSE file for more details.
 
 Hoo boy...
 
-- [ ] write tests
-  - do them for bash too
-- [ ] Publish part 2 (pushing back because part 1 is way too big and I need
-      a sensible milestone)
-  - [ ] Fix docstrings - a lot of them are out of date
-  - [ ] Workflow DSL
+- [ ] tests
+  - monkeypatch `run_*` commands
+  - monkeypatch github API commands
+  - snapshots for io
+  - `bats` for bash, maybe a custom pytest runner
+- [ ] publishing improvements
+  - Fix docstrings - a lot of them are out of date
+  - Workflow DSL
     - In particular, a `Dependency` abc with `may`, `must` and `validate`
       methods
     - Possibly a type for `Callable[[], List[Action]]`
-  - [ ] validate that provider is official/recognized
+  - `shlex` names
+  - Detect if tag exists, only `--force` if necessary
+  - Validate that provider is official/recognized
     - This seems to be a requirement to publish to Hashicorp
-  - [ ] validate directory name
-  - [ ] validate module structure
+  - Validate directory name
+  - Validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
-  - [ ] validate on main branch
-  - [ ] validate github remote
-  - [ ] check if module is available through API
-  - [ ] `-force` flag
-  - [ ] `-auto-approve` flag
-- [ ] unwise/update bugs
+  - Validate on main branch
+  - Validate github remote
+  - Check if module is available through API
+- [ ] flags
+  - parse command flags automatically - no use case for "bleed-through"
+  - `-force` publish flag
+  - `-auto-approve` publish flag
+- [ ] unwise/update bugs, etc
   - Somehow got in a state once where tfmod was empty except for state files
+  - Command output quoting is fubar
+  - Certain kinds of errors aren't behing appropriately handled
+  - Command line parsing is Wrong
+  - Write `doctor` command to help debug issues
 - [ ] config
-  - needs so far kinda sorted by `gh` config and/or `git` config
-    - git prefer https or ssh
-    - git prefer main branch
-  - but can at least show the `gh` config, yeah?
-- [ ] fix command output quoting (both python and bash)
-- [ ] login
-  - log github cli login status
-  - open <https://registry.terraform.io/sign-in>
-- [ ] whoami
-  - github whoami mostly
-- [ ] viewing commands
-  - [ ] docs - open terraform registry page in browser
-  - [ ] namespace - open terraform registry page for namespace in browser
-  - [ ] repo - open github repo in browser
-  - [ ] unpublish - open appropriate page, with directions, in browser
-- [ ] ping
-  - github
-  - terraform registry
+  - show `gh` config
+  - show git config's `init.defaultBranch`
+  - where to get preferred git remote type? ssh vs https?
+  - may need to stop punting on bespoke config file
 - [ ] script related commands
-  - [ ] run
-  - [ ] lint
-  - [ ] fmt/format
-  - [ ] test
-  - [ ] validate
-- [ ] doctor
-  - "is installed correctly", for now
-- [ ] tagging (latest, beta etc)
+  - run
+  - lint
+  - fmt/format
+  - test
+  - validate
+- [ ] viewing commands
+  - docs - open terraform registry page in browser
+  - namespace - open terraform registry page for namespace in browser
+  - repo - open github repo in browser
+  - unpublish - open appropriate page, with directions, in browser
+- [ ] nice-to-haves
+  - login
+    - show `gh` status with directions to log in
+    - open <https://registry.terraform.io/sign-in>
+  - whoami - show `gh` user info
+  - ping
+    - github (public) API
+    - terraform registry
+- [ ] dist tagging (latest, beta etc)
   - TODO: how does npm implement dist-tag?
   - also implement npm's dist-tag behavior on publish
