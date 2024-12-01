@@ -75,16 +75,15 @@ Hoo boy...
   - snapshots for io
   - `bats` for bash, maybe a custom pytest runner
 - [ ] publishing improvements
-  - Validate directory name
+  - Validate github remote
+  - Validate on main branch
   - Validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
-  - Validate on main branch
-  - Validate github remote
-  - Detect if tag exists, only `--force` if necessary
   - Check if module is available through API
   - Bug: Attempts to update description to None
     - Shouldn't spec validation catch this?
     - Shouldn't init default it to something?
+  - Detect if tag exists, only `--force` if necessary
 - [ ] flags
   - parse command flags automatically - no use case for "bleed-through"
   - `-force` publish flag

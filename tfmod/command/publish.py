@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import shlex
 from typing import cast, Dict, List, Optional, Self, Tuple
 
@@ -108,11 +109,16 @@ class PathResource(Resource[str]):
         return os.getcwd()
 
     def validate(self: Self, resource: str) -> None:
-        # spec = must(SpecResource)
+        spec = must(SpecResource)
+        expected = f"terraform-{spec.provider}-{spec.name}"
+        actual = Path(resource).name
 
-        # Validate that the directory name matches the spec. Show warnings if
-        # this isn't the case.
-        pass
+        if expected != actual:
+            logger.warn(
+                title=f'Directory name "{actual}" does not match module.tfvars',
+                message=f""""The project should to be named \"{expected}\", in order
+                to match the conventions of the Terraform registry.""",
+            )
 
 
 class GitResource(Resource[GitRepo]):
