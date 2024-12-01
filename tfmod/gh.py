@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 import shlex
-import subprocess
+from subprocess import CalledProcessError
 from typing import Dict, List, Optional
 
 from github import Auth, Github
@@ -16,6 +16,7 @@ except ImportError:
 from tfmod.constants import GH_BIN, GH_CONFIG_DIR
 from tfmod.error import GhError
 from tfmod.io import logger
+from tfmod.process import run_out
 
 
 @dataclass
@@ -75,22 +76,14 @@ def get_gh_user(hosts: Optional[GhHosts]) -> Optional[str]:
         logger.debug("github.com not found in gh hosts")
 
 
-# TODO: This is mostly copy-paste from git.py...
 def gh_out(command: List[str], path: str = os.getcwd()) -> str:
     argv = [GH_BIN] + command
-    proc = subprocess.run([GH_BIN] + command, cwd=path, capture_output=True)
-    print(proc.stderr.decode("unicode_escape"))
     try:
-        proc.check_returncode()
-    except subprocess.CalledProcessError as exc:
+        return run_out(argv, cwd=path)
+    except CalledProcessError as exc:
         raise GhError(
             f'"{shlex.join(argv)}" exited unsuccessfully (status: {exc.returncode})'
         )
-    else:
-        if proc.stderr:
-            print(proc.stderr)
-    # NOTE: This *may* not technically be safe to do, but here's hoping...
-    return proc.stdout.decode("unicode_escape")
 
 
 # TODO: What happens if I log out?

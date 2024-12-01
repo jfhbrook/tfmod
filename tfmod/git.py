@@ -2,47 +2,35 @@ from dataclasses import dataclass
 import os
 import re
 import shlex
-import subprocess
+from subprocess import CalledProcessError
 from typing import Dict, List, Literal, Optional
 
 from tfmod.constants import GIT_BIN
 from tfmod.error import GitError
 from tfmod.io import logger
+from tfmod.process import run_interactive, run_out, run_test
 
 Direction = Literal["fetch"] | Literal["push"]
 
 
 def git_out(command: List[str], path: str = os.getcwd()) -> str:
     argv = [GIT_BIN] + command
-    proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=True)
-    print(proc.stderr.decode("unicode_escape"))
     try:
-        proc.check_returncode()
-    except subprocess.CalledProcessError as exc:
+        return run_out(argv, cwd=path)
+    except CalledProcessError as exc:
         raise GitError(
             f'"{shlex.join(argv)}" exited unsuccessfully (status: {exc.returncode})'
         )
-    else:
-        if proc.stderr:
-            print(proc.stderr)
-    # NOTE: This *may* not technically be safe to do, but here's hoping...
-    return proc.stdout.decode("unicode_escape")
 
 
 def git_test(command: List[str], path: str = os.getcwd()) -> bool:
-    argv = [GIT_BIN] + command
-    proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=True)
-    logger.trace(f"Running: {shlex.join(argv)}")
-    logger.trace(proc.stderr.decode("unicode_escape"))
-
-    return proc.returncode == 0
+    return run_test([GIT_BIN] + command, cwd=path)
 
 
 def git_interactive(command: List[str], path: str = os.getcwd()) -> None:
-    proc = subprocess.run([GIT_BIN] + command, cwd=path, capture_output=False)
     try:
-        proc.check_returncode()
-    except subprocess.CalledProcessError as exc:
+        return run_interactive([GIT_BIN] + command, cwd=path)
+    except CalledProcessError as exc:
         raise GitError(str(exc))
 
 

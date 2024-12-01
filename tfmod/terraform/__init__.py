@@ -220,6 +220,9 @@ class Terraform:
         """
         Run the Terraform command
         """
+        # TODO: The interrupts this is going out of its way to handle are
+        # probably handled reasonably well by subprocess.run. Port this to
+        # use run_interactive from tfmod.process and call it a day.
         with self._state():
             _args, _env = self.build()
             _env = dict(env, **_env)
