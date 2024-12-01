@@ -67,12 +67,6 @@ OFFICIAL_PROVIDERS = {
 }
 
 #
-# Hoo boy...
-#
-# TODO: It would be nice to have a real DAG language here.
-#
-
-#
 # Resources.
 #
 
