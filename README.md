@@ -75,11 +75,6 @@ Hoo boy...
   - snapshots for io
   - `bats` for bash, maybe a custom pytest runner
 - [ ] publishing improvements
-  - Fix docstrings - a lot of them are out of date
-  - Workflow DSL
-    - In particular, a `Dependency` abc with `may`, `must` and `validate`
-      methods
-    - Possibly a type for `Callable[[], List[Action]]`
   - `shlex` names
   - Detect if tag exists, only `--force` if necessary
   - Validate that provider is official/recognized
@@ -90,6 +85,9 @@ Hoo boy...
   - Validate on main branch
   - Validate github remote
   - Check if module is available through API
+  - Bug: Attempts to update description to None
+    - Shouldn't spec validation catch this?
+    - Shouldn't init default it to something?
 - [ ] flags
   - parse command flags automatically - no use case for "bleed-through"
   - `-force` publish flag

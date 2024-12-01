@@ -6,7 +6,6 @@ from github.Repository import Repository
 from giturlparse import GitUrlParsed
 
 from tfmod.error import (
-    Error,
     GhRemoteNotFoundError,
     GitDirtyError,
     GitRepoNotFoundError,
@@ -55,9 +54,11 @@ class PathResource(Resource[str]):
         return os.getcwd()
 
     def validate(self: Self, resource: str) -> None:
-        spec = must(SpecResource)
+        # spec = must(SpecResource)
+
         # Validate that the directory name matches the spec. Show warnings if
         # this isn't the case.
+        pass
 
 
 class GitResource(Resource[GitRepo]):
@@ -128,13 +129,13 @@ class RemoteResource(Resource[Remote]):
         return remote_name, remote
 
     def validate(self: Self, resource: Remote) -> None:
-        _, remote = resource
-        spec = must(SpecResource)
+        # _, remote = resource
+        # spec = must(SpecResource)
 
-        namespace = (cast(str, spec.namespace),)
-        name = (spec.repo_name(),)
-        remote_namespace = (remote.user,)
-        remote_name = (remote.name,)
+        # namespace = (cast(str, spec.namespace),)
+        # name = (spec.repo_name(),)
+        # remote_namespace = (remote.user,)
+        # remote_name = (remote.name,)
 
         # TODO
         pass
