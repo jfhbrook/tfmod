@@ -1,15 +1,12 @@
 import os
+import shlex
 from typing import cast, Dict, List, Optional, Self, Tuple
 
 from github.GithubException import UnknownObjectException
 from github.Repository import Repository
 from giturlparse import GitUrlParsed
 
-from tfmod.error import (
-    GhRemoteNotFoundError,
-    GitDirtyError,
-    GitRepoNotFoundError,
-)
+from tfmod.error import GhRemoteNotFoundError, GitDirtyError, GitRepoNotFoundError
 from tfmod.gh import (
     get_gh_user,
     gh_client,
@@ -214,6 +211,7 @@ def _remote_actions() -> List[Action]:
     repo_name = spec.repo_name()
 
     user = must(UserResource)
+    remote_name = "origin"
     git_url = f"git@github.com:{user}/{repo_name}"
 
     actions: List[Action] = list()
@@ -223,15 +221,15 @@ def _remote_actions() -> List[Action]:
         actions.append(
             Action(
                 type="+",
-                name=f"gh repo create {repo_name}",
+                name=shlex.join(["gh", "repo", "create", repo_name]),
                 run=lambda: gh_repo_create(repo_name),
             )
         )
     actions.append(
         Action(
             type="+",
-            name=f"git remote add origin {git_url}",
-            run=lambda: must(GitResource).add_remote("origin", git_url),
+            name=shlex.join(["git", "remote", "add", remote_name, git_url]),
+            run=lambda: must(GitResource).add_remote(remote_name, git_url),
         )
     )
 
@@ -262,7 +260,7 @@ def _description_actions() -> List[Action]:
     return [
         Action(
             type="~",
-            name=f"gh repo edit --description {description}",
+            name=shlex.join(["gh", "repo", "edit", "--description", description]),
             run=lambda: gh_repo_description(description),
         )
     ]

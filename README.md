@@ -75,8 +75,6 @@ Hoo boy...
   - snapshots for io
   - `bats` for bash, maybe a custom pytest runner
 - [ ] publishing improvements
-  - `shlex` names
-  - Detect if tag exists, only `--force` if necessary
   - Validate that provider is official/recognized
     - This seems to be a requirement to publish to Hashicorp
   - Validate directory name
@@ -84,6 +82,7 @@ Hoo boy...
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
   - Validate on main branch
   - Validate github remote
+  - Detect if tag exists, only `--force` if necessary
   - Check if module is available through API
   - Bug: Attempts to update description to None
     - Shouldn't spec validation catch this?
