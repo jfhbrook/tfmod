@@ -4,7 +4,7 @@ from typing import Any, cast
 from tfmod.error import GitDirtyError, GitRepoNotFoundError, SpecNotFoundError
 from tfmod.gh import gh_client
 from tfmod.git import git_add, git_commit, git_init, git_is_dirty, GitRepo
-from tfmod.io import logger, prompt_confirm
+from tfmod.io import prompt_confirm
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
 from tfmod.version import Version

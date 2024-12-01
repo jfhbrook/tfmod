@@ -9,11 +9,11 @@ class Version:
     versioning, but they don't advertise support of the full spec.
     """
 
-    major = int
-    minor = int
-    semver = int
+    major: int
+    minor: int
+    patch: int
 
     @classmethod
     def parse(cls: Type[Self], version: str) -> Self:
-        splitted = version.split(".")
-        return cls(*splitted)
+        major, minor, patch = [int(v) for v in version.split(".")]
+        return cls(major=major, minor=minor, patch=patch)
