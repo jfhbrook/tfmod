@@ -224,8 +224,6 @@ def _remote_actions() -> List[Action]:
     spec = must_spec()
     repo_name = spec.repo_name()
 
-    # TODO: Pull this from... git config?
-    git_protocol = "ssh"
     user = must_user()
     git_url = f"git@github.com:{user}/{repo_name}"
 

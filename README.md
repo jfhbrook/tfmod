@@ -3,11 +3,6 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] tagenpush
-    - create x.y.z tag
-    - create/force x.y tag
-    - create/force x tag
-    - git push origin main --tags
   - [ ] get happy path working
     - Suspect a LOT of issues with the github client. It's a disaster, I may
       need to use requests directly because jesus fucking christ

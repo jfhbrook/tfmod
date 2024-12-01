@@ -9,7 +9,6 @@ import giturlparse
 
 from tfmod.constants import GIT_BIN
 from tfmod.error import GitError
-from tfmod.io import logger
 from tfmod.process import run_interactive, run_out, run_test
 
 Direction = Literal["fetch"] | Literal["push"]

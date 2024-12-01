@@ -3,7 +3,7 @@ from enum import IntEnum
 import json
 import os
 import textwrap
-from typing import List, Literal, Mapping, Optional, Self, Tuple
+from typing import Literal, Mapping, Optional, Self
 
 from rich import print as pprint
 

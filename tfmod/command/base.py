@@ -170,7 +170,7 @@ def cli(fn: Main) -> Main:
         except CliError as exc:
             print(str(exc))
             sys.exit(2)
-        except TerraformError as exc:
+        except TerraformError:
             # In theory, Terraform should report its own errors
             logger.debug(traceback.format_exc())
             sys.exit(1)

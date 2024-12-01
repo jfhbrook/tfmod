@@ -1,12 +1,8 @@
-from dataclasses import dataclass
 import os
-import re
 import shlex
 import subprocess
-from typing import Dict, List, Literal, Optional
+from typing import List, Literal
 
-from tfmod.constants import GIT_BIN
-from tfmod.error import GitError
 from tfmod.io import logger
 
 Direction = Literal["fetch"] | Literal["push"]
