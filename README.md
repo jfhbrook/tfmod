@@ -1,8 +1,70 @@
 # tfmod
 
+Publish Terraform modules to GitHub, following
+[Hashicorp's documented practices](https://developer.hashicorp.com/terraform/registry/modules/publish).
+
+## How Ready is This?
+
+**It works on my machine!**
+
+But for real - it's currently pretty limited, is missing a lot of features,
+and doesn't have tests. I also don't currently have any modules that I can
+publish to the public registry, as I tend to use off-label providers.
+
+That said, it's useful to me today. I use it to tag my `terraform-shell-git-*`
+modules, with moderate success. I suspect that it will cowpath over time.
+
+## Usage
+
+### Installing and Updating
+
+To install, download and run the install script:
+
+```sh
+curl -LsSf https://raw.githubusercontent.com/jfhbrook/tfmod/refs/heads/main/install.sh 
+```
+
+To update once it's installed:
+
+```sh
+tfmod update
+```
+
+That should all work, theoretically. The install/update script needs a little love.
+
+### Setting Up a Terraform Module
+
+To get started, run:
+
+```sh
+tfmod init
+```
+
+This will create a file called `module.tfvars` which contains all the
+configuration tfmod (currently) needs to publish packages.
+
+### Publishing
+
+We have lazers!!!
+
+```sh
+tfmod publish
+```
+
+## Development
+
+There's a `justfile` that's reasonably well-documented. I currently don't
+have tests, but get a lot of mileage out of `just check` and `just lint`.
+
+## License
+
+MIT. See the LICENSE file for more details.
+
 ## TODOs
 
-- [ ] tests
+Hoo boy...
+
+- [ ] write tests
   - do them for bash too
 - [ ] Publish part 2 (pushing back because part 1 is way too big and I need
       a sensible milestone)
