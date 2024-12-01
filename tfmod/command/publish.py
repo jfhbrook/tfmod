@@ -299,8 +299,10 @@ def tag_and_push(version: Version) -> List[Action]:
     """
     Return actions that would tag and push to git.
     """
-    validate_mopped()
+    # silent action:
+    # validate_mopped()
     # lazy_repo = load_git
+    # lazy_remote = lambda: github_remote(spec, load_git())
     raise NotImplementedError("tag_and_push")
 
 
