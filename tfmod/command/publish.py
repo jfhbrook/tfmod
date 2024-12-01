@@ -46,6 +46,14 @@ def _validate_directory(name: str, path: str = os.getcwd()) -> None:
     pass
 
 
+def validate_module() -> None:
+    """
+    Validate that the module has the expected directory structure. Show
+    warnings if this isn't the case.
+    """
+    pass
+
+
 def try_git() -> Tuple[Optional[GitRepo], List[Action]]:
     """
     Attempt to load the git repository. If not found, return actions which should
@@ -55,14 +63,24 @@ def try_git() -> Tuple[Optional[GitRepo], List[Action]]:
         repo = GitRepo.load()
         _validate_current_branch(repo)
     except GitRepoNotFoundError:
-        return None, [Action(type="+", name="git init", run=GitRepo.init)]
+        @cache
+        def lazy_repo() -> GitRepo:
+            return GitRepo.load()
+
+        return None, [
+            Action(type="+", name="git init", run=GitRepo.init),
+            Action(type="+", name="git add .", run=lambda: lazy_repo().add(".")),
+            Action(type="+", name="git commit", run=lambda: lazy_repo().commit),
+        ]
 
     return repo, []
 
 
+@cache
 def load_git() -> GitRepo:
     """
-    Load the git repository. By the point this is called, it should exist.
+    Load the git repository. By the time this is called, actions should have
+    been completed.
     """
     repo = GitRepo.load()
     _validate_current_branch(repo)
@@ -80,6 +98,38 @@ def _validate_current_branch(repo: GitRepo) -> None:
     #
     #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
     pass
+
+
+# TODO: -force flag
+def mop(repo: Optional[GitRepo]) -> List[Action]:
+    """
+    Check the repository to see if it's dirty. If so, generate actions that
+    would make it clean.
+    """
+    if not repo or not repo.dirty():
+        # If the repo doesn't exist, we'll do these tasks during the git init.
+        # If it's clean, then we don't have anything to do.
+        return []
+
+    print("Repository contains uncommitted changes:")
+    repo.status()
+
+    actions = [
+        Action(type="~", name="git add .", run=lambda: repo.add(".")),
+        Action(type="~", name="git commit", run=repo.commit),
+    ]
+
+    return actions
+
+
+def validate_mopped() -> None:
+    """
+    Validate that the repository is not dirty. By the time this is called,
+    actions should have been completed.
+    """
+    repo = load_git()
+    if repo.dirty():
+        raise GitDirtyError("All files must be committed to continue.")
 
 
 def github_remote(spec: Spec, git: GitRepo) -> GitUrlParsed:
@@ -169,7 +219,7 @@ def _github_remote_actions(spec: Spec, git: Lazy[GitRepo]) -> List[Action]:
     actions: List[Action] = list()
 
     try:
-        _github_repo(spec.namespace, name)
+        github_repo(spec)
     except UnknownObjectException:
         actions.append(
             Action(
@@ -216,35 +266,41 @@ def try_github_remote(
         return remote, []
 
 
-def validate_module() -> None:
-    raise NotImplementedError("validate_module()")
+def update_description(spec: Spec) -> List[Action]:
+    """
+    Check if the spec description matches what's on GitHub. If it doesn't match
+    (or the repository doesn't exist), return actions that would update
+    the GitHub repository's description to match the spec.
+    """
+
+    try:
+        repo = github_repo(spec)
+    except UnknownObjectException:
+        return _update_description(spec)
+    else:
+        if repo.description != spec.description:
+            return _update_description(spec)
+        return []
 
 
-def git_mop(repo: GitRepo) -> None:
-    # TODO: -force flag
-    if repo.dirty():
-        print("Repository contains uncommitted changes:")
-        repo.status()
+def _update_description(spec: Spec) -> List[Action]:
+    """
+    Return description actions, given we know they're required.
+    """
+    def lazy_github():
+        return github_repo(spec)
 
-        actions = [
-            Action(type="~", name="git add .", run=lambda: repo.add(".")),
-            Action(type="~", name="git commit", run=repo.commit),
-        ]
+    actions: List[Action] = list()
 
-        try:
-            run_actions(actions)
-        except ApprovalInterruptError:
-            raise GitDirtyError("All files must be committed to continue.")
-
-    if repo.dirty():
-        raise GitDirtyError("All files must be committed to continue.")
+    raise NotImplementedError("description_actions")
 
 
-def update_description(description: str) -> None:
-    raise NotImplementedError("update_description()")
-
-
-def tag_and_push(version: Version) -> None:
+def tag_and_push(version: Version) -> List[Action]:
+    """
+    Return actions that would tag and push to git.
+    """
+    validate_mopped()
+    # lazy_repo = load_git
     raise NotImplementedError("tag_and_push")
 
 
@@ -259,33 +315,16 @@ def open_package_url() -> None:
 def publish() -> None:
     spec = load_spec()
     version = Version.parse(cast(str, spec.version))
-    description = cast(str, spec.description)
-
-    git, git_actions = try_git()
-    remote, remote_actions = try_github_remote(spec, git)
-
-    run_actions(git_actions + remote_actions)
-
-    if not git:
-        git = load_git()
-    if not remote:
-        remote = github_remote(spec, git)
-
-    # If we don't have these now, we have bigger problems
-    assert git
-    assert remote
 
     validate_module()
 
-    git_mop(git)
+    git, git_actions = try_git()
+    mop_actions = mop(git)
+    _, remote_actions = try_github_remote(spec, git)
+    description_actions = update_description(spec)
+    push_actions = tag_and_push(version)
 
-    github = github_repo(spec)
-
-    # TODO: We should be able to pre-load these into actions too
-    if description != github.description:
-        update_description(description)
-
-    tag_and_push(version)
+    run_actions(git_actions + mop_actions + remote_actions + description_actions + push_actions)
 
     if not is_package_available():
         open_package_url()
