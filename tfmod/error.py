@@ -25,10 +25,6 @@ class CliError(Error):
     pass
 
 
-class ApprovalInterruptError(Error):
-    pass
-
-
 class TerraformError(Error):
     """
     Terraform exited unsuccessfully. Ensure that the configuration is correct.
@@ -94,4 +90,28 @@ class GhRemoteNotFoundError(GhError):
 class PublishError(Error):
     """
     TfMod encountered an error when trying to publish your module.
+    """
+
+
+class PlanError(Error):
+    """
+    TfMod encountered an error while creating the plan.
+    """
+
+
+class ApplyError(PlanError):
+    """
+    TfMod encountered an error while applying the plan.
+    """
+
+
+class ApplyInterruptError(ApplyError):
+    """
+    TfMod was interrupted while applying the plan.
+    """
+
+
+class ResourceError(PlanError):
+    """
+    An exception occurred while resolving a resource.
     """

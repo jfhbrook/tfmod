@@ -1,17 +1,14 @@
-from functools import cache
 import os
-from typing import cast, Dict, List, Optional, Tuple
+from typing import cast, Dict, List, Optional, Self, Tuple
 
+from github.GithubException import UnknownObjectException
 from github.Repository import Repository
 from giturlparse import GitUrlParsed
 
-from tfmod.action import Action, run_actions
 from tfmod.error import (
-    Error,
     GhRemoteNotFoundError,
     GitDirtyError,
     GitRepoNotFoundError,
-    PublishError,
 )
 from tfmod.gh import (
     get_gh_user,
@@ -22,6 +19,7 @@ from tfmod.gh import (
 )
 from tfmod.git import GitRepo
 from tfmod.io import logger
+from tfmod.plan import Action, apply, may, must, Plan, Resource
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
 from tfmod.version import Version
@@ -39,124 +37,108 @@ from tfmod.version import Version
 #
 
 
-@cache
-def must_spec() -> Spec:
-    """
-    Validate and load the spec file. Must return a spec.
-    """
-    cmd = Terraform("spec").isolated_state().spec().auto_approve()
-    cmd.run()
+class SpecResource(Resource[Spec]):
+    def get(self: Self) -> Optional[Spec]:
+        # We validate with Terraform before trying to load. This is because
+        # we want to see Terraform errors prior to choking on the load.
+        self._validate()
+        return Spec.load()
 
-    spec = Spec.load()
-    _validate_directory(spec.repo_name())
-    return spec
-
-
-def try_git() -> Optional[GitRepo]:
-    """
-    Try to load the git repository. Not cached.
-    """
-
-    try:
-        repo = GitRepo.load()
-        _validate_current_branch(repo)
-        return repo
-    except GitRepoNotFoundError as exc:
-        logger.debug(str(exc))
-        return None
+    def _validate(self: Self) -> None:
+        cmd = Terraform("spec").isolated_state().spec().auto_approve()
+        cmd.run()
 
 
-@cache
-def must_git() -> GitRepo:
-    """
-    Load the git repository. GitRepo must exist when this is called.
-    """
-    repo = GitRepo.load()
-    _validate_current_branch(repo)
-    return repo
+class PathResource(Resource[str]):
+    def get(self: Self) -> Optional[str]:
+        return os.getcwd()
+
+    def validate(self: Self, resource: str) -> None:
+        # spec = must(SpecResource)
+
+        # Validate that the directory name matches the spec. Show warnings if
+        # this isn't the case.
+        pass
 
 
-def try_user() -> Optional[str]:
-    """
-    Optionally load the GitHub user from the "gh" cli's host files.
-    """
-    hosts = load_gh_hosts_optional()
-    return get_gh_user(hosts)
+class GitResource(Resource[GitRepo]):
+    def get(self: Self) -> Optional[GitRepo]:
+        must(PathResource)
+        try:
+            repo = GitRepo.load()
+            return repo
+        except GitRepoNotFoundError as exc:
+            logger.debug(str(exc))
+            return None
+
+    def validate(self: Self, resource: GitRepo) -> None:
+        # Validate that the current branch is the main branch. Raise an Error if
+        # this is not the case, unless forced.
+        # Needs some reliable-ish way to detect what the main branch is. This will
+        # either be through configuration (in module.tfvars or in main config) or
+        # detected via something like:
+        #
+        #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
+        pass
 
 
-@cache
-def must_user() -> str:
-    user = try_user()
-    if not user:
-        raise PublishError('GitHub user not found in "gh" CLI\'s configuration')
-    return user
+class UserResource(Resource[str]):
+    def get(self: Self) -> Optional[str]:
+        hosts = load_gh_hosts_optional()
+        return get_gh_user(hosts)
 
 
-def try_repository() -> Optional[Repository]:
-    try:
-        return _must_repository()
-    except Error:
-        return None
+class RepositoryResource(Resource[Repository]):
+    def get(self: Self) -> Optional[Repository]:
+        spec = must(SpecResource)
+        client = gh_client()
+
+        try:
+            return client.get_user(cast(str, spec.namespace)).get_repo(spec.repo_name())
+        except UnknownObjectException as exc:
+            logger.debug(str(exc))
+            return None
 
 
-@cache
-def must_repository() -> Repository:
-    return _must_repository()
+Remote = Tuple[str, GitUrlParsed]
 
 
-def _must_repository() -> Repository:
-    spec = must_spec()
-    client = gh_client()
-    return client.get_user(cast(str, spec.namespace)).get_repo(spec.repo_name())
+class RemoteResource(Resource[Remote]):
+    def get(self: Self) -> Optional[Remote]:
+        git = must(GitResource)
 
+        remotes: Dict[str, GitUrlParsed] = {
+            name: remote.parse() for name, remote in git.remotes.items()
+        }
 
-def try_remote() -> Optional[Tuple[str, GitUrlParsed]]:
-    try:
-        return _must_remote()
-    except Error as exc:
-        logger.debug(str(exc))
-        return None
+        remote: Optional[GitUrlParsed] = None
+        remote_name: str = ""
 
+        if "origin" in remotes and remotes["origin"].platform == "github":
+            remote = remotes["origin"]
+            remote_name = "origin"
+        else:
+            for name, rem in remotes.items():
+                if rem.platform == "github":
+                    remote = rem
+                    remote_name = name
+                    break
+        if not remote:
+            raise GhRemoteNotFoundError("GitHub remote not found")
 
-@cache
-def must_remote() -> Tuple[str, GitUrlParsed]:
-    return _must_remote()
+        return remote_name, remote
 
+    def validate(self: Self, resource: Remote) -> None:
+        # _, remote = resource
+        # spec = must(SpecResource)
 
-def _must_remote() -> Tuple[str, GitUrlParsed]:
-    """
-    Find which git remote points to GitHub. If none seem to, raise an exception.
-    """
-    spec = must_spec()
-    git = must_git()
+        # namespace = (cast(str, spec.namespace),)
+        # name = (spec.repo_name(),)
+        # remote_namespace = (remote.user,)
+        # remote_name = (remote.name,)
 
-    remotes: Dict[str, GitUrlParsed] = {
-        name: remote.parse() for name, remote in git.remotes.items()
-    }
-
-    remote: Optional[GitUrlParsed] = None
-    remote_name: str = ""
-
-    if "origin" in remotes and remotes["origin"].platform == "github":
-        remote = remotes["origin"]
-        remote_name = "origin"
-    else:
-        for name, rem in remotes.items():
-            if rem.platform == "github":
-                remote = rem
-                remote_name = name
-                break
-    if not remote:
-        raise GhRemoteNotFoundError("GitHub remote not found")
-
-    _validate_github_remote(
-        namespace=spec.namespace,
-        name=spec.repo_name(),
-        remote_namespace=remote.user,
-        remote_name=remote.name,
-    )
-
-    return remote_name, remote
+        # TODO
+        pass
 
 
 #
@@ -172,13 +154,13 @@ def git_actions() -> List[Action]:
     Attempt to load the git repository. If not found, return actions which should
     create the repository.
     """
-    repo = try_git()
+    repo = may(GitResource)
 
     if not repo:
         return [
             Action(type="+", name="git init", run=GitRepo.init),
-            Action(type="+", name="git add .", run=lambda: must_git().add(".")),
-            Action(type="+", name="git commit", run=lambda: must_git().commit),
+            Action(type="+", name="git add .", run=lambda: must(GitResource).add(".")),
+            Action(type="+", name="git commit", run=lambda: must(GitResource).commit),
         ]
 
     return []
@@ -190,7 +172,7 @@ def mop_actions() -> List[Action]:
     Check the repository to see if it's dirty. If so, generate actions that
     would make it clean.
     """
-    repo = try_git()
+    repo = may(GitResource)
 
     if not repo or not repo.dirty():
         # If the repo doesn't exist, we'll do these tasks during the git init.
@@ -215,12 +197,12 @@ def remote_actions() -> List[Action]:
     repository (if necessary) and add it as a remote.
     """
 
-    git = try_git()
+    git = may(GitResource)
 
     if not git:
         return _remote_actions()
 
-    remote = try_remote()
+    remote = may(RemoteResource)
     if not remote:
         return _remote_actions()
     else:
@@ -228,15 +210,15 @@ def remote_actions() -> List[Action]:
 
 
 def _remote_actions() -> List[Action]:
-    spec = must_spec()
+    spec = must(SpecResource)
     repo_name = spec.repo_name()
 
-    user = must_user()
+    user = must(UserResource)
     git_url = f"git@github.com:{user}/{repo_name}"
 
     actions: List[Action] = list()
 
-    repo = try_repository()
+    repo = may(RepositoryResource)
     if not repo:
         actions.append(
             Action(
@@ -249,7 +231,7 @@ def _remote_actions() -> List[Action]:
         Action(
             type="+",
             name=f"git remote add origin {git_url}",
-            run=lambda: must_git().add_remote("origin", git_url),
+            run=lambda: must(GitResource).add_remote("origin", git_url),
         )
     )
 
@@ -263,8 +245,8 @@ def description_actions() -> List[Action]:
     the GitHub repository's description to match the spec.
     """
 
-    spec = must_spec()
-    repo = try_repository()
+    spec = must(SpecResource)
+    repo = may(RepositoryResource)
     if not repo:
         return _description_actions()
     else:
@@ -274,7 +256,7 @@ def description_actions() -> List[Action]:
 
 
 def _description_actions() -> List[Action]:
-    spec = must_spec()
+    spec = must(SpecResource)
     description = cast(str, spec.description)
 
     return [
@@ -290,8 +272,9 @@ def tag_and_push_actions(version: Version) -> List[Action]:
     """
     Return actions that would tag and push to git.
     """
-    git = must_git()
-    remote, _ = must_remote()
+    git = must(GitResource)
+    remote, _ = must(RemoteResource)
+
     branch = git.current_branch
     patch = f"{version.major}.{version.minor}.{version.patch}"
     minor = f"{version.major}.{version.minor}"
@@ -337,18 +320,20 @@ def is_package_available() -> bool:
 
 
 def open_package_url() -> None:
-    print("""To publish your package, go to:
+    print(
+        """To publish your package, go to:
 
-    https://registry.terraform.io/github/create""")
+    https://registry.terraform.io/github/create"""
+    )
 
 
 def publish() -> None:
-    spec = must_spec()
+    spec = must(SpecResource)
     version = Version.parse(cast(str, spec.version))
 
     validate_module()
 
-    run_actions(
+    plan: Plan = (
         git_actions()
         + mop_actions()
         + remote_actions()
@@ -356,55 +341,17 @@ def publish() -> None:
         + tag_and_push_actions(version)
     )
 
+    apply(plan)
+
     if not is_package_available():
         open_package_url()
 
 
-#
-# Validators for dependencies. These *must* be called by the relevant
-# dependency fetchers, and *must* be cached. They may either take arguments
-# or call "must" functions, whichever is more convenient.
-#
-
-
-@cache
-def _validate_directory(name: str, path: str = os.getcwd()) -> None:
-    """
-    Validate that the directory name matches the spec. Show warnings if
-    this isn't the case.
-    """
-    pass
-
-
-def _validate_current_branch(repo: GitRepo) -> None:
-    """
-    Validate that the current branch is the main branch. Raise an Error if
-    this is not the case, unless forced.
-    """
-    # Needs some reliable-ish way to detect what the main branch is. This will
-    # either be through configuration (in module.tfvars or in main config) or
-    # detected via something like:
-    #
-    #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
-    pass
-
-
-def _validate_mopped() -> None:
+def validate_mopped() -> None:
     """
     Validate that the repository is not dirty. By the time this is called,
     actions should have been completed.
     """
-    repo = must_git()
+    repo = must(GitResource)
     if repo.dirty():
         raise GitDirtyError("All files must be committed to continue.")
-
-
-@cache
-def _validate_github_remote(
-    namespace: str, name: str, remote_namespace: str, remote_name: str
-) -> None:
-    """
-    Validate that the git remote matches the spec. Show warnings if
-    this isn't the case. Cached to only warn once.
-    """
-    pass
