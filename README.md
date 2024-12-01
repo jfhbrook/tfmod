@@ -73,23 +73,23 @@ Hoo boy...
   - do them for bash too
 - [ ] Publish part 2 (pushing back because part 1 is way too big and I need
       a sensible milestone)
+  - [ ] Fix docstrings - a lot of them are out of date
   - [ ] Workflow DSL
     - In particular, a `Dependency` abc with `may`, `must` and `validate`
       methods
     - Possibly a type for `Callable[[], List[Action]]`
   - [ ] validate that provider is official/recognized
+    - This seems to be a requirement to publish to Hashicorp
   - [ ] validate directory name
   - [ ] validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
   - [ ] validate on main branch
   - [ ] validate github remote
-  - [ ] open publish page (if module not available)
   - [ ] check if module is available through API
   - [ ] `-force` flag
-- [ ] unwise/update bug involving malformed directory
-  - I somehow to got things in a state where tfmod was empty except for
-    state files
-  - that predictably broke a ton of stuff
+  - [ ] `-auto-approve` flag
+- [ ] unwise/update bugs
+  - Somehow got in a state once where tfmod was empty except for state files
 - [ ] config
   - needs so far kinda sorted by `gh` config and/or `git` config
     - git prefer https or ssh
@@ -120,26 +120,3 @@ Hoo boy...
 - [ ] tagging (latest, beta etc)
   - TODO: how does npm implement dist-tag?
   - also implement npm's dist-tag behavior on publish
-- [ ] HOLD: weird help parsing error
-  - it showed up and later magically went away. is this recurring?
-- [ ] what now?
-
-
-## resources
-
-- [publishing a public module](https://developer.hashicorp.com/terraform/registry/modules/publish)
-- [standard module structure](https://developer.hashicorp.com/terraform/language/modules/develop/structure)
-- [terraform registry http api](https://developer.hashicorp.com/terraform/registry/api-docs)
-  - it looks like it doesn't support creating/publishing a module, might need
-    to get creative
-  - potentially worth writing a Python client library for it anyway, though?
-- [PyGithub](https://github.com/PyGithub/PyGithub)
-  - can set the repository description
-  - can potentially create the repository if it doesn't exist
-- [pygit2](https://github.com/libgit2/pygit2)
-  - or just shell out to git lol
-- [python-hcl2](https://pypi.org/project/python-hcl2/)
-- [go-flag](https://github.com/jfhbrook/go-flag)
-  - doesn't have particular support for positional args. I'm not sure how
-    terraform solves that - terraform *does* use the flag package, as far as
-    I know
