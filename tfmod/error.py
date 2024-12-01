@@ -69,3 +69,10 @@ class GitDirtyError(GitError):
     TfMod detected uncommitted changes in the current project and will not
     continue. To override this behavior, set the -force flag.
     """
+
+
+class GhError(Error):
+    """
+    TfMod encountered an error when trying to use the gh CLI. Check your configuration
+    and try again.
+    """

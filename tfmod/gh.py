@@ -1,6 +1,9 @@
 from dataclasses import dataclass
+import os
 from pathlib import Path
-from typing import Dict, Optional
+import shlex
+import subprocess
+from typing import Dict, List, Optional
 
 from github import Auth, Github
 from yaml import load
@@ -10,7 +13,8 @@ try:
 except ImportError:
     from yaml import Loader
 
-from tfmod.constants import GH_CONFIG_DIR
+from tfmod.constants import GH_BIN, GH_CONFIG_DIR
+from tfmod.error import GhError
 from tfmod.io import logger
 
 
@@ -71,8 +75,31 @@ def get_gh_user(hosts: Optional[GhHosts]) -> Optional[str]:
         logger.debug("github.com not found in gh hosts")
 
 
+# TODO: This is mostly copy-paste from git.py...
+def gh_out(command: List[str], path: str = os.getcwd()) -> str:
+    argv = [GH_BIN] + command
+    proc = subprocess.run([GH_BIN] + command, cwd=path, capture_output=True)
+    print(proc.stderr.decode("unicode_escape"))
+    try:
+        proc.check_returncode()
+    except subprocess.CalledProcessError as exc:
+        raise GhError(
+            f'"{shlex.join(argv)}" exited unsuccessfully (status: {exc.returncode})'
+        )
+    else:
+        if proc.stderr:
+            print(proc.stderr)
+    # NOTE: This *may* not technically be safe to do, but here's hoping...
+    return proc.stdout.decode("unicode_escape")
+
+
+# TODO: What happens if I log out?
 def gh_auth_token(host: str = "github.com", user: Optional[str] = None) -> Auth.Token:
-    raise NotImplementedError("gh_auth_token()")
+    argv = ["auth", "token", "-h", host]
+    if user is not None:
+        argv.append("-u")
+        argv.append(user)
+    return Auth.Token(gh_out(argv).strip())
 
 
 def gh_client(host: str = "github.com", user: Optional[str] = None) -> Github:
