@@ -1,6 +1,7 @@
 import os
 from typing import cast, Dict, List, Optional, Self, Tuple
 
+from github.GithubException import UnknownObjectException
 from github.Repository import Repository
 from giturlparse import GitUrlParsed
 
@@ -91,8 +92,11 @@ class RepositoryResource(Resource[Repository]):
         spec = must(SpecResource)
         client = gh_client()
 
-        # TODO: What errors would this raise?
-        return client.get_user(cast(str, spec.namespace)).get_repo(spec.repo_name())
+        try:
+            return client.get_user(cast(str, spec.namespace)).get_repo(spec.repo_name())
+        except UnknownObjectException as exc:
+            logger.debug(str(exc))
+            return None
 
 
 Remote = Tuple[str, GitUrlParsed]
