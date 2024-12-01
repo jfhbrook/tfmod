@@ -2,9 +2,6 @@
 
 ## TODOs
 
-- [ ] publish
-  - [ ] identify less happy paths, stub tests
-    - A lot of them are uncommon, oops
 - [ ] tests
   - do after publish is working, since that's the main functionality and the
     APIs should have solidified by then
