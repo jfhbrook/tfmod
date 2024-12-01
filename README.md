@@ -3,18 +3,14 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] get name and namespace from git remote
-  - [ ] get name and namespace from directory name
-  - [ ] push actions to single layer
-  - [ ] validate name/namespace between module.tfvars and following match:
-    - directory name
-    - git remote
-  - [ ] find repo with github client and module.tfvars name/namespace
-  - [ ] when no remote and no repo, create repo w/ `gh`
-  - [ ] when no remote and repo, add as remote
-  - [ ] check/update description for git repo
+  - [ ] refactor for cached gets
+  - [ ] validate directory
+  - [ ] validate module
   - [ ] validate on main branch
-    - validate that branch is main branch
+  - [ ] validate github remote
+  - [ ] check/update description for git repo
+  - [ ] tag and push
+  - [ ] get name and namespace from directory name
   - [ ] validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
   - [ ] tagenpush
@@ -23,6 +19,11 @@
     - create/force x tag
     - TODO: dist tag? how does npm do this?
     - git push origin main --tags
+  - [ ] identify happy path, get happy path working
+    - Suspect a LOT of issues with the github client. It's a disaster, I may
+      need to use requests directly because jesus fucking christ
+  - [ ] identify less happy paths, get them specced out
+    - A lot of them are uncommon, oops
   - [ ] open publish page (if module not available)
   - [ ] check if module is available through API
   - [ ] `-force` flag
@@ -30,14 +31,12 @@
   - I somehow to got things in a state where tfmod was empty except for
     state files
   - that predictably broke a ton of stuff
-- [ ] update does not error when I expect it to
-  - I think this is because of how subshells work
 - [ ] tests
   - do after publish is working, since that's the main functionality and the
     APIs should have solidified by then
   - do them for bash too
 - [ ] config
-  - needs so far kinda sorted by `gh` config
+  - needs so far kinda sorted by `gh` config and/or `git` config
     - git prefer https or ssh
     - git prefer main branch
   - but can at least show the `gh` config, yeah?

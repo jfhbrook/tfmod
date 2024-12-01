@@ -63,6 +63,7 @@ def try_git() -> Tuple[Optional[GitRepo], List[Action]]:
         repo = GitRepo.load()
         _validate_current_branch(repo)
     except GitRepoNotFoundError:
+
         @cache
         def lazy_repo() -> GitRepo:
             return GitRepo.load()
@@ -287,6 +288,7 @@ def _update_description(spec: Spec) -> List[Action]:
     """
     Return description actions, given we know they're required.
     """
+
     def lazy_github():
         return github_repo(spec)
 
@@ -321,12 +323,19 @@ def publish() -> None:
     validate_module()
 
     git, git_actions = try_git()
+    # TODO: Passing git through these is probably unnecessary, if they can
+    # call a cached load_git directly... we can keep injecting the spec
+    # though.
     mop_actions = mop(git)
+    # TODO: If we don't inject remote (or git) then we don't need these
+    # functions to return them - can simplify their call signatures
     _, remote_actions = try_github_remote(spec, git)
     description_actions = update_description(spec)
     push_actions = tag_and_push(version)
 
-    run_actions(git_actions + mop_actions + remote_actions + description_actions + push_actions)
+    run_actions(
+        git_actions + mop_actions + remote_actions + description_actions + push_actions
+    )
 
     if not is_package_available():
         open_package_url()
