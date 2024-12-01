@@ -3,7 +3,6 @@
 ## TODOs
 
 - [ ] publish
-  - [ ] check/update description for git repo
   - [ ] tagenpush
     - create x.y.z tag
     - create/force x.y tag
@@ -20,6 +19,10 @@
   - do them for bash too
 - [ ] Publish part 2 (pushing back because part 1 is way too big and I need
       a sensible milestone)
+  - [ ] Workflow DSL
+    - In particular, a `Dependency` abc with `may`, `must` and `validate`
+      methods
+    - Possibly a type for `Callable[[], List[Action]]`
   - [ ] validate directory name
   - [ ] validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>

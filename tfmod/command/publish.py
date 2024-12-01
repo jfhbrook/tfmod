@@ -263,9 +263,16 @@ def description_actions() -> List[Action]:
 
 
 def _description_actions() -> List[Action]:
-    # actions: List[Action] = list()
+    spec = must_spec()
+    repo = must_repository()
 
-    raise NotImplementedError("description_actions")
+    return [
+        Action(
+            type="~",
+            name="(edit GitHub repository description)",
+            run=lambda: repo.edit(description=cast(str, spec.description)),
+        )
+    ]
 
 
 def tag_and_push_actions(version: Version) -> List[Action]:
