@@ -50,26 +50,47 @@ class Resource[T](ABC):
         self._cached: Optional[T] = None
 
     def may(self: Self) -> Optional[T]:
+        """
+        Attempt to get the resource. If the resource isn't ready, None is
+        returned. Successful attempts are cached.
+        """
         if self._cached is not None:
             return self._cached
-        maybe = self._get()
+        maybe = self.get()
         if maybe is not None:
+            self.validate(maybe)
             self._cached = maybe
         return maybe
 
     def must(self: Self) -> T:
+        """
+        Get the resource. If the resource isn't ready, raises a
+        ResourceError. Successful attempts are cached.
+        """
         maybe = self.may()
         if not maybe:
             raise ResourceError("Resource can not be resolved")
         return maybe
 
-    @abstractmethod
-    def _get(self: Self) -> Optional[T]:
-        raise NotImplementedError("_get")
+    def clear(self: Self) -> None:
+        """
+        Clear the resource, as though it has never been received.
+        """
+        self._cached = None
 
     @abstractmethod
-    def _validate(self: Self, obj: T) -> None:
-        raise NotImplementedError("_validate")
+    def get(self: Self) -> Optional[T]:
+        """
+        Attempt to get the resource. If the resource isn't ready, None must be
+        returned.
+        """
+        raise NotImplementedError("_get")
+
+    def validate(self: Self, resource: T) -> None:
+        """
+        Validate the resource. This hook is run when a resource first resolved.
+        """
+        pass
 
 
 def no_changes(plan: Plan) -> bool:
