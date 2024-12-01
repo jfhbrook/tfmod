@@ -51,6 +51,11 @@ We have lazers!!!
 tfmod publish
 ```
 
+That will generate a list of actions to execute in order to publish the
+module:
+
+![](https://github.com/jfhbrook/tfmod/blob/main/img/publish.jpg?raw=true)
+
 ## Development
 
 There's a `justfile` that's reasonably well-documented. I currently don't
