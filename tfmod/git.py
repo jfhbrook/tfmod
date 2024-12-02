@@ -97,12 +97,9 @@ class GitRepo:
         # This check is courtesy a different StackOverflow post:
         #
         #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
-        out = git_out(["remote", "show", remote])
+        out = git_out(["symbolic-ref", f"refs/remotes/{remote}/HEAD"]).strip()
 
-        search = re.search(r"^\s+HEAD branch: (.*)$", out, re.MULTILINE)
-        if not search:
-            return None
-        return search.group(1)
+        return out.split("/")[3]
 
     def add(self, what: str) -> None:
         git_interactive(["add", what], self.path)
