@@ -7,7 +7,12 @@ from github.GithubException import UnknownObjectException
 from github.Repository import Repository
 from giturlparse import GitUrlParsed
 
-from tfmod.error import GhRemoteNotFoundError, GitDirtyError, GitRepoNotFoundError
+from tfmod.error import (
+    DefaultBranchError,
+    GhRemoteNotFoundError,
+    GitDirtyError,
+    GitRepoNotFoundError,
+)
 from tfmod.gh import (
     get_gh_user,
     gh_client,
@@ -125,16 +130,6 @@ class GitResource(Resource[GitRepo]):
             logger.debug(str(exc))
             return None
 
-    def validate(self: Self, resource: GitRepo) -> None:
-        # Validate that the current branch is the main branch. Raise an Error if
-        # this is not the case, unless forced.
-        # Needs some reliable-ish way to detect what the main branch is. This will
-        # either be through configuration (in module.tfvars or in main config) or
-        # detected via something like:
-        #
-        #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
-        pass
-
 
 class UserResource(Resource[str]):
     def get(self: Self) -> Optional[str]:
@@ -183,25 +178,47 @@ class RemoteResource(Resource[Remote]):
         return remote_name, remote
 
     def validate(self: Self, resource: Remote) -> None:
+        self._validate_namespace(resource)
+        self._validate_name(resource)
+        self._validate_default_branch(resource)
+
+    def _validate_namespace(self: Self, resource: Remote) -> None:
         _, remote = resource
         spec = must(SpecResource)
 
-        expected_namespace = cast(str, spec.namespace)
-        actual_namespace = remote.user
-        expected_name = spec.repo_name()
-        actual_name = remote.name
+        expected = cast(str, spec.namespace)
+        actual = remote.user
 
-        if expected_namespace != actual_namespace:
+        if expected != actual:
             logger.warn(
-                title=f'GitHub namespace "{actual_namespace}" does not match '
-                "module.tfvars",
-                message=f'The expected namespace is "{expected_namespace}".',
+                title=f'GitHub namespace "{actual}" does not match ' "module.tfvars",
+                message=f'The expected namespace is "{expected}".',
             )
-        if expected_name != actual_name:
+
+    def _validate_name(self: Self, resource: Remote) -> None:
+        _, remote = resource
+        spec = must(SpecResource)
+
+        expected = spec.repo_name()
+        actual = remote.name
+
+        if expected != actual:
             logger.warn(
-                title=f'Repository name "{actual_name}" does not match module.tfvars',
-                message=f""""The project should to be named \"{expected_name}\", in
+                title=f'Repository name "{actual}" does not match module.tfvars',
+                message=f""""The project should to be named \"{expected}\", in
                 order to match the conventions of the Terraform registry.""",
+            )
+
+    def _validate_default_branch(self: Self, resource: Remote) -> None:
+        remote, _ = resource
+        git = must(GitResource)
+
+        expected = git.default_branch(remote)
+        actual = git.current_branch
+
+        if expected != actual:
+            raise DefaultBranchError(
+                f"Branch {actual} is not the default branch ({expected})"
             )
 
 

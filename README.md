@@ -75,7 +75,6 @@ Hoo boy...
   - snapshots for io
   - `bats` for bash, maybe a custom pytest runner
 - [ ] publishing improvements
-  - Validate on main branch
   - Validate module structure
     - <https://developer.hashicorp.com/terraform/language/modules/develop/structure>
   - Check if module is available through API

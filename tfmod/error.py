@@ -64,13 +64,6 @@ class GitRepoNotFoundError(GitError):
     """
 
 
-class GitDirtyError(GitError):
-    """
-    TfMod detected uncommitted changes in the current project and will not
-    continue. To override this behavior, set the -force flag.
-    """
-
-
 class GhError(Error):
     """
     TfMod encountered an error when trying to use the gh CLI. Check your configuration
@@ -78,18 +71,30 @@ class GhError(Error):
     """
 
 
-class GhRemoteNotFoundError(GhError):
+class PublishError(Error):
+    """
+    TfMod encountered an error when trying to publish your module.
+    """
+
+
+class GhRemoteNotFoundError(PublishError):
     """
     TfMod was unable to find a GitHub remote for this repository. Make sure
     that a git remote is defined that is hosted by GitHub.
     """
 
 
-# A generic error for the publish task.
-# TODO: This error message could be improved.
-class PublishError(Error):
+class DefaultBranchError(PublishError):
     """
-    TfMod encountered an error when trying to publish your module.
+    TfMod detected that the current branch is not the default and will not
+    continue. To override this behavior, set the -force flag.
+    """
+
+
+class GitDirtyError(PublishError):
+    """
+    TfMod detected uncommitted changes in the current project and will not
+    continue. To override this behavior, set the -force flag.
     """
 
 
