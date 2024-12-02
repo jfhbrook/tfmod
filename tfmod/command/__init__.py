@@ -5,11 +5,11 @@ from typing import Optional
 import flag
 
 from tfmod.command.base import cli, command, exit, run
-from tfmod.command.publish import publish as _publish
 from tfmod.constants import TFMOD_VERSION
 from tfmod.error import Error
 from tfmod.gh import get_gh_user, GhHosts, load_gh_hosts_optional
 from tfmod.io import logger
+from tfmod.publish import publish as _publish
 from tfmod.terraform import Terraform
 
 
