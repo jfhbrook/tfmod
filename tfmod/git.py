@@ -3,7 +3,7 @@ import os
 import re
 import shlex
 from subprocess import CalledProcessError
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, NoReturn, Optional
 
 import giturlparse
 
@@ -14,25 +14,35 @@ from tfmod.process import run_interactive, run_out, run_test
 Direction = Literal["fetch"] | Literal["push"]
 
 
+def git_error(exc: CalledProcessError, argv: List[str]) -> NoReturn:
+    raise GitError(
+        f'"{shlex.join(argv)}" exited unsuccessfully " f"(status: {exc.returncode})',
+        exc.stderr,
+    )
+
+
 def git_out(command: List[str], path: str = os.getcwd()) -> str:
     argv = [GIT_BIN] + command
     try:
         return run_out(argv, cwd=path)
     except CalledProcessError as exc:
-        raise GitError(
-            f'"{shlex.join(argv)}" exited unsuccessfully (status: {exc.returncode})'
-        )
+        git_error(exc, argv)
 
 
 def git_test(command: List[str], path: str = os.getcwd()) -> bool:
-    return run_test([GIT_BIN] + command, cwd=path)
+    argv = [GIT_BIN] + command
+    try:
+        return run_test(argv, cwd=path)
+    except CalledProcessError as exc:
+        git_error(exc, argv)
 
 
 def git_interactive(command: List[str], path: str = os.getcwd()) -> None:
+    argv = [GIT_BIN] + command
     try:
-        return run_interactive([GIT_BIN] + command, cwd=path)
+        return run_interactive(argv, cwd=path)
     except CalledProcessError as exc:
-        raise GitError(str(exc))
+        git_error(exc, argv)
 
 
 @dataclass
@@ -97,9 +107,13 @@ class GitRepo:
         # This check is courtesy a different StackOverflow post:
         #
         #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
-        out = git_out(["symbolic-ref", f"refs/remotes/{remote}/HEAD"]).strip()
-
-        return out.split("/")[3]
+        try:
+            out = git_out(["symbolic-ref", f"refs/remotes/{remote}/HEAD"]).strip()
+            return out.split("/")[3]
+        except GitError as exc:
+            if b"not a symbolic ref" in exc.stderr:
+                return None
+            raise exc
 
     def add(self, what: str) -> None:
         git_interactive(["add", what], self.path)

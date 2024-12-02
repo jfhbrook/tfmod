@@ -67,11 +67,11 @@ class SpecResource(Resource[Spec]):
 
         if resource.provider not in OFFICIAL_PROVIDERS and not resource.private:
             logger.warn(
-                title=f"${resource.provider} is not an official provider",
-                message="""If the Terraform Registry does not recognize the
-                provider, it may not allow you to publish it.
+                title=f"{resource.provider} is not an official provider",
+                message="""
+If the Terraform Registry does not recognize the provider, it may not allow you
+to publish it.
 
-                To quiet this message, set the "private" field in your
-                module.tfvars file.
-                """,
+To quiet this message, set the "private" field in your module.tfvars file.
+                """.strip(),
             )

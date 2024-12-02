@@ -46,7 +46,7 @@ class RemoteResource(Resource[Remote]):
         spec = must(SpecResource)
 
         expected = cast(str, spec.namespace)
-        actual = remote.user
+        actual = remote.owner
 
         if expected != actual:
             logger.warn(
@@ -72,8 +72,17 @@ class RemoteResource(Resource[Remote]):
         remote, _ = resource
         git = must(GitResource)
 
-        expected = git.default_branch(remote)
+        # TODO: This check is for the default branch with respect to the git
+        # repo - ie, if you called --set-upstream. A repo might not *have* a
+        # default branch - but the github API should be able to tell us what
+        # GitHub's default branch is,
+        # by looking at the "default_branch" property on the repo.
+
+        expected: Optional[str] = git.default_branch(remote)
         actual = git.current_branch
+
+        if expected is None:
+            return
 
         if expected != actual:
             raise DefaultBranchError(

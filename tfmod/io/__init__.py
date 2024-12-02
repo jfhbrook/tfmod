@@ -80,6 +80,7 @@ class Logger:
             )
         )
         if body:
+            pprint(f"[{color}]{MIDDLE_BAR}")
             for line in textwrap.dedent(body).strip().split("\n"):
                 pprint(f"[{color}]{MIDDLE_BAR} [/{color}] {line}")
         pprint(f"[{color}]{BOTTOM_BAR}[/{color}]")

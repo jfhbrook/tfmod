@@ -162,6 +162,7 @@ def tag_and_push_actions() -> List[Action]:
         Action(
             type="~", name=f"git tag {major} -f", run=lambda: git.tag(major, force=True)
         ),
+        # TODO: If repo is new, add --set-upstream flag
         Action(
             type="~",
             name=f"git push {remote} {branch}",

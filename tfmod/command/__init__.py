@@ -67,10 +67,16 @@ def init(_args: CommandArgs) -> None:
     cmd.run()
 
 
-@command(flags=dict(
-    force=Flag(flag.bool_, "force", False, "Force TfMod to publish, even when dangerous"),
-    auto_approve=Flag(flag.bool_, "auto-approve", False, "Automatically approve the publish plan")
-))
+@command(
+    flags=dict(
+        force=Flag(
+            flag.bool_, "force", False, "Force TfMod to publish, even when dangerous"
+        ),
+        auto_approve=Flag(
+            flag.bool_, "auto-approve", False, "Automatically approve the publish plan"
+        ),
+    )
+)
 def publish(args: CommandArgs) -> None:
     """
     Publish the current

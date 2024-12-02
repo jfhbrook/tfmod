@@ -1,3 +1,6 @@
+from typing import Self
+
+
 class Error(Exception):
     """
     TfMod experienced an error. This is likely a bug in TfMod. Consider filing
@@ -12,7 +15,7 @@ class Help(Error):
 
 
 class Exit(Error):
-    def __init__(self, exit_code: int) -> None:
+    def __init__(self: Self, exit_code: int) -> None:
         if exit_code:
             message = f"TfMod exited with an error (code: {exit_code})"
         else:
@@ -55,6 +58,10 @@ class GitError(Error):
 
         https://github.com/jfhbrook/tfmod/issues
     """
+
+    def __init__(self: Self, message: str, stderr: bytes) -> None:
+        super().__init__(message)
+        self.stderr = stderr
 
 
 class GitRepoNotFoundError(GitError):
