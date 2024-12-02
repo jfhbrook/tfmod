@@ -6,7 +6,7 @@ from typing import Optional, Self
 from tfmod.io import logger
 from tfmod.plan import must, Resource
 from tfmod.publish.resource.spec import SpecResource
-from tfmod.validate import validate_readme
+from tfmod.validate import validate_license, validate_readme
 
 
 class ModuleResource(Resource[str]):
@@ -18,6 +18,7 @@ class ModuleResource(Resource[str]):
     def validate(self: Self, resource: str) -> None:
         self._validate_directory_name(resource)
         validate_readme(resource)
+        validate_license(resource)
 
     def _validate_directory_name(self: Self, resource: str) -> None:
         spec = must(SpecResource)

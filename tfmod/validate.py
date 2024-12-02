@@ -120,11 +120,33 @@ def validate_readme(path: str) -> None:
     if not os.path.isfile(Path(path) / "README.md"):
         logger.warn(
             title="No README.md found",
-            message="""
-            The Terraform expects a README.md in the root of your
+            message=textwrap.dedent(
+                """
+            The Terraform Registry expects a README.md in the root of your
             project, and uses it to generate documentation on their site. For
             more information, see:
 
                 https://developer.hashicorp.com/terraform/registry/modules/publish
-            """,
+            """
+            ).strip(),
+        )
+
+
+def validate_license(path: str) -> None:
+    """
+    Validate that the project has a LICENSE. Terraform Registry uses this
+    to confirm the module is open source and to show in their documentation.
+    """
+    if not os.path.isfile(Path(path) / "LICENSE"):
+        logger.warn(
+            title="No README.md found",
+            message=textwrap.dedent(
+                """
+            The Terraform Registry expects a LICENSE file in the root of your project,
+            and uses it to confirm the project is open source. For more information,
+            see:
+
+                https://developer.hashicorp.com/terraform/registry/modules/publish
+            """
+            ).strip(),
         )

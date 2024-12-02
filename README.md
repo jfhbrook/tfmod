@@ -70,7 +70,6 @@ MIT. See the LICENSE file for more details.
 - [ ] Get tfmod working again
   - [x] terraform-shell-git-push - simpler case
   - [ ] terraform-dokku-deployment - fresh module sans git init
-- Validate module has LICENSE file
 - Tests and fixes for module.tfvars init and validation
   - introduce `tftest`
   - init can create/write null values, should at least write empty strings
