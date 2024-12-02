@@ -170,13 +170,13 @@ Only 'yes' will be accepted to approve.""",
     )
 
 
-def apply(plan: Plan) -> None:
+def apply(plan: Plan, auto_approve: bool = False) -> None:
     global APPLYING
 
     if no_changes(plan):
         return
 
-    if prompt_apply(plan):
+    if auto_approve or prompt_apply(plan):
         APPLYING = True
         try:
             for action in plan:

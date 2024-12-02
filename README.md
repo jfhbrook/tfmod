@@ -70,12 +70,6 @@ MIT. See the LICENSE file for more details.
 - [ ] Get tfmod working again
   - [x] terraform-shell-git-push - simpler case
   - [ ] terraform-dokku-deployment - fresh module sans git init
-- [ ] flags
-  - [x] basic support for command flags
-  - [ ] usage for command flags
-  - [ ] fix usage output anyway
-  - [ ] `-force` publish flag
-  - [ ] `-auto-approve` publish flag
 - [ ] config
   - show `gh` config
   - show git config's `init.defaultBranch`
@@ -88,6 +82,9 @@ MIT. See the LICENSE file for more details.
   - Command line parsing is Wrong
   - Write `doctor` command to help debug issues
   - `bats`, maybe a custom pytest runner
+- [ ] usage fixes
+  - document command flags
+  - fix formatting issues
 - [ ] check for updates in version command
 - [ ] Migrate off `rich`
   - It's too clever, adding extra colors I don't want

@@ -37,15 +37,14 @@ def git_actions() -> List[Action]:
     return []
 
 
-# TODO: -force flag
-def mop_actions() -> List[Action]:
+def mop_actions(force: bool) -> List[Action]:
     """
     Check the repository to see if it's dirty. If so, generate actions that
     would make it clean.
     """
     repo = may(GitResource)
 
-    if not repo or not repo.dirty():
+    if not repo or not repo.dirty() or force:
         # If the repo doesn't exist, we'll do these tasks during the git init.
         # If it's clean, then we don't have anything to do.
         return []
@@ -140,7 +139,7 @@ def _description_actions() -> List[Action]:
     ]
 
 
-def tag_and_push_actions() -> List[Action]:
+def tag_and_push_actions(force: bool) -> List[Action]:
     """
     Return actions that would tag and push to git.
     """
@@ -169,8 +168,8 @@ def tag_and_push_actions() -> List[Action]:
         # TODO: -force flag, and/or validate if this tag exists
         Action(
             type="+",
-            name=f"git tag {patch} -f",
-            run=lambda: must(GitResource).tag(patch),
+            name=f"git tag {patch}" + (" -f" if force else ""),
+            run=lambda: must(GitResource).tag(patch, force=force),
         ),
         Action(
             type="~",
@@ -185,8 +184,8 @@ def tag_and_push_actions() -> List[Action]:
         # TODO: If repo is new, add --set-upstream flag
         Action(
             type="~",
-            name=f"git push {remote} {branch}",
-            run=lambda: must(GitResource).push(remote, branch),
+            name=f"git push {remote} {branch}" + (" --force" if force else ""),
+            run=lambda: must(GitResource).push(remote, branch, force=force),
         ),
         Action(
             type="~",
@@ -243,19 +242,21 @@ def open_package_url() -> None:
     print("(To disable this check, set private = true in module.tfvars)")
 
 
-def publish(_args: Dict[str, Any]) -> None:
+def publish(args: Dict[str, Any]) -> None:
+    force: bool = args["force"]
+    auto_approve = args["auto_approve"]
     spec = must(SpecResource)
     must(ModuleResource)
 
     plan: Plan = (
         git_actions()
-        + mop_actions()
+        + mop_actions(force)
         + remote_actions()
         + description_actions()
-        + tag_and_push_actions()
+        + tag_and_push_actions(force)
     )
 
-    apply(plan)
+    apply(plan, auto_approve=auto_approve)
 
     if not spec.private and is_unpublished(spec):
         open_package_url()
