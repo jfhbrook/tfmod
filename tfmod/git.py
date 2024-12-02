@@ -3,12 +3,12 @@ import os
 import re
 import shlex
 from subprocess import CalledProcessError
-from typing import Dict, List, Literal, NoReturn, Optional
+from typing import Dict, List, Literal, NoReturn, Optional, Self
 
 import giturlparse
 
 from tfmod.constants import GIT_BIN
-from tfmod.error import GitError
+from tfmod.error import GitError, GitHeadNotFoundError, GitRepoNotFoundError
 from tfmod.process import run_interactive, run_out, run_test
 
 Direction = Literal["fetch"] | Literal["push"]
@@ -16,7 +16,7 @@ Direction = Literal["fetch"] | Literal["push"]
 
 def git_error(exc: CalledProcessError, argv: List[str]) -> NoReturn:
     raise GitError(
-        f'"{shlex.join(argv)}" exited unsuccessfully " f"(status: {exc.returncode})',
+        f'"{shlex.join(argv)}" exited unsuccessfully ' f"(status: {exc.returncode})",
         exc.stderr,
     )
 
@@ -59,10 +59,17 @@ class GitRemote:
 
 
 def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
-    out = git_out(["remote", "-v"], path).strip()
+    try:
+        out = git_out(["remote", "-v"], path).strip()
+    except GitError as exc:
+        if b"not a git repository" in exc.stderr:
+            raise GitRepoNotFoundError(str(exc), exc.stderr)
+        raise exc
 
     remotes: Dict[str, Dict[str, str]] = dict()
     for line in out.split("\n"):
+        if not line:
+            continue
         name, url, direction = re.split(r"\s+", line)
         direction = direction[1:-1]
         if name not in remotes:
@@ -72,26 +79,31 @@ def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
     return {name: GitRemote(**kwargs) for name, kwargs in remotes.items()}
 
 
-def git_current_branch(path: str = os.getcwd()) -> str:
-    return git_out(["rev-parse", "--abbrev-ref", "HEAD"], path).strip()
-
-
 @dataclass
 class GitRepo:
     remotes: Dict[str, GitRemote]
-    current_branch: str
     path: str
 
     @classmethod
     def load(cls, path: str = os.getcwd()) -> "GitRepo":
         remotes = git_remote(path)
-        current_branch = git_current_branch(path)
 
-        return GitRepo(remotes=remotes, current_branch=current_branch, path=path)
+        return GitRepo(remotes=remotes, path=path)
 
     @classmethod
     def init(cls, path: str = os.getcwd()) -> None:
         git_interactive(["init"], path)
+
+    def current_branch(self: Self) -> str:
+        try:
+            return git_out(["rev-parse", "--abbrev-ref", "HEAD"], self.path).strip()
+        except GitError as exc:
+            if b"unknown revision or path" in exc.stderr:
+                raise GitHeadNotFoundError(str(exc), exc.stderr)
+
+            if b"not a git repository" in exc.stderr:
+                raise GitRepoNotFoundError(str(exc), exc.stderr)
+            raise exc
 
     def status(self) -> None:
         git_interactive(["status"], self.path)

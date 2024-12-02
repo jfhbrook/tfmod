@@ -71,6 +71,15 @@ class GitRepoNotFoundError(GitError):
     """
 
 
+class GitHeadNotFoundError(GitError):
+    """
+    The git repository has no commits. Try running:
+
+        git add .
+        git commit -m 'First commit'
+    """
+
+
 class GhError(Error):
     """
     TfMod encountered an error when trying to use the gh CLI. Check your configuration

@@ -5,7 +5,7 @@ import webbrowser
 
 from tf_registry import RegistryClient, RegistryError
 
-from tfmod.error import GitDirtyError
+from tfmod.error import GitDirtyError, GitHeadNotFoundError
 from tfmod.gh import gh_repo_create, gh_repo_description
 from tfmod.git import GitRepo
 from tfmod.io import logger
@@ -86,7 +86,7 @@ def _remote_actions() -> List[Action]:
 
     user = must(UserResource)
     remote_name = "origin"
-    git_url = f"git@github.com:{user}/{repo_name}"
+    git_url = f"git@github.com:{user}/{repo_name}.git"
 
     actions: List[Action] = list()
 
@@ -144,34 +144,54 @@ def tag_and_push_actions() -> List[Action]:
     """
     Return actions that would tag and push to git.
     """
-    git = must(GitResource)
-    remote, _ = must(RemoteResource)
     version = must(VersionResource)
+    git = may(GitResource)
+    rem = may(RemoteResource)
 
-    branch = git.current_branch
+    if rem:
+        remote, _ = rem
+    else:
+        remote = "origin"
+
+    if git is None:
+        branch = "main"
+    else:
+        try:
+            branch = git.current_branch()
+        except GitHeadNotFoundError:
+            branch = "main"
+
     patch = f"{version.major}.{version.minor}.{version.patch}"
     minor = f"{version.major}.{version.minor}"
     major = str(version.major)
 
     return [
         # TODO: -force flag, and/or validate if this tag exists
-        Action(type="+", name=f"git tag {patch} -f", run=lambda: git.tag(patch)),
         Action(
-            type="~", name=f"git tag {minor} -f", run=lambda: git.tag(minor, force=True)
+            type="+",
+            name=f"git tag {patch} -f",
+            run=lambda: must(GitResource).tag(patch),
         ),
         Action(
-            type="~", name=f"git tag {major} -f", run=lambda: git.tag(major, force=True)
+            type="~",
+            name=f"git tag {minor} -f",
+            run=lambda: must(GitResource).tag(minor, force=True),
+        ),
+        Action(
+            type="~",
+            name=f"git tag {major} -f",
+            run=lambda: must(GitResource).tag(major, force=True),
         ),
         # TODO: If repo is new, add --set-upstream flag
         Action(
             type="~",
             name=f"git push {remote} {branch}",
-            run=lambda: git.push(remote, branch),
+            run=lambda: must(GitResource).push(remote, branch),
         ),
         Action(
             type="~",
             name=f"git push {remote} --tags --force",
-            run=lambda: git.push(remote, tags=True, force=True),
+            run=lambda: must(GitResource).push(remote, tags=True, force=True),
         ),
     ]
 

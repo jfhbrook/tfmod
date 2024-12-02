@@ -1,3 +1,4 @@
+import traceback
 from typing import Optional, Self
 
 from tfmod.error import GitRepoNotFoundError
@@ -15,6 +16,6 @@ class GitResource(Resource[GitRepo]):
         try:
             repo = GitRepo.load()
             return repo
-        except GitRepoNotFoundError as exc:
-            logger.debug(str(exc))
+        except GitRepoNotFoundError:
+            logger.debug(traceback.format_exc())
             return None

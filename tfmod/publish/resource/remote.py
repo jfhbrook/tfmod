@@ -2,9 +2,9 @@ from typing import Any, cast, Dict, Optional, Self, Tuple
 
 from giturlparse import GitUrlParsed
 
-from tfmod.error import DefaultBranchError, GhRemoteNotFoundError
+from tfmod.error import DefaultBranchError
 from tfmod.io import logger
-from tfmod.plan import must, Resource
+from tfmod.plan import may, must, Resource
 from tfmod.publish.resource.git import GitResource
 from tfmod.publish.resource.spec import SpecResource
 
@@ -15,7 +15,10 @@ class RemoteResource(Resource[Remote]):
     name = "remote"
 
     def get(self: Self) -> Optional[Remote]:
-        git = must(GitResource)
+        git = may(GitResource)
+
+        if not git:
+            return
 
         remotes: Dict[str, GitUrlParsed] = {
             name: remote.parse() for name, remote in git.remotes.items()
@@ -34,7 +37,7 @@ class RemoteResource(Resource[Remote]):
                     remote_name = name
                     break
         if not remote:
-            raise GhRemoteNotFoundError("GitHub remote not found")
+            return None
 
         return remote_name, remote
 

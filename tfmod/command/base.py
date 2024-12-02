@@ -231,6 +231,7 @@ def cli(fn: Main) -> Main:
             logger.debug(traceback.format_exc())
             sys.exit(1)
         except Error as exc:
+            logger.debug(traceback.format_exc())
             logger.exception(exc)
             sys.exit(1)
         except (KeyboardInterrupt, EOFError):

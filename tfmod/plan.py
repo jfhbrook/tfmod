@@ -52,11 +52,11 @@ class Resource[T](ABC):
 
     def __init__(self: Self) -> None:
         self._cached: Optional[T] = None
-        pprint(f"[bold]{self.name}: Refreshing state...[/bold]")
 
     def may(self: Self) -> Optional[T]:
         if self._cached is not None:
             return self._cached
+        pprint(f"[bold]{self.name}: Refreshing state...[/bold]")
         maybe = self.get()
         if maybe is not None:
             self.validate(maybe)
@@ -66,7 +66,7 @@ class Resource[T](ABC):
     def must(self: Self) -> T:
         maybe = self.may()
         if not maybe:
-            raise ResourceError("Resource can not be resolved")
+            raise ResourceError(f"Resource {self.name} can not be resolved")
         return maybe
 
     def clear(self: Self) -> None:
