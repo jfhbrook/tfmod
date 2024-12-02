@@ -48,8 +48,11 @@ class Resource[T](ABC):
 
     _singleton: "Optional[Resource[T]]" = None
 
+    name: str = "<none>"
+
     def __init__(self: Self) -> None:
         self._cached: Optional[T] = None
+        pprint(f"[bold]{self.name}: Refreshing state...[/bold]")
 
     def may(self: Self) -> Optional[T]:
         if self._cached is not None:

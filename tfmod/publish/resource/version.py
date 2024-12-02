@@ -6,6 +6,8 @@ from tfmod.version import Version
 
 
 class VersionResource(Resource[Version]):
+    name = "version"
+
     def get(self: Self) -> Optional[Version]:
         spec = must(SpecResource)
 

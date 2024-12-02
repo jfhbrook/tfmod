@@ -10,6 +10,8 @@ from tfmod.publish.resource.spec import SpecResource
 
 
 class RepositoryResource(Resource[Repository]):
+    name = "repository"
+
     def get(self: Self) -> Optional[Repository]:
         spec = must(SpecResource)
         client = gh_client()

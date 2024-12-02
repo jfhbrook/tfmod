@@ -8,6 +8,8 @@ from tfmod.publish.resource.module import ModuleResource
 
 
 class GitResource(Resource[GitRepo]):
+    name = "git"
+
     def get(self: Self) -> Optional[GitRepo]:
         must(ModuleResource)
         try:

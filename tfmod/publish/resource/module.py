@@ -10,6 +10,8 @@ from tfmod.validate import validate_readme
 
 
 class ModuleResource(Resource[str]):
+    name = "module"
+
     def get(self: Self) -> Optional[str]:
         return os.getcwd()
 

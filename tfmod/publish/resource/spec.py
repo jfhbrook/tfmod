@@ -51,6 +51,8 @@ OFFICIAL_PROVIDERS = {
 
 
 class SpecResource(Resource[Spec]):
+    name = "spec"
+
     def get(self: Self) -> Optional[Spec]:
         # We validate with Terraform before trying to load. This is because
         # we want to see Terraform errors prior to choking on the load.

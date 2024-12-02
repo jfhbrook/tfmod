@@ -1,4 +1,4 @@
-from typing import cast, Dict, Optional, Self, Tuple
+from typing import Any, cast, Dict, Optional, Self, Tuple
 
 from giturlparse import GitUrlParsed
 
@@ -12,6 +12,8 @@ Remote = Tuple[str, GitUrlParsed]
 
 
 class RemoteResource(Resource[Remote]):
+    name = "remote"
+
     def get(self: Self) -> Optional[Remote]:
         git = must(GitResource)
 
@@ -46,7 +48,7 @@ class RemoteResource(Resource[Remote]):
         spec = must(SpecResource)
 
         expected = cast(str, spec.namespace)
-        actual = remote.owner
+        actual = cast(Any, remote).owner
 
         if expected != actual:
             logger.warn(
