@@ -86,13 +86,23 @@ class GitRepo:
     def status(self) -> None:
         git_interactive(["status"], self.path)
 
-    # This dirty check is courtesy an answer on this StackOverflow post:
-    #
-    #    https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
-
     def dirty(self) -> bool:
+        # This dirty check is courtesy an answer on this StackOverflow post:
+        #
+        #     https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
         lines = git_out(["status", "--porcelain"], self.path).strip()
         return len(lines) > 0
+
+    def default_branch(self, remote: str) -> Optional[str]:
+        # This check is courtesy a different StackOverflow post:
+        #
+        #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
+        out = git_out(["remote", "show", remote])
+
+        search = re.search(r"^\s+HEAD branch: (.*)$", out, re.MULTILINE)
+        if not search:
+            return None
+        return search.group(1)
 
     def add(self, what: str) -> None:
         git_interactive(["add", what], self.path)
