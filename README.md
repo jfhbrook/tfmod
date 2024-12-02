@@ -67,6 +67,7 @@ MIT. See the LICENSE file for more details.
 
 ## TODOs
 
+- [ ] Get tfmod working with fresh module sans git init
 - Validate module has LICENSE file
 - Tests and fixes for module.tfvars init and validation
   - introduce `tftest`
