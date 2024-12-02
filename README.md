@@ -95,6 +95,8 @@ MIT. See the LICENSE file for more details.
   - Write `doctor` command to help debug issues
   - `bats`, maybe a custom pytest runner
 - [ ] check for updates in version command
+- [ ] Migrate off `rich`
+  - It's too clever, adding extra colors I don't want
 - [ ] python bugs and tests
   - monkeypatch `run_*` commands
   - monkeypatch github API commands
