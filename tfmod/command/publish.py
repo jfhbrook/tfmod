@@ -1,10 +1,7 @@
-import fnmatch
 import os
 import os.path
 from pathlib import Path
-import re
 import shlex
-import textwrap
 from typing import cast, Dict, List, Optional, Self, Tuple
 
 from github.GithubException import UnknownObjectException
@@ -29,6 +26,7 @@ from tfmod.io import logger
 from tfmod.plan import Action, apply, may, must, Plan, Resource
 from tfmod.spec import Spec
 from tfmod.terraform import Terraform
+from tfmod.validate import validate_readme
 from tfmod.version import Version
 
 # The Terraform Registry seems to only allow modules to be published which
@@ -113,8 +111,7 @@ class ModuleResource(Resource[str]):
 
     def validate(self: Self, resource: str) -> None:
         self._validate_directory_name(resource)
-        self._validate_readme(resource)
-        self._validate_structure(resource)
+        validate_readme(resource)
 
     def _validate_directory_name(self: Self, resource: str) -> None:
         spec = must(SpecResource)
@@ -127,67 +124,6 @@ class ModuleResource(Resource[str]):
                 message=f""""The project should to be named \"{expected}\", in order
                 to match the conventions of the Terraform registry.""",
             )
-
-    def _validate_readme(self: Self, resource: str) -> None:
-        if not os.path.isfile(Path(resource) / "README.md"):
-            logger.warn(
-                title="No README.md found",
-                message="""
-                The Terraform expects a README.md in the root of your
-                project, and uses it to generate documentation on their site. For
-                more information, see:
-
-                    https://developer.hashicorp.com/terraform/registry/modules/publish
-                """,
-            )
-
-    def _validate_structure(self: Self, resource: str) -> None:
-        ignore: List[str] = list()
-        misplaced: List[str] = list()
-
-        # We at least make an *attempt* to respect .gitignore. This is hard to
-        # fully test, but if the validation step is super slow, this being
-        # broken is why.
-        try:
-            with open(Path(resource) / ".gitignore", "r") as f:
-                for line in f:
-                    if re.match(r"^\s*#", line):
-                        continue
-                    ignore.append(line)
-        except FileNotFoundError:
-            pass
-
-        for root, dirs, files in os.walk(resource):
-            # Terraform files in the root and modules directories are fine
-            if root == resource:
-                if "modules" in dirs:
-                    dirs.remove("modules")
-                continue
-
-            for pat in ignore:
-                for f in fnmatch.filter([str(Path(root) / f) for f in files], pat):
-                    files.remove(f)
-
-            for file in files:
-                if file.endswith(".tf"):
-                    misplaced.append(file)
-
-        if misplaced:
-            title = "Module has Terraform files in unapproved locations"
-            body = "The following files are in unapproved locations:\n\n"
-            for file in misplaced:
-                body += f"- {file}\n"
-            body += textwrap.dedent(
-                """
-
-            Terraform files must either be in the project root or inside modules in the
-            ./modules folder. For more information see:
-
-                https://developer.hashicorp.com/terraform/language/modules/develop/structure
-            """
-            )
-
-            logger.warn(title, body)
 
 
 class GitResource(Resource[GitRepo]):
