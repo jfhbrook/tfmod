@@ -1,6 +1,8 @@
+import fnmatch
 import os
 import os.path
 from pathlib import Path
+import re
 import shlex
 import textwrap
 from typing import cast, Dict, List, Optional, Self, Tuple
@@ -130,7 +132,7 @@ class ModuleResource(Resource[str]):
         if not os.path.isfile(Path(resource) / "README.md"):
             logger.warn(
                 title="No README.md found",
-                message=f"""
+                message="""
                 The Terraform expects a README.md in the root of your
                 project, and uses it to generate documentation on their site. For
                 more information, see:
@@ -140,7 +142,20 @@ class ModuleResource(Resource[str]):
             )
 
     def _validate_structure(self: Self, resource: str) -> None:
+        ignore: List[str] = list()
         misplaced: List[str] = list()
+
+        # We at least make an *attempt* to respect .gitignore. This is hard to
+        # fully test, but if the validation step is super slow, this being
+        # broken is why.
+        try:
+            with open(Path(resource) / ".gitignore", "r") as f:
+                for line in f:
+                    if re.match(r"^\s*#", line):
+                        continue
+                    ignore.append(line)
+        except FileNotFoundError:
+            pass
 
         for root, dirs, files in os.walk(resource):
             # Terraform files in the root and modules directories are fine
@@ -148,6 +163,10 @@ class ModuleResource(Resource[str]):
                 if "modules" in dirs:
                     dirs.remove("modules")
                 continue
+
+            for pat in ignore:
+                for f in fnmatch.filter([str(Path(root) / f) for f in files], pat):
+                    files.remove(f)
 
             for file in files:
                 if file.endswith(".tf"):
