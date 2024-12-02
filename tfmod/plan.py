@@ -40,6 +40,8 @@ ACTION_MARKER = {
     "-": "[red]-[/red]",
 }
 
+APPLYING = False
+
 
 class Resource[T](ABC):
     """
@@ -56,7 +58,8 @@ class Resource[T](ABC):
     def may(self: Self) -> Optional[T]:
         if self._cached is not None:
             return self._cached
-        pprint(f"[bold]{self.name}: Refreshing state...[/bold]")
+        if not APPLYING:
+            pprint(f"[bold]{self.name}: Refreshing state...[/bold]")
         maybe = self.get()
         if maybe is not None:
             self.validate(maybe)
@@ -168,11 +171,17 @@ Only 'yes' will be accepted to approve.""",
 
 
 def apply(plan: Plan) -> None:
+    global APPLYING
+
     if no_changes(plan):
         return
 
     if prompt_apply(plan):
-        for action in plan:
-            action.run()
+        APPLYING = True
+        try:
+            for action in plan:
+                action.run()
+        finally:
+            APPLYING = False
     else:
         raise ApplyInterruptError("error asking for approval: interrupted")
