@@ -1,6 +1,8 @@
 import os
+import os.path
 from pathlib import Path
 import shlex
+import textwrap
 from typing import cast, Dict, List, Optional, Self, Tuple
 
 from github.GithubException import UnknownObjectException
@@ -103,11 +105,16 @@ class SpecResource(Resource[Spec]):
             )
 
 
-class PathResource(Resource[str]):
+class ModuleResource(Resource[str]):
     def get(self: Self) -> Optional[str]:
         return os.getcwd()
 
     def validate(self: Self, resource: str) -> None:
+        self._validate_directory_name(resource)
+        self._validate_readme(resource)
+        self._validate_structure(resource)
+
+    def _validate_directory_name(self: Self, resource: str) -> None:
         spec = must(SpecResource)
         expected = spec.repo_name()
         actual = Path(resource).name
@@ -119,10 +126,54 @@ class PathResource(Resource[str]):
                 to match the conventions of the Terraform registry.""",
             )
 
+    def _validate_readme(self: Self, resource: str) -> None:
+        if not os.path.isfile(Path(resource) / "README.md"):
+            logger.warn(
+                title="No README.md found",
+                message=f"""
+                The Terraform expects a README.md in the root of your
+                project, and uses it to generate documentation on their site. For
+                more information, see:
+
+                    https://developer.hashicorp.com/terraform/registry/modules/publish
+                """,
+            )
+
+    def _validate_structure(self: Self, resource: str) -> None:
+        misplaced: List[str] = list()
+
+        for root, dirs, files in os.walk(resource):
+            # Terraform files in the root and modules directories are fine
+            if root == resource:
+                if "modules" in dirs:
+                    dirs.remove("modules")
+                continue
+
+            for file in files:
+                if file.endswith(".tf"):
+                    misplaced.append(file)
+
+        if misplaced:
+            title = "Module has Terraform files in unapproved locations"
+            body = "The following files are in unapproved locations:\n\n"
+            for file in misplaced:
+                body += f"- {file}\n"
+            body += textwrap.dedent(
+                """
+
+            Terraform files must either be in the project root or inside modules in the
+            ./modules folder. For more information see:
+
+                https://developer.hashicorp.com/terraform/language/modules/develop/structure
+            """
+            )
+
+            logger.warn(title, body)
+
 
 class GitResource(Resource[GitRepo]):
     def get(self: Self) -> Optional[GitRepo]:
-        must(PathResource)
+        must(ModuleResource)
         try:
             repo = GitRepo.load()
             return repo
