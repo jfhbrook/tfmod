@@ -67,14 +67,20 @@ MIT. See the LICENSE file for more details.
 
 ## TODOs
 
-Hoo boy...
-
-- [ ] publishing improvements
-  - Check if module is available through API
+- Tests and fixes for module.tfvars init and validation
+  - introduce `tftest`
+  - init can create/write null values, should at least write empty strings
+  - spec doesn't validate against null values or falsey values, have to do that
+    with a validation block
 - [ ] flags
-  - parse command flags automatically - no use case for "bleed-through"
   - `-force` publish flag
   - `-auto-approve` publish flag
+  - handle secondary flags in usage somehow
+- [ ] config
+  - show `gh` config
+  - show git config's `init.defaultBranch`
+  - preferred git remote type
+  - disable automatically opening publish page in browser
 - [ ] bash (unwise/update) bugs and tests
   - Somehow got in a state once where tfmod was empty except for state files
   - Command output quoting is fubar
@@ -87,21 +93,13 @@ Hoo boy...
   - monkeypatch `run_*` commands
   - monkeypatch github API commands
   - snapshots for io
-  - Bug: Attempts to update description to None if empty in module.tfvars
-    - Shouldn't spec validation catch this?
-    - Shouldn't init default it to something?
   - Question: Is namespace actually required? Isn't that implied by GitHub?
-- [ ] config
-  - show `gh` config
-  - show git config's `init.defaultBranch`
-  - where to get preferred git remote type? ssh vs https?
-  - may need to stop punting on bespoke config file
 - [ ] script related commands
   - run
   - lint
   - fmt/format
-  - test
-  - validate
+  - test - tests-of-the-sierra-madre by default
+  - validate - check module structure
 - [ ] viewing commands
   - docs - open terraform registry page in browser
   - namespace - open terraform registry page for namespace in browser

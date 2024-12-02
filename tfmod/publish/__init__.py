@@ -1,9 +1,14 @@
 import shlex
+import textwrap
 from typing import cast, List
+import webbrowser
+
+from tf_registry import RegistryClient, RegistryError
 
 from tfmod.error import GitDirtyError
 from tfmod.gh import gh_repo_create, gh_repo_description
 from tfmod.git import GitRepo
+from tfmod.io import logger
 from tfmod.plan import Action, apply, may, must, Plan
 from tfmod.publish.resource.git import GitResource
 from tfmod.publish.resource.module import ModuleResource
@@ -12,6 +17,7 @@ from tfmod.publish.resource.repository import RepositoryResource
 from tfmod.publish.resource.spec import SpecResource
 from tfmod.publish.resource.user import UserResource
 from tfmod.publish.resource.version import VersionResource
+from tfmod.spec import Spec
 
 
 def git_actions() -> List[Action]:
@@ -169,20 +175,55 @@ def tag_and_push_actions() -> List[Action]:
     ]
 
 
-def is_package_available() -> bool:
+def is_unpublished(spec: Spec) -> bool:
+    namespace = cast(str, spec.namespace)
+    name = cast(str, spec.name)
+    provider = cast(str, spec.provider)
+    try:
+        client = RegistryClient()
+        # Hoping this is a relatively quick check, since the payloads are
+        # virtually nonexistent
+        client.latest_download_url(namespace, name, provider)
+    except RegistryError as exc:
+        # Not found, baby!
+        if exc.code == 404:
+            return True
+
+        # Don't block, just return False
+        logger.debug(f"Terraform Registry API error: {exc}")
+        logger.warn(
+            f"Terraform Registry API failed with code {exc.code}:",
+            textwrap.dedent(
+                f"""
+            The Terraform Registry may be having issues and may work in the future.
+            """
+            ).strip(),
+        )
     return False
+
+
+CREATE_PACKAGE_URL = "https://registry.terraform.io/github/create"
 
 
 def open_package_url() -> None:
     print(
-        """To publish your package, go to:
-
-    https://registry.terraform.io/github/create"""
+        "Your module is available on GitHub, but not published to the "
+        "Terraform Registry."
     )
+    print(f"To publish your package, visit:")
+    print("")
+    print(f"    {CREATE_PACKAGE_URL}")
+    print("")
+
+    # TODO: Disable opening URL in core config
+    if webbrowser.open_new_tab(CREATE_PACKAGE_URL):
+        print(f"{CREATE_PACKAGE_URL} has automatically been opened in your browser.")
+
+    print("(To disable this check, set private = true in module.tfvars)")
 
 
 def publish() -> None:
-    must(SpecResource)
+    spec = must(SpecResource)
     must(ModuleResource)
 
     plan: Plan = (
@@ -195,8 +236,10 @@ def publish() -> None:
 
     apply(plan)
 
-    if not is_package_available():
+    if not spec.private and is_unpublished(spec):
         open_package_url()
+    else:
+        logger.ok("Your module has been published!")
 
 
 def validate_mopped() -> None:
