@@ -3,14 +3,29 @@ import functools
 import sys
 import textwrap
 import traceback
-from typing import Callable, Dict, List, NoReturn, Optional
+from typing import Any, Callable, Dict, List, NoReturn, Optional, Self
 
 import flag
 
 from tfmod.error import CliError, Error, Exit, Help, TerraformError
 from tfmod.io import logger
 
-CommandRunner = Callable[[], None]
+CommandArgs = Dict[str, Any]
+CommandRunner = Callable[[CommandArgs], None]
+
+
+@dataclass
+class Flag[T]:
+    type: Callable[[str, T, str], flag.Pointer[T]]
+    name: str
+    default: T
+    usage: str
+
+
+Flags = Dict[str, Flag[Any]]
+FlagVars = Dict[str, flag.Pointer[Any]]
+
+COMMAND_VARS: Dict[str, FlagVars] = dict()
 
 
 @dataclass
@@ -22,16 +37,50 @@ class Command:
     name: str
     help: str
     command: CommandRunner
+    flags: Flags
 
-    def run(self) -> None:
-        self.command()
+    @property
+    def vars(self: Self) -> Optional[FlagVars]:
+        return COMMAND_VARS.get(self.name, None)
+
+    def load_vars(self: Self) -> FlagVars:
+        """
+        Define and return command flag vars.
+        """
+        # Only load vars once
+        if self.vars:
+            return self.vars
+
+        vars: FlagVars = dict()
+
+        for name, fl in self.flags.items():
+            vars[name] = fl.type(fl.name, fl.default, fl.usage)
+
+        COMMAND_VARS[self.name] = vars
+        return vars
+
+    @property
+    def args(self: Self) -> Dict[str, Any]:
+        # Only parse once
+        if self.vars:
+            vars = self.vars
+        else:
+            vars = self.load_vars()
+            flag.parse()
+
+        return {name: var.deref() for name, var in vars.items()}
+
+    def run(self: Self, args: CommandArgs) -> None:
+        self.command(args)
 
 
 COMMANDS: Dict[str, Command] = dict()
 
 
 def command(
-    name: Optional[str] = None, help: Optional[str] = None
+    name: Optional[str] = None,
+    help: Optional[str] = None,
+    flags: Optional[Flags] = None,
 ) -> Callable[[CommandRunner], CommandRunner]:
     """
     Define a command
@@ -45,7 +94,12 @@ def command(
             help_message = help
         elif command.__doc__:
             help_message = textwrap.dedent(command.__doc__).strip()
-        cmd = Command(name=command_name, help=help_message, command=command)
+        cmd = Command(
+            name=command_name,
+            help=help_message,
+            command=command,
+            flags=flags if flags else dict(),
+        )
         COMMANDS[command_name] = cmd
         return command
 
@@ -86,6 +140,8 @@ def usage():
         command = flag.args[0]
 
         if command in COMMANDS:
+            cmd = COMMANDS[command]
+            cmd.load_vars()
             print(f"Usage: tfmod [OPTIONS] {command}")
             print("")
             print(COMMANDS[command].help)
@@ -205,7 +261,7 @@ def run() -> None:
     if command in COMMANDS:
         cmd = COMMANDS[command]
         flag.args.pop(0)
-        cmd.run()
+        cmd.run(cmd.args)
 
         exit()
     else:

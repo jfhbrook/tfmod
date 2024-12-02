@@ -4,7 +4,7 @@ from typing import Optional
 
 import flag
 
-from tfmod.command.base import cli, command, exit, run
+from tfmod.command.base import cli, command, CommandArgs, exit, Flag, run
 from tfmod.constants import TFMOD_VERSION
 from tfmod.error import Error
 from tfmod.gh import get_gh_user, GhHosts, load_gh_hosts_optional
@@ -30,7 +30,7 @@ def version() -> None:
 
 
 @command(name="version")
-def version_cmd() -> None:
+def version_cmd(_args: CommandArgs) -> None:
     """
     Show the current TfMod version
     """
@@ -38,7 +38,7 @@ def version_cmd() -> None:
 
 
 @command()
-def init() -> None:
+def init(_args: CommandArgs) -> None:
     """
     Initialize a new project
     """
@@ -67,17 +67,20 @@ def init() -> None:
     cmd.run()
 
 
-@command()
-def publish() -> None:
+@command(flags=dict(
+    force=Flag(flag.bool_, "force", False, "Force TfMod to publish, even when dangerous"),
+    auto_approve=Flag(flag.bool_, "auto-approve", False, "Automatically approve the publish plan")
+))
+def publish(args: CommandArgs) -> None:
     """
     Publish the current
     """
 
-    _publish()
+    _publish(args)
 
 
 @command()
-def config() -> None:
+def config(_args: CommandArgs) -> None:
     """
     Configure TfMod
     """
@@ -88,7 +91,7 @@ def config() -> None:
 
 
 @command()
-def update() -> None:
+def update(_args: CommandArgs) -> None:
     """
     Install or update TfMod and its dependencies
     """
@@ -98,7 +101,7 @@ def update() -> None:
 
 
 @command()
-def unwise() -> None:
+def unwise(_args: CommandArgs) -> None:
     """
     Remove TfMod and its files.
     """

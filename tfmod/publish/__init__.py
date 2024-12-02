@@ -1,6 +1,6 @@
 import shlex
 import textwrap
-from typing import cast, List
+from typing import Any, cast, Dict, List
 import webbrowser
 
 from tf_registry import RegistryClient, RegistryError
@@ -194,7 +194,7 @@ def is_unpublished(spec: Spec) -> bool:
         logger.warn(
             f"Terraform Registry API failed with code {exc.code}:",
             textwrap.dedent(
-                f"""
+                """
             The Terraform Registry may be having issues and may work in the future.
             """
             ).strip(),
@@ -210,7 +210,7 @@ def open_package_url() -> None:
         "Your module is available on GitHub, but not published to the "
         "Terraform Registry."
     )
-    print(f"To publish your package, visit:")
+    print("To publish your package, visit:")
     print("")
     print(f"    {CREATE_PACKAGE_URL}")
     print("")
@@ -222,7 +222,7 @@ def open_package_url() -> None:
     print("(To disable this check, set private = true in module.tfvars)")
 
 
-def publish() -> None:
+def publish(_args: Dict[str, Any]) -> None:
     spec = must(SpecResource)
     must(ModuleResource)
 

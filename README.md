@@ -67,15 +67,18 @@ MIT. See the LICENSE file for more details.
 
 ## TODOs
 
+- Validate module has LICENSE file
 - Tests and fixes for module.tfvars init and validation
   - introduce `tftest`
   - init can create/write null values, should at least write empty strings
   - spec doesn't validate against null values or falsey values, have to do that
     with a validation block
 - [ ] flags
-  - `-force` publish flag
-  - `-auto-approve` publish flag
-  - handle secondary flags in usage somehow
+  - [x] basic support for command flags
+  - [ ] usage for command flags
+  - [ ] fix usage output anyway
+  - [ ] `-force` publish flag
+  - [ ] `-auto-approve` publish flag
 - [ ] config
   - show `gh` config
   - show git config's `init.defaultBranch`
