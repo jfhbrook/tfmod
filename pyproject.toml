@@ -31,17 +31,6 @@ dependencies = [
   "toml",
 ]
 
-[project.optional-dependencies]
-dev = [
-  "flake8",
-  "flake8-black",
-  "pytest",
-  "black",
-  "isort",
-  "jupyter-console",
-  "validate-pyproject[all]",
-]
-
 [project.scripts]
 router = "tfmod:main"
 
@@ -61,3 +50,15 @@ testpaths = [ "tests" ]
 
 [tool.setuptools]
 packages = [ "tfmod" ]
+
+[dependency-groups]
+dev = [
+    "flake8",
+    "flake8-black",
+    "pytest",
+    "black",
+    "isort",
+    "jupyter-console",
+    "tftest>=1.8.5",
+    "validate-pyproject[all]",
+]

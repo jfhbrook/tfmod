@@ -16,7 +16,7 @@ default:
 # Setup project
 setup:
   for module in {{ root-modules }}; do terraform "-chdir=${module}" init -upgrade; done
-  uv sync -U --extra dev
+  uv sync -U --dev
   uv pip install -e .
 
 #

@@ -243,11 +243,11 @@ wheels = [
 
 [[package]]
 name = "fastjsonschema"
-version = "2.21.0"
+version = "2.21.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/31/d0/492a26afa3bdd0cb5dd78f59d7f4ca902d8e335856530e599e0d1ed9140d/fastjsonschema-2.21.0.tar.gz", hash = "sha256:a02026bbbedc83729da3bfff215564b71902757f33f60089f1abae193daa4771", size = 373839 }
+sdist = { url = "https://files.pythonhosted.org/packages/8b/50/4b769ce1ac4071a1ef6d86b1a3fb56cdc3a37615e8c5519e1af96cdac366/fastjsonschema-2.21.1.tar.gz", hash = "sha256:794d4f0a58f848961ba16af7b9c85a3e88cd360df008c59aac6fc5ae9323b5d4", size = 373939 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/3a/404a60bb9789ce4daecbb4ec780bee1c46d2ea5258cf689b7ab63acefd6f/fastjsonschema-2.21.0-py3-none-any.whl", hash = "sha256:5b23b8e7c9c6adc0ecb91c03a0768cb48cd154d9159378a69c8318532e0b5cbf", size = 23911 },
+    { url = "https://files.pythonhosted.org/packages/90/2b/0817a2b257fe88725c25589d89aec060581aabf668707a8d03b2e9e0cb2a/fastjsonschema-2.21.1-py3-none-any.whl", hash = "sha256:c9e5b7e908310918cf494a434eeb31384dd84a98b57a30bcb1f535015b554667", size = 23924 },
 ]
 
 [[package]]
@@ -994,7 +994,7 @@ dependencies = [
     { name = "toml" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "black" },
     { name = "flake8" },
@@ -1002,25 +1002,40 @@ dev = [
     { name = "isort" },
     { name = "jupyter-console" },
     { name = "pytest" },
+    { name = "tftest" },
     { name = "validate-pyproject", extra = ["all"] },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "black", marker = "extra == 'dev'" },
-    { name = "flake8", marker = "extra == 'dev'" },
-    { name = "flake8-black", marker = "extra == 'dev'" },
     { name = "giturlparse", specifier = ">=0.12.0" },
     { name = "go-flag" },
-    { name = "isort", marker = "extra == 'dev'" },
-    { name = "jupyter-console", marker = "extra == 'dev'" },
     { name = "pygithub", specifier = ">=2.5.0" },
-    { name = "pytest", marker = "extra == 'dev'" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "tf-registry" },
     { name = "toml" },
-    { name = "validate-pyproject", extras = ["all"], marker = "extra == 'dev'" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black" },
+    { name = "flake8" },
+    { name = "flake8-black" },
+    { name = "isort" },
+    { name = "jupyter-console" },
+    { name = "pytest" },
+    { name = "tftest", specifier = ">=1.8.5" },
+    { name = "validate-pyproject", extras = ["all"] },
+]
+
+[[package]]
+name = "tftest"
+version = "1.8.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/7a/b75e4bd761767168b868ddf6da9ff2f8237feea1725143efb21d12c90e80/tftest-1.8.5.tar.gz", hash = "sha256:4dc4cbe3dd6c89b0d8732ac5ec8d1ed27e4e3aff26374baa42af6e5c90087df8", size = 22859 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/50/56/b17a36b14af4957f46324b693a4d42d643965e8094030e83a474245f778a/tftest-1.8.5-py3-none-any.whl", hash = "sha256:8162043ed30f80c8606a89e9fe68f68840972ea36d9c8b1e40fa27cbf463eaf3", size = 16026 },
 ]
 
 [[package]]
