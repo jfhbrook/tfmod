@@ -69,27 +69,28 @@ MIT. See the LICENSE file for more details.
 
 Hoo boy...
 
-- [ ] tests
-  - monkeypatch `run_*` commands
-  - monkeypatch github API commands
-  - snapshots for io
-  - `bats` for bash, maybe a custom pytest runner
 - [ ] publishing improvements
   - Check if module is available through API
-  - Bug: Attempts to update description to None
-    - Shouldn't spec validation catch this?
-    - Shouldn't init default it to something?
-  - Detect if tag exists, only `--force` if necessary
 - [ ] flags
   - parse command flags automatically - no use case for "bleed-through"
   - `-force` publish flag
   - `-auto-approve` publish flag
-- [ ] unwise/update bugs, etc
+- [ ] bash (unwise/update) bugs and tests
   - Somehow got in a state once where tfmod was empty except for state files
   - Command output quoting is fubar
   - Certain kinds of errors aren't behing appropriately handled
   - Command line parsing is Wrong
   - Write `doctor` command to help debug issues
+  - `bats`, maybe a custom pytest runner
+- [ ] check for updates in version command
+- [ ] python bugs and tests
+  - monkeypatch `run_*` commands
+  - monkeypatch github API commands
+  - snapshots for io
+  - Bug: Attempts to update description to None if empty in module.tfvars
+    - Shouldn't spec validation catch this?
+    - Shouldn't init default it to something?
+  - Question: Is namespace actually required? Isn't that implied by GitHub?
 - [ ] config
   - show `gh` config
   - show git config's `init.defaultBranch`
@@ -114,6 +115,8 @@ Hoo boy...
   - ping
     - github (public) API
     - terraform registry
-- [ ] dist tagging (latest, beta etc)
-  - TODO: how does npm implement dist-tag?
-  - also implement npm's dist-tag behavior on publish
+- [ ] more publishing improvements
+  - dist tagging (latest, beta, etc)
+    - TODO: how does npm implement dist-tag?
+    - NOTE: `npm` has a separate companion command too
+  - Detect if tag exists, only `--force` if necessary
