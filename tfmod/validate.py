@@ -139,7 +139,7 @@ def validate_license(path: str) -> None:
     """
     if not os.path.isfile(Path(path) / "LICENSE"):
         logger.warn(
-            title="No README.md found",
+            title="No LICENSE found",
             message=textwrap.dedent(
                 """
             The Terraform Registry expects a LICENSE file in the root of your project,

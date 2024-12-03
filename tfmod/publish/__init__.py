@@ -187,6 +187,8 @@ def tag_and_push_actions(force: bool) -> List[Action]:
 
     if git is None:
         branch = default_branch if default_branch else "main"
+    else:
+        branch = git.current_branch()
 
     patch = f"{version.major}.{version.minor}.{version.patch}"
     minor = f"{version.major}.{version.minor}"

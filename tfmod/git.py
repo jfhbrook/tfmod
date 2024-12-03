@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import os
+import os.path
+from pathlib import Path
 import re
 import shlex
 from subprocess import CalledProcessError
@@ -83,6 +85,17 @@ def git_get_config(name: str) -> str:
     return git_out(["config", "get", name]).strip()
 
 
+def find_git_root(path: str) -> str:
+    home = Path(os.path.expanduser("~"))
+    root = Path(path)
+    while root != home:
+        if os.path.isdir(root / ".git"):
+            return str(root)
+        root = root.parent
+
+    raise GitError(f"Path {path} is not in a git repository", b"")
+
+
 @dataclass
 class GitRepo:
     remotes: Dict[str, GitRemote]
@@ -90,7 +103,11 @@ class GitRepo:
 
     @classmethod
     def load(cls, path: str = os.getcwd()) -> "GitRepo":
-        remotes = git_remote(path)
+        try:
+            root = find_git_root(path)
+        except GitError:
+            root = path
+        remotes = git_remote(root)
 
         return GitRepo(remotes=remotes, path=path)
 
