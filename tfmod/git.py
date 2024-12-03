@@ -79,6 +79,10 @@ def git_remote(path: str = os.getcwd()) -> Dict[str, GitRemote]:
     return {name: GitRemote(**kwargs) for name, kwargs in remotes.items()}
 
 
+def git_get_config(name: str) -> str:
+    return git_out(["config", "get", name]).strip()
+
+
 @dataclass
 class GitRepo:
     remotes: Dict[str, GitRemote]
@@ -114,18 +118,6 @@ class GitRepo:
         #     https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
         lines = git_out(["status", "--porcelain"], self.path).strip()
         return len(lines) > 0
-
-    def default_branch(self, remote: str) -> Optional[str]:
-        # This check is courtesy a different StackOverflow post:
-        #
-        #     https://stackoverflow.com/questions/28666357/how-to-get-default-git-branch
-        try:
-            out = git_out(["symbolic-ref", f"refs/remotes/{remote}/HEAD"]).strip()
-            return out.split("/")[3]
-        except GitError as exc:
-            if b"not a symbolic ref" in exc.stderr:
-                return None
-            raise exc
 
     def add(self, what: str) -> None:
         git_interactive(["add", what], self.path)

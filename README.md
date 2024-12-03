@@ -70,11 +70,7 @@ MIT. See the LICENSE file for more details.
 - [ ] Get tfmod working again
   - [x] terraform-shell-git-push - simpler case
   - [ ] terraform-dokku-deployment - fresh module sans git init
-- [ ] Fix default branch config
-  - Check if upstream set
-  - If not, check GitHub
-  - If not, check init.defaultbranch
-  - if not, warn and use current branch
+- [ ] traverse upward to find git root
 - [ ] config
   - show git config's `init.defaultBranch`
   - `gh_git_remote`

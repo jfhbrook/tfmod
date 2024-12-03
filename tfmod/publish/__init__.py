@@ -1,16 +1,17 @@
 import shlex
 import textwrap
 import traceback
-from typing import Any, cast, Dict, List
+from typing import Any, cast, Dict, List, Optional
 import webbrowser
 
 from tf_registry import RegistryClient, RegistryError
 
-from tfmod.error import GhError, GitDirtyError, GitHeadNotFoundError
+from tfmod.error import DefaultBranchError, GhError, GitDirtyError
 from tfmod.gh import gh_git_protocol, gh_repo_create, gh_repo_description
 from tfmod.git import GitRepo
 from tfmod.io import logger
 from tfmod.plan import Action, apply, may, must, Plan
+from tfmod.publish.resource.default_branch import DefaultBranchResource
 from tfmod.publish.resource.git import GitResource
 from tfmod.publish.resource.module import ModuleResource
 from tfmod.publish.resource.remote import RemoteResource
@@ -171,18 +172,21 @@ def tag_and_push_actions(force: bool) -> List[Action]:
     git = may(GitResource)
     rem = may(RemoteResource)
 
+    default_branch: Optional[str] = None
+
+    try:
+        default_branch = may(DefaultBranchResource)
+    except DefaultBranchError:
+        if not force:
+            raise
+
     if rem:
         remote, _ = rem
     else:
         remote = "origin"
 
     if git is None:
-        branch = "main"
-    else:
-        try:
-            branch = git.current_branch()
-        except GitHeadNotFoundError:
-            branch = "main"
+        branch = default_branch if default_branch else "main"
 
     patch = f"{version.major}.{version.minor}.{version.patch}"
     minor = f"{version.major}.{version.minor}"

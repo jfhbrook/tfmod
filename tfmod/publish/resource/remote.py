@@ -2,7 +2,6 @@ from typing import Any, cast, Dict, Optional, Self, Tuple
 
 from giturlparse import GitUrlParsed
 
-from tfmod.error import DefaultBranchError
 from tfmod.io import logger
 from tfmod.plan import may, must, Resource
 from tfmod.publish.resource.git import GitResource
@@ -44,7 +43,6 @@ class RemoteResource(Resource[Remote]):
     def validate(self: Self, resource: Remote) -> None:
         self._validate_namespace(resource)
         self._validate_name(resource)
-        self._validate_default_branch(resource)
 
     def _validate_namespace(self: Self, resource: Remote) -> None:
         _, remote = resource
@@ -71,25 +69,4 @@ class RemoteResource(Resource[Remote]):
                 title=f'Repository name "{actual}" does not match module.tfvars',
                 message=f""""The project should to be named \"{expected}\", in
                 order to match the conventions of the Terraform registry.""",
-            )
-
-    def _validate_default_branch(self: Self, resource: Remote) -> None:
-        remote, _ = resource
-        git = must(GitResource)
-
-        # TODO: This check is for the default branch with respect to the git
-        # repo - ie, if you called --set-upstream. A repo might not *have* a
-        # default branch - but the github API should be able to tell us what
-        # GitHub's default branch is,
-        # by looking at the "default_branch" property on the repo.
-
-        expected: Optional[str] = git.default_branch(remote)
-        actual = git.current_branch
-
-        if expected is None:
-            return
-
-        if expected != actual:
-            raise DefaultBranchError(
-                f"Branch {actual} is not the default branch ({expected})"
             )
