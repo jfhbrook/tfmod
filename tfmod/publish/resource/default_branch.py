@@ -1,6 +1,6 @@
 from typing import Optional, Self
 
-from tfmod.error import DefaultBranchError, GitError
+from tfmod.error import DefaultBranchError, GitError, GitHeadNotFoundError
 from tfmod.git import git_get_config
 from tfmod.io import logger
 from tfmod.plan import may, Resource
@@ -26,10 +26,11 @@ class DefaultBranchResource(Resource[str]):
         try:
             logger.info("Falling back to the local default branch...")
             default_branch = git_get_config("init.defaultbranch")
-            if not default_branch:
+            if default_branch:
                 logger.info("Local default branch configured")
-                return None
-        except GitError:
+                return default_branch
+            return None
+        except GitError as exc:
             return None
 
     def validate(self: Self, resource: str) -> None:
@@ -39,7 +40,12 @@ class DefaultBranchResource(Resource[str]):
             logger.info("Git repository does not exist - not validating branch")
             return
 
-        if resource != git.current_branch:
+        try:
+            current_branch = git.current_branch()
+        except GitHeadNotFoundError:
+            return
+
+        if resource != git.current_branch():
             raise DefaultBranchError(
-                f"Branch {git.current_branch} is not the default branch ({resource})"
+                f"Branch {current_branch} is not the default branch ({resource})"
             )

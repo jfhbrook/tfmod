@@ -67,13 +67,6 @@ MIT. See the LICENSE file for more details.
 
 ## TODOs
 
-- [ ] Get tfmod working again
-  - [x] terraform-shell-git-push - simpler case
-  - [ ] terraform-dokku-deployment - fresh module sans git init
-- [ ] config
-  - show git config's `init.defaultBranch`
-  - `gh_git_remote`
-  - app config: disable automatically opening publish page in browser
 - [ ] bash (unwise/update) bugs and tests
   - Somehow got in a state once where tfmod was empty except for state files
   - Command output quoting is fubar
@@ -85,6 +78,10 @@ MIT. See the LICENSE file for more details.
   - document command flags
   - fix formatting issues
 - [ ] check for updates in version command
+- [ ] config
+  - show git config's `init.defaultBranch`
+  - `gh_git_remote`
+  - app config: disable automatically opening publish page in browser
 - [ ] Migrate off `rich`
   - It's too clever, adding extra colors I don't want
 - [ ] python bugs and tests

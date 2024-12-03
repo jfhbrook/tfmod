@@ -110,8 +110,13 @@ def gh_client(host: str = "github.com", user: Optional[str] = None) -> Github:
     return Github(auth=auth)
 
 
-def gh_repo_create(name: str) -> None:
-    gh_interactive(["repo", "create", name])
+def gh_repo_create(name: str, public=True) -> None:
+    argv = ["repo", "create", name]
+    if public:
+        argv.append("--public")
+    else:
+        argv.append("--private")
+    gh_interactive(argv)
 
 
 def gh_repo_description(description: str) -> None:

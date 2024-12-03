@@ -87,6 +87,7 @@ def _remote_actions() -> List[Action]:
 
     user = must(UserResource)
     remote_name = "origin"
+    public = not spec.private
 
     protocol: str = "ssh"
 
@@ -119,8 +120,16 @@ def _remote_actions() -> List[Action]:
         actions.append(
             Action(
                 type="+",
-                name=shlex.join(["gh", "repo", "create", repo_name]),
-                run=lambda: gh_repo_create(repo_name),
+                name=shlex.join(
+                    [
+                        "gh",
+                        "repo",
+                        "create",
+                        repo_name,
+                        "--public" if public else "--private",
+                    ]
+                ),
+                run=lambda: gh_repo_create(repo_name, public=public),
             )
         )
     actions.append(
@@ -185,7 +194,9 @@ def tag_and_push_actions(force: bool) -> List[Action]:
     else:
         remote = "origin"
 
-    if git is None:
+    if default_branch:
+        branch = default_branch
+    elif git is None:
         branch = default_branch if default_branch else "main"
     else:
         branch = git.current_branch()
