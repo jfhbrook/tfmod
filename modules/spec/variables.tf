@@ -8,6 +8,7 @@ variable "module" {
     description = string
     private     = optional(bool)
     scripts     = optional(map(list(string)))
+    # Deprecated.
     git = optional(object({
       main_branch = optional(string)
     }))

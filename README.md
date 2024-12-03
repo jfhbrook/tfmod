@@ -70,11 +70,15 @@ MIT. See the LICENSE file for more details.
 - [ ] Get tfmod working again
   - [x] terraform-shell-git-push - simpler case
   - [ ] terraform-dokku-deployment - fresh module sans git init
+- [ ] Fix default branch config
+  - Check if upstream set
+  - If not, check GitHub
+  - If not, check init.defaultbranch
+  - if not, warn and use current branch
 - [ ] config
-  - show `gh` config
   - show git config's `init.defaultBranch`
-  - preferred git remote type
-  - disable automatically opening publish page in browser
+  - `gh_git_remote`
+  - app config: disable automatically opening publish page in browser
 - [ ] bash (unwise/update) bugs and tests
   - Somehow got in a state once where tfmod was empty except for state files
   - Command output quoting is fubar

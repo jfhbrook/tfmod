@@ -116,3 +116,7 @@ def gh_repo_create(name: str) -> None:
 
 def gh_repo_description(description: str) -> None:
     gh_interactive(["repo", "edit", "--description", description])
+
+
+def gh_git_protocol() -> str:
+    return gh_out(["config", "get", "git_protocol"]).strip()

@@ -1,12 +1,13 @@
 import shlex
 import textwrap
+import traceback
 from typing import Any, cast, Dict, List
 import webbrowser
 
 from tf_registry import RegistryClient, RegistryError
 
-from tfmod.error import GitDirtyError, GitHeadNotFoundError
-from tfmod.gh import gh_repo_create, gh_repo_description
+from tfmod.error import GhError, GitDirtyError, GitHeadNotFoundError
+from tfmod.gh import gh_git_protocol, gh_repo_create, gh_repo_description
 from tfmod.git import GitRepo
 from tfmod.io import logger
 from tfmod.plan import Action, apply, may, must, Plan
@@ -85,7 +86,30 @@ def _remote_actions() -> List[Action]:
 
     user = must(UserResource)
     remote_name = "origin"
-    git_url = f"git@github.com:{user}/{repo_name}.git"
+
+    protocol: str = "ssh"
+
+    def default_ssh():
+        nonlocal protocol
+
+        logger.warn(
+            "Could not discover GitHub git protocol", "Protocol will default to SSH."
+        )
+        protocol = "ssh"
+
+    try:
+        protocol = gh_git_protocol()
+    except GhError:
+        logger.info(traceback.format_exc())
+        default_ssh()
+
+    if protocol not in {"https", "ssh"}:
+        default_ssh()
+
+    if protocol == "ssh":
+        git_url = f"git@github.com:{user}/{repo_name}.git"
+    else:
+        git_url = f"https://github.com/{user}/{repo_name}.git"
 
     actions: List[Action] = list()
 

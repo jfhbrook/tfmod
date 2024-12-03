@@ -8,11 +8,9 @@ locals {
       namespace   = var.namespace
       version     = var.version_
       description = var.description
+      private     = var.module == null ? False : coalesce(var.module.private, false)
 
       scripts = local.scripts
-      git = {
-        main_branch = "main"
-      }
     }
   })
 }
