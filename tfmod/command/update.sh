@@ -240,9 +240,9 @@ function update-module {
 
 function update-all-modules {
   if [ -n "${CLONED}" ]; then
-    echo "${COLOR_BOLD}Initializing Terraform modules...${COLOR_RESET}"
+    echo -e "${COLOR_BOLD}Initializing Terraform modules...${COLOR_RESET}"
   else
-    echo "${COLOR_BOLD}Updating Terraform modules...${COLOR_RESET}"
+    echo -e "${COLOR_BOLD}Updating Terraform modules...${COLOR_RESET}"
   fi
 
   update-module init
