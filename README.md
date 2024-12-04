@@ -67,13 +67,11 @@ MIT. See the LICENSE file for more details.
 
 ## TODOs
 
-- [ ] bash (unwise/update) bugs and tests
-  - Command line parsing is Wrong
-  - Write `doctor` command to help debug issues
-  - `bats`, maybe a custom pytest runner
+- [ ] Write `doctor` command to help debug issues
 - [ ] usage fixes
   - document command flags
   - fix formatting issues
+- [ ] full command line parsing in bash land
 - [ ] check for updates in version command
 - [ ] config
   - show git config's `init.defaultBranch`
