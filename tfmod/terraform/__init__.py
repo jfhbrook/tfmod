@@ -3,8 +3,7 @@ import os
 import os.path
 from pathlib import Path
 import shutil
-from subprocess import Popen
-from time import sleep
+import subprocess
 from typing import Dict, Generator, List, Mapping, Optional, Self, Tuple
 
 from tfmod.constants import (
@@ -55,19 +54,11 @@ def clear_file(path: Path) -> None:
 
 
 class Terraform:
-    def __init__(
-        self,
-        name: str,
-        command: str = "apply",
-        interval: float = 0.1,
-        timeout: Optional[float] = None,
-    ) -> None:
+    def __init__(self, name: str, command: str = "apply") -> None:
         self._name: str = name
         self._path: Path = MODULES_DIR / name
         self._state_path: Optional[Path] = None
         self._command: str = command
-        self._interval: float = interval
-        self._timeout: Optional[float] = timeout
         self._loaded_spec: bool = False
         self.__spec: Optional[Spec] = None
         self._env: Dict[str, str] = dict()
@@ -212,34 +203,18 @@ class Terraform:
 
         return args + self._args, self._env
 
-    def _finish(self, exit_code: int) -> None:
-        if exit_code:
-            raise TerraformError(exit_code)
-
     def run(self, env: Mapping[str, str] = os.environ) -> None:
         """
         Run the Terraform command
         """
-        # TODO: The interrupts this is going out of its way to handle are
-        # probably handled reasonably well by subprocess.run. Port this to
-        # use run_interactive from tfmod.process and call it a day.
         with self._state():
-            _args, _env = self.build()
+            _argv, _env = self.build()
             _env = dict(env, **_env)
 
-            args = [TERRAFORM_BIN] + _args
+            argv = [TERRAFORM_BIN] + _argv
 
-            logger.info(f"Running Terraform with args: {_args}")
-
-            with Popen(args, env=_env) as proc:
-                try:
-                    while True:
-                        exit_code: Optional[int] = proc.poll()
-                        if exit_code is not None:
-                            self._finish(exit_code)
-                            return
-                        sleep(self._interval)
-                except KeyboardInterrupt:
-                    exit_code = proc.wait(self._timeout)
-                    self._finish(proc.wait(timeout=self._timeout))
-                    return
+        try:
+            with logger.quote(f"terraform {self._command}"):
+                subprocess.run(argv, env=env, capture_output=False, check=True)
+        except subprocess.CalledProcessError as exc:
+            raise TerraformError(exc.returncode)

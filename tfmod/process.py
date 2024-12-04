@@ -1,7 +1,7 @@
 import os
 import shlex
 import subprocess
-from typing import List, Literal
+from typing import List, Literal, Mapping, Optional
 
 from tfmod.io import logger
 
@@ -9,7 +9,8 @@ Direction = Literal["fetch"] | Literal["push"]
 
 
 def run_out(argv: List[str], cwd: str = os.getcwd()) -> str:
-    proc = subprocess.run(argv, cwd=cwd, capture_output=True)
+    with logger.quote(shlex.join(argv)):
+        proc = subprocess.run(argv, cwd=cwd, capture_output=True)
     proc.check_returncode()
     if proc.stderr:
         print(proc.stderr.decode("unicode_escape"))
@@ -26,5 +27,8 @@ def run_test(argv: List[str], cwd: str = os.getcwd()) -> bool:
     return proc.returncode == 0
 
 
-def run_interactive(argv: List[str], cwd: str = os.getcwd()) -> None:
-    subprocess.run(argv, cwd=cwd, capture_output=False, check=True)
+def run_interactive(
+    argv: List[str], cwd: str = os.getcwd(), env: Optional[Mapping[str, str]] = None
+) -> None:
+    with logger.quote(shlex.join(argv)):
+        subprocess.run(argv, cwd=cwd, env=env, capture_output=False, check=True)

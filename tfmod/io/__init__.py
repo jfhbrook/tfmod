@@ -1,9 +1,10 @@
+from contextlib import contextmanager
 import datetime
 from enum import IntEnum
 import json
 import os
 import textwrap
-from typing import Literal, Mapping, Optional, Self
+from typing import Generator, Literal, Mapping, Optional, Self
 
 from rich import print as pprint
 
@@ -140,6 +141,22 @@ class Logger:
 
     def ok(self, message: str) -> None:
         pprint(f"[green]{message}[/green]")
+
+    def hbar(self) -> None:
+        try:
+            columns, _ = os.get_terminal_size()
+        except OSError:
+            columns = 79
+        pprint(f"[color(8)]{'─' * columns}[/color(8)]")
+
+    @contextmanager
+    def quote(self, message: str) -> Generator[None, None, None]:
+        pprint(f"[color(8)]{message}[/color(8)]")
+        self.hbar()
+
+        yield
+
+        self.hbar()
 
 
 class JSONLogger(Logger):

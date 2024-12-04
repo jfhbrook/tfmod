@@ -68,9 +68,6 @@ MIT. See the LICENSE file for more details.
 ## TODOs
 
 - [ ] bash (unwise/update) bugs and tests
-  - Somehow got in a state once where tfmod was empty except for state files
-  - Command output quoting is fubar
-  - Certain kinds of errors aren't behing appropriately handled
   - Command line parsing is Wrong
   - Write `doctor` command to help debug issues
   - `bats`, maybe a custom pytest runner
