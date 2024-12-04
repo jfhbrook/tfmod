@@ -8,7 +8,7 @@ locals {
       namespace   = var.namespace
       version     = var.version_
       description = var.description
-      private     = var.module == null ? False : coalesce(var.module.private, false)
+      private     = var.module == null ? false : coalesce(var.module.private, false)
 
       scripts = local.scripts
     }
