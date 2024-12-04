@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -Eeuo pipefail
 
 
 #
@@ -354,7 +354,7 @@ function no-packages {
 
 function install-homebrew {
   if confirm 'Would you like to install homebrew?'; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" | quote 'homebrew installer' || fatal-update
     info 'Homebrew installed'
     return 0
   fi
@@ -375,7 +375,7 @@ function brew-install {
 
   # Homebrew doesn't prompt by default
   if confirm 'Would you like to install these formulas with homebrew?'; then
-    brew install "${HOMEBREW_FORMULAS[@]}" | quote 'brew install'
+    brew install "${HOMEBREW_FORMULAS[@]}" | quote 'brew install' || fatal-update
     return 0
   fi
   return 1
@@ -385,12 +385,12 @@ function brew-install {
 
 function apt-install {
   if no-packages; then return 0; fi
-  sudo apt install "${PACKAGES[@]}" | quote 'apt install'
+  sudo apt install "${PACKAGES[@]}" | quote 'apt install' || fatal-update
 }
 
 function dnf-install {
   if no-packages; then return 0; fi
-  sudo dnf install "${PACKAGES[@]}" | quote 'dnf install'
+  sudo dnf install "${PACKAGES[@]}" | quote 'dnf install' || fatal-update
 }
 
 # do it up
@@ -469,7 +469,7 @@ function install-uv {
   echo
 
   if confirm 'Would you like to install uv?'; then
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    curl -LsSf https://astral.sh/uv/install.sh | sh | quote 'curl -LsSf https://astral.sh/uv/install | sh' || fatal-update
     return 0
   fi
   return 1
@@ -497,11 +497,11 @@ function clone-tfmod {
 
   if [ ! -d "${TFMOD_HOME}" ]; then
     echo -e "${COLOR_BOLD}Cloning TfMod source...${COLOR_RESET}"
-    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git 1>&1 | quote 'git clone')
+    (cd "${STATE_DIR}" && git clone git@github.com:jfhbrook/tfmod.git 1>&1 | quote 'git clone') || fatal-update
     CLONED=1
   else
     echo -e "${COLOR_BOLD}Pulling TfMod source...${COLOR_RESET}"
-    (cd ~/.local/state/tfmod && git pull origin 2>&1 | quote 'git pull')
+    (cd "${TFMOD_HOME}" && git pull origin 2>&1 | quote 'git pull') || fatal-update
   fi
 }
 
@@ -510,7 +510,7 @@ function update-module {
   module="${1}"
   echo -e "${COLOR_BOLD}• modules/${module}:${COLOR_RESET}"
   
-  terraform -chdir="${TFMOD_HOME}/modules/${module}" init -upgrade | quote 'terraform init -upgrade'
+  terraform -chdir="${TFMOD_HOME}/modules/${module}" init -upgrade | quote 'terraform init -upgrade' || fatal-update
 }
 
 function update-all-modules {
@@ -531,8 +531,8 @@ function update-python {
     echo -e "${COLOR_BOLD}Updating Python libraries..."
   fi
 
-  (cd "${TFMOD_BIN}" && rm -rf .venv)
-  (cd "${TFMOD_BIN}" && "${UV_BIN}" sync 2>&1) | quote 'uv sync'
+  (cd "${TFMOD_HOME}" && rm -rf .venv) || fatal-update
+  (cd "${TFMOD_HOME}" && "${UV_BIN}" sync 2>&1 | quote 'uv sync') || fatal-update
 }
 
 function setup-bin-script {
