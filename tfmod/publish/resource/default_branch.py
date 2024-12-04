@@ -1,3 +1,4 @@
+import traceback
 from typing import Optional, Self
 
 from tfmod.error import DefaultBranchError, GitError, GitHeadNotFoundError
@@ -30,7 +31,8 @@ class DefaultBranchResource(Resource[str]):
                 logger.info("Local default branch configured")
                 return default_branch
             return None
-        except GitError as exc:
+        except GitError:
+            logger.info(traceback.format_exc())
             return None
 
     def validate(self: Self, resource: str) -> None:

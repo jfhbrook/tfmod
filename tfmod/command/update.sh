@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+STATE_DIR="${HOME}/.local/state"
+TFMOD_HOME="${STATE_DIR}/tfmod"
+
 UPDATE_OK='TfMod has been successfully updated!
 
 You may now begin working with TfMod. Try running "tfmod init" to create
@@ -97,7 +100,7 @@ function brew-install {
 
   # Homebrew doesn't prompt by default
   if confirm 'Would you like to install these formulas with homebrew?'; then
-    brew install "${HOMEBREW_FORMULAS[@]}" | quote
+    brew install "${HOMEBREW_FORMULAS[@]}" | quote 'brew install'
     return 0
   fi
   return 1
@@ -107,12 +110,12 @@ function brew-install {
 
 function apt-install {
   if no-packages; then return 0; fi
-  sudo apt install "${PACKAGES[@]}"
+  sudo apt install "${PACKAGES[@]}" | quote 'apt install'
 }
 
 function dnf-install {
   if no-packages; then return 0; fi
-  sudo dnf install "${PACKAGES[@]}"
+  sudo dnf install "${PACKAGES[@]}" | quote 'dnf install'
 }
 
 # do it up
@@ -212,33 +215,54 @@ alternately, consider the tool '\'tfswitch\'':
     https://tfswitch.warrensbox.com/'
 }
 
-TF_MODULES="init spec"
+CLONED=""
 
-function install-tfmod {
-  mkdir -p ~/.local/state
+function clone-tfmod {
+  mkdir -p "${STATE_DIR}"
 
-  if [ ! -d ~/.local/state/tfmod ]; then
-    echo 'Installing TfMod to ~/.local/state/tfmod...'
-    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git 1>&1)
+  if [ ! -d "${TFMOD_HOME}" ]; then
+    echo -e "${COLOR_BOLD}Cloning TfMod source...${COLOR_RESET}"
+    (cd ~/.local/state && git clone git@github.com:jfhbrook/tfmod.git 1>&1 | quote 'git clone')
+    CLONED=1
   else
-    echo 'Updating TfMod source in ~/.local/state/tfmod...'
-    (cd ~/.local/state/tfmod && git pull origin 2>&1)
+    echo -e "${COLOR_BOLD}Pulling TfMod source...${COLOR_RESET}"
+    (cd ~/.local/state/tfmod && git pull origin 2>&1 | quote 'git pull')
   fi
-  find-uv
-  assert-uv
-  echo 'Updating Terraform modules...'
-  (set -euo pipefail; cd ~/.local/state/tfmod \
-    && for module in ${TF_MODULES}; do \
-        echo "- modules/$(basename "${module}")"
-        terraform "-chdir=modules/${module}" init -upgrade
-      done)
-  echo 'Updating Python dependencies...'
-  (set -euo pipefail; cd ~/.local/state/tfmod \
-    && rm -rf .venv \
-    && "${UV_BIN}" sync 2>&1)
+}
 
+function update-module {
+  local module
+  module="${1}"
+  echo -e "${COLOR_BOLD}• modules/${module}:${COLOR_RESET}"
+  
+  terraform -chdir="${TFMOD_HOME}/modules/${module}" init -upgrade | quote 'terraform init -upgrade'
+}
+
+function update-all-modules {
+  if [ -n "${CLONED}" ]; then
+    echo "${COLOR_BOLD}Initializing Terraform modules...${COLOR_RESET}"
+  else
+    echo "${COLOR_BOLD}Updating Terraform modules...${COLOR_RESET}"
+  fi
+
+  update-module init
+  update-module spec
+}
+
+function update-python {
+  if [ -n "${CLONED}" ]; then
+    echo -e "${COLOR_BOLD}Installing Python libraries..."
+  else
+    echo -e "${COLOR_BOLD}Updating Python libraries..."
+  fi
+
+  (cd "${TFMOD_BIN}" && rm -rf .venv)
+  (cd "${TFMOD_BIN}" && "${UV_BIN}" sync 2>&1) | quote 'uv sync'
+}
+
+function setup-bin-script {
   if [ -z "${CALLED_FROM_INSTALLER:-}" ]; then
-    echo 'Copying TfMod to ~/.local/bin/tfmod...'
+    echo -e "${COLOR_BOLD}Copying TfMod to ~/.local/bin/tfmod...${COLOR_RESET}"
     mkdir -p ~/.local/bin
     cp ~/.local/state/tfmod/bin/tfmod ~/.local/bin/tfmod
   fi
@@ -260,7 +284,14 @@ function install {
   install-packages
   install-terraform
   install-uv
-  install-tfmod
+
+  clone-tfmod
+  find-uv
+  assert-uv
+  update-all-modules
+  update-python
+  setup-bin-script
+
   check-path
   update-ok
 }

@@ -79,14 +79,19 @@ case "${TF_LOG}" in
     TF_LOG='TRACE'
 esac
 
-# TODO: Implement in python? Remove?
-function quote {
-  if ! is-info; then
-    return 0
-  fi
-  while read -r line; do
-    echo "  │ ${line}"
-  done
+function hbar {
+  echo -e "${COLOR_GRAY}$(printf %"${COLUMNS:-$(tput cols)}"s | tr ' ' '─')${COLOR_RESET}"
 }
 
+function quote {
+  # shellcheck disable=SC2116
+  message="$(echo "$@")"
+  echo -e "${COLOR_GRAY}${message}${COLOR_RESET}"
+  hbar
 
+  while read -r line; do
+    echo "${line}"
+  done
+
+  hbar
+}
