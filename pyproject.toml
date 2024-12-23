@@ -31,8 +31,16 @@ dependencies = [
   "toml",
 ]
 
-[project.scripts]
-router = "tfmod:main"
+[project.optional-dependencies]
+dev = [
+  "flake8",
+  "flake8-black",
+  "pytest",
+  "black",
+  "isort",
+  "jupyter-console",
+  "validate-pyproject[all]",
+]
 
 [tool.uv]
 package = true
