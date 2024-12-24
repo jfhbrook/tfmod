@@ -11,9 +11,9 @@ Direction = Literal["fetch"] | Literal["push"]
 def run_out(argv: List[str], cwd: str = os.getcwd()) -> str:
     with logger.quote(shlex.join(argv)):
         proc = subprocess.run(argv, cwd=cwd, capture_output=True)
-    proc.check_returncode()
-    if proc.stderr:
-        print(proc.stderr.decode("unicode_escape"))
+        proc.check_returncode()
+        if proc.stderr:
+            print(proc.stderr.decode("unicode_escape"))
     # NOTE: This *may* not technically be safe to do, but here's hoping...
     return proc.stdout.decode("unicode_escape")
 
