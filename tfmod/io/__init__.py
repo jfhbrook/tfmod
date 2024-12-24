@@ -149,14 +149,22 @@ class Logger:
             columns = 79
         pprint(f"[color(8)]{'─' * columns}[/color(8)]")
 
-    @contextmanager
-    def quote(self, message: str) -> Generator[None, None, None]:
+    def start_quote(self, message: str) -> None:
         pprint(f"[color(8)]{message}[/color(8)]")
+
+    @contextmanager
+    def wrap_quote(self) -> Generator[None, None, None]:
         self.hbar()
 
         yield
 
         self.hbar()
+
+    @contextmanager
+    def quote(self, message: str) -> Generator[None, None, None]:
+        self.start_quote(message)
+        with self.wrap_quote():
+            yield
 
 
 class JSONLogger(Logger):
